@@ -15,6 +15,7 @@ private:
   void onExit(wxCommandEvent &event);
 
   BM bm;
+  int m_uiRecentMessageCount;
   std::mutex m_mutex;
   wxTreeCtrl *rtSaTree;
   wxTextCtrl *messageList;

@@ -38,8 +38,6 @@ private:
   std::function<void(int rt, int sa, bool state)> m_updateSaState;
 
   S16BIT m_devNum;
-  int m_uiTotalMessageBufferSize;
-  int m_uiSingleMessageBulkSize;
   int m_monitorPollThreadSleepMs;
 
   bool m_loop;

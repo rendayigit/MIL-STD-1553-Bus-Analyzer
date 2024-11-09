@@ -1,25 +1,14 @@
 #include "bm.hpp"
-#include "fileOperations/fileOperations.hpp"
-#include "json/json.hpp"
 
 #include <chrono>
 #include <exception>
 #include <iostream>
 #include <string>
 
-const std::string CONFIG_PATH =
-    FileOperations::getInstance().getExecutableDirectory() + "../config.json";
-
 BM::BM()
     : m_devNum(Json(CONFIG_PATH)
                    .getNode("DEFAULT_DEVICE_NUMBER")
                    .getValue<S16BIT>()),
-      m_uiTotalMessageBufferSize(Json(CONFIG_PATH)
-                                     .getNode("UI_TOTAL_MESSAGE_BUFFER_SIZE")
-                                     .getValue<int>()),
-      m_uiSingleMessageBulkSize(Json(CONFIG_PATH)
-                                    .getNode("UI_SINGLE_MESSAGE_BULK_SIZE")
-                                    .getValue<int>()),
       m_monitorPollThreadSleepMs(Json(CONFIG_PATH)
                                      .getNode("MONITOR_POLL_THREAD_SLEEP_MS")
                                      .getValue<int>()),
@@ -156,22 +145,10 @@ void BM::monitor() {
 
     m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
-    // messageBuffer = messageString + "\n" + messageBuffer;
-
     m_updateSaState(message.getRt(), message.getSa(), true);
     // TODO: implement false state
 
-    // Transfer the messages to the UI in bulks for better UI performance
-    // if (message.getNumber() % m_uiSingleMessageBulkSize == 0) {
-      // Only display the last UI_TOTAL_MESSAGE_BUFFER_SIZE number of
-      // characters of the message buffer
-      // messageBuffer = messageBuffer.substr(
-      //     messageBuffer.size() > m_uiTotalMessageBufferSize
-      //         ? messageBuffer.size() - m_uiTotalMessageBufferSize
-      //         : 0);
-
-      m_updateMessages(messageString + "\n");
-    // }
+    m_updateMessages(messageString + "\n");
     // }
 
     std::this_thread::sleep_for(

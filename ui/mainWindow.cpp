@@ -8,11 +8,12 @@
 
 enum { ID_CONNECT_BTN = 1, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
 
-constexpr int MAX_LINE_COUNT = 150;
-
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPoint(250, 250),
               wxSize(440, 340)) {
+  m_uiRecentMessageCount =
+      Json(CONFIG_PATH).getNode("UI_RECENT_MESSAGE_COUNT").getValue<int>();
+
   auto *menuFile = new wxMenu;
   menuFile->Append(wxID_EXIT);
 
@@ -51,7 +52,6 @@ MyFrame::MyFrame()
   messageList =
       new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250),
                      wxTE_READONLY | wxTE_MULTILINE);
-  // messageList->Enable(false);
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -87,14 +87,11 @@ MyFrame::MyFrame()
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, text] {
       try {
-        // messageList->SetValue(text);
-        // messageList->AppendText(text);
-
         wxString currentText = text + messageList->GetValue();
         wxArrayString lines = wxSplit(currentText, '\n');
 
-        // If the number of lines exceeds MAX_LINE_COUNT, trim the excess lines
-        if (lines.size() > MAX_LINE_COUNT) {
+        // If the number of lines exceeds limit, trim the excess lines
+        if (lines.size() > m_uiRecentMessageCount) {
           lines.RemoveAt(lines.size() - 1, 1);
         }
 
