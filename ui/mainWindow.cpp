@@ -8,6 +8,8 @@
 
 enum { ID_CONNECT_BTN = 1, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
 
+constexpr int MAX_LINE_COUNT = 150;
+
 MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPoint(250, 250),
               wxSize(440, 340)) {
@@ -49,7 +51,7 @@ MyFrame::MyFrame()
   messageList =
       new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250),
                      wxTE_READONLY | wxTE_MULTILINE);
-  messageList->Enable(false);
+  // messageList->Enable(false);
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -82,19 +84,18 @@ MyFrame::MyFrame()
   });
 
   bm.setUpdateMessages([&](const std::string &text) {
+    std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, text] {
-      std::lock_guard<std::mutex> lock(m_mutex);
-
       try {
         // messageList->SetValue(text);
         // messageList->AppendText(text);
 
-        wxString currentText = messageList->GetValue() + text;
+        wxString currentText = text + messageList->GetValue();
         wxArrayString lines = wxSplit(currentText, '\n');
 
-        // If the number of lines exceeds 50, trim the excess lines
-        if (lines.size() > 50) {
-          lines.RemoveAt(0, lines.size() - 50); // Keep only the last 50 lines
+        // If the number of lines exceeds MAX_LINE_COUNT, trim the excess lines
+        if (lines.size() > MAX_LINE_COUNT) {
+          lines.RemoveAt(lines.size() - 1, 1);
         }
 
         // Join the lines back together
@@ -102,7 +103,7 @@ MyFrame::MyFrame()
         messageList->SetValue(newText);
 
         // Auto-scroll to the end
-        messageList->ShowPosition(messageList->GetLastPosition());
+        // messageList->ShowPosition(messageList->GetLastPosition());
       } catch (std::exception &e) {
         // ignore
       }

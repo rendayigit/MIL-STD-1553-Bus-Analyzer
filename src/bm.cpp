@@ -156,13 +156,13 @@ void BM::monitor() {
 
     m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
-    messageBuffer += messageString + "\n";
+    // messageBuffer = messageString + "\n" + messageBuffer;
 
     m_updateSaState(message.getRt(), message.getSa(), true);
     // TODO: implement false state
 
     // Transfer the messages to the UI in bulks for better UI performance
-    if (message.getNumber() % m_uiSingleMessageBulkSize == 0) {
+    // if (message.getNumber() % m_uiSingleMessageBulkSize == 0) {
       // Only display the last UI_TOTAL_MESSAGE_BUFFER_SIZE number of
       // characters of the message buffer
       // messageBuffer = messageBuffer.substr(
@@ -170,8 +170,8 @@ void BM::monitor() {
       //         ? messageBuffer.size() - m_uiTotalMessageBufferSize
       //         : 0);
 
-      m_updateMessages(messageBuffer);
-    }
+      m_updateMessages(messageString + "\n");
+    // }
     // }
 
     std::this_thread::sleep_for(
