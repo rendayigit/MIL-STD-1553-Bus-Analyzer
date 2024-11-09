@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "App",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/bm-gui",
+            "args": [],
+            "cwd": "${workspaceFolder}/bin/"
+        }
+    ]
+}

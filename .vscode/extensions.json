@@ -1,0 +1,17 @@
+{
+    "recommendations": [
+        "tdennis4496.cmantic",
+        "ms-vscode.cpptools",
+        "matepek.vscode-catch2-test-adapter",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools",
+        "ryanluker.vscode-coverage-gutters",
+        "eamodio.gitlens",
+        "christian-kohler.path-intellisense",
+        "esbenp.prettier-vscode",
+        "spmeesseman.vscode-taskexplorer",
+        "gruntfuggly.todo-tree",
+        "rjmacarthy.twinny"
+    ]
+}
