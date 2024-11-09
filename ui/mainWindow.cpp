@@ -111,13 +111,17 @@ MyFrame::MyFrame()
   });
 
   bm.setUpdateSaState([&](int rt, int sa, bool state) {
-    if (state) {
-      rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("green"));
-      rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa], wxColour("green"));
-    } else {
-      rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("red"));
-      rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa], wxColour("red"));
-    }
+    std::lock_guard<std::mutex> lock(m_mutex);
+    wxTheApp->CallAfter([this, rt, sa, state] {
+      if (state) {
+        rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("green"));
+        rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa],
+                                          wxColour("green"));
+      } else {
+        rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("red"));
+        rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa], wxColour("red"));
+      }
+    });
   });
 }
 
