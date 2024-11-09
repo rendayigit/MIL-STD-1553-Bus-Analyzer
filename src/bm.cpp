@@ -165,10 +165,10 @@ void BM::monitor() {
     if (message.getNumber() % m_uiSingleMessageBulkSize == 0) {
       // Only display the last UI_TOTAL_MESSAGE_BUFFER_SIZE number of
       // characters of the message buffer
-      messageBuffer = messageBuffer.substr(
-          messageBuffer.size() > m_uiTotalMessageBufferSize
-              ? messageBuffer.size() - m_uiTotalMessageBufferSize
-              : 0);
+      // messageBuffer = messageBuffer.substr(
+      //     messageBuffer.size() > m_uiTotalMessageBufferSize
+      //         ? messageBuffer.size() - m_uiTotalMessageBufferSize
+      //         : 0);
 
       m_updateMessages(messageBuffer);
     }

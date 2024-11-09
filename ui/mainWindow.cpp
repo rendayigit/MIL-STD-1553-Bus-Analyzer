@@ -1,5 +1,6 @@
 #include "mainWindow.hpp"
 #include "common.hpp"
+#include "wx/sizer.h"
 #include <array>
 #include <exception>
 #include <iostream>
@@ -48,6 +49,25 @@ MyFrame::MyFrame()
   messageList =
       new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250),
                      wxTE_READONLY | wxTE_MULTILINE);
+  messageList->Enable(false);
+
+  auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *bottomHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  topHorizontalSizer->Add(deviceIdTextInput, 0, wxEXPAND | wxALL, 5);
+  topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, 5);
+
+  bottomHorizontalSizer->Add(rtSaTree, 0, wxEXPAND | wxALL, 5);
+  bottomHorizontalSizer->Add(messageList, 1, wxEXPAND | wxALL, 5);
+
+  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, 5);
+  verticalSizer->Add(bottomHorizontalSizer, 1, wxEXPAND | wxALL, 5);
+
+  SetSizer(verticalSizer);
+
+  verticalSizer->Fit(this);
+  verticalSizer->SetSizeHints(this);
 
   CreateStatusBar();
   SetStatusText("Ready, press connect");
@@ -66,7 +86,20 @@ MyFrame::MyFrame()
       std::lock_guard<std::mutex> lock(m_mutex);
 
       try {
-        messageList->SetValue(text);
+        // messageList->SetValue(text);
+        // messageList->AppendText(text);
+
+        wxString currentText = messageList->GetValue() + text;
+        wxArrayString lines = wxSplit(currentText, '\n');
+
+        // If the number of lines exceeds 50, trim the excess lines
+        if (lines.size() > 50) {
+          lines.RemoveAt(0, lines.size() - 50); // Keep only the last 50 lines
+        }
+
+        // Join the lines back together
+        wxString newText = wxJoin(lines, '\n');
+        messageList->SetValue(newText);
 
         // Auto-scroll to the end
         messageList->ShowPosition(messageList->GetLastPosition());
