@@ -120,10 +120,10 @@ void BM::monitor() {
     // if (err == 1) {
     Message message = getMessage(&sMsg);
 
-    std::string messageString = "message#: " + std::to_string(message.getNumber()) + " time: " + message.getTime() +
-                                " bus: " + message.getBus() + " type: " + message.getType() +
-                                " rt: " + std::to_string(message.getRt()) + " sa: " + std::to_string(message.getSa()) +
-                                " wc: " + std::to_string(message.wc()) + " data: ";
+    std::string messageString = "Message: " + std::to_string(message.getNumber()) + "\t\t\t Time: " + message.getTime() +
+                                "\t Bus: " + message.getBus() + "\t Type: " + message.getType() +
+                                "\t RT: " + std::to_string(message.getRt()) + "\t SA: " + std::to_string(message.getSa()) +
+                                "\t WC: " + std::to_string(message.wc()) + "\t Data: ";
 
     std::vector<std::string> data = message.getData();
 
@@ -142,7 +142,6 @@ void BM::monitor() {
     // TODO(renda): implement false state
 
     m_updateMessages(messageString + "\n");
-
     // }
   }
 }

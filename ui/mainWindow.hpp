@@ -11,6 +11,7 @@ public:
 
 private:
   void onConnectClicked(wxCommandEvent &event);
+  void onFilterClicked(wxCommandEvent &event);
   void onSaClicked(wxTreeEvent &event);
   void onExit(wxCommandEvent &event);
 
@@ -20,4 +21,5 @@ private:
   wxTextCtrl *m_deviceIdTextInput;
   wxTreeCtrl *m_milStd1553Tree;
   wxTextCtrl *m_messageList;
+  wxButton *m_filterButton;
 };

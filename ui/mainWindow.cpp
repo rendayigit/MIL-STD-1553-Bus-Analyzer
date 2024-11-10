@@ -1,15 +1,18 @@
 #include "mainWindow.hpp"
 #include "common.hpp"
 #include "milStd1553.hpp"
+#include "wx/debug.h"
+#include "wx/gdicmn.h"
+#include "wx/gtk/button.h"
 #include "wx/sizer.h"
 #include <array>
 #include <exception>
 #include <iostream>
 #include <string>
 
-enum { ID_CONNECT_BTN = 1, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
+enum { ID_CONNECT_BTN = 1, ID_FILTER_BTN, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
 
-MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPoint(250, 250), wxSize(440, 340)) {
+MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_MESSAGE_COUNT").getValue<int>();
 
   auto *menuFile = new wxMenu;
@@ -22,6 +25,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPo
   m_deviceIdTextInput = new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000", wxPoint(10, 10), wxSize(60, 50));
 
   auto *connectButton = new wxButton(this, ID_CONNECT_BTN, "Connect", wxPoint(75, 10), wxSize(100, 50));
+
+  m_filterButton =
+      new wxButton(this, ID_FILTER_BTN, "No filter set, displaying all messages.", wxPoint(340, 10), wxSize(420, 50));
+  m_filterButton->Enable(false);
 
   m_milStd1553Tree = new wxTreeCtrl(this, ID_RT_SA_TREE, wxPoint(10, 65), wxSize(180, 195));
 
@@ -51,6 +58,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPo
 
   topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, 5);
   topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, 5);
+  topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, 5);
 
   bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, 5);
   bottomHorizontalSizer->Add(m_messageList, 1, wxEXPAND | wxALL, 5);
@@ -67,6 +75,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPo
   SetStatusText("Ready, press connect");
 
   Bind(wxEVT_BUTTON, &MyFrame::onConnectClicked, this, ID_CONNECT_BTN);
+  Bind(wxEVT_BUTTON, &MyFrame::onFilterClicked, this, ID_FILTER_BTN);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
   m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
 
@@ -122,6 +131,12 @@ void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
   }
 }
 
+void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
+  m_bm.setFilter(false);
+  m_filterButton->SetLabelText("No filter set, displaying all messages.");
+  m_filterButton->Enable(false);
+}
+
 void MyFrame::onSaClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
@@ -137,7 +152,9 @@ void MyFrame::onSaClicked(wxTreeEvent &event) {
   wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(rtItem);
   wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
 
-  wxLogMessage("Filtering messages for: %s, %s, %s", busText, rtText, saText);
+  wxString logMessage = wxString::Format("Filtering messages for: %s, %s, %s", busText, rtText, saText);
+
+  wxLogMessage(logMessage);
 
   char bus = 'A';
   busText.GetChar(busText.size() - 1).GetAsChar(&bus);
@@ -147,8 +164,12 @@ void MyFrame::onSaClicked(wxTreeEvent &event) {
   m_bm.setFilteredBus(bus);
   m_bm.setFilteredRt(rt);
   m_bm.setFilteredSa(sa);
-
   m_bm.setFilter(true);
+
+  m_filterButton->SetLabelText(logMessage + ". Click to clear filter.");
+  m_filterButton->Enable(true);
+
+  m_messageList->Clear();
 }
 
 void MyFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
