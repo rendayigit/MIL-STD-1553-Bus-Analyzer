@@ -8,7 +8,7 @@
 BM::BM()
     : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
       m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
-      m_loop(false) {}
+      m_loop(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
 
 BM::~BM() { stopBm(); }
 
@@ -113,8 +113,9 @@ void BM::monitor() {
 
   // Poll Messages
   while (m_loop) {
-    // err = aceMTGetStkMsgDecoded(m_devNum, &sMsg, ACE_MT_MSGLOC_NEXT_PURGE,
-    // ACE_MT_STKLOC_ACTIVE);
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
+
+    // err = aceMTGetStkMsgDecoded(m_devNum, &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
     // if (err == 1) {
     Message message = getMessage(&sMsg);
@@ -132,14 +133,16 @@ void BM::monitor() {
 
     m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
+    if (m_filter and not(m_filteredBus == message.getBus() and m_filteredRt == message.getRt() and
+                         m_filteredSa == message.getSa())) {
+      continue;
+    }
+
     m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
     // TODO(renda): implement false state
 
     m_updateMessages(messageString + "\n");
+
     // }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
-
-    // TODO(renda): implement filter
   }
 }

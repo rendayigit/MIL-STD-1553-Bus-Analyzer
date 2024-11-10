@@ -72,11 +72,6 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor", wxPo
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bm.getDevNum()));
 
-  m_bm.setUpdateFilter([&](const std::string &text) {
-    // TODO(renda): implement filter
-    wxLogMessage("Filter set to: %s", text.c_str());
-  });
-
   m_bm.setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, text] {
@@ -130,19 +125,30 @@ void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
 void MyFrame::onSaClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
-  // Retrieve the SA (Sub-Address) item text
   wxString saText = m_milStd1553Tree->GetItemText(selectedItem);
 
-  // Retrieve the parent item of the selected item (which should be the RT)
-  wxTreeItemId rtItem = m_milStd1553Tree->GetItemParent(selectedItem);
+  if (not saText.Contains("SA")) {
+    return;
+  }
 
-  // Check if the parent exists and retrieve its text
+  wxTreeItemId rtItem = m_milStd1553Tree->GetItemParent(selectedItem);
   wxString rtText = m_milStd1553Tree->IsEmpty() ? "No RT" : m_milStd1553Tree->GetItemText(rtItem);
 
-  // Log both RT and SA information
-  wxLogMessage("Selected item: %s, %s", rtText, saText);
+  wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(rtItem);
+  wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
 
-  // TODO(renda): implement filter
+  wxLogMessage("Filtering messages for: %s, %s, %s", busText, rtText, saText);
+
+  char bus = 'A';
+  busText.GetChar(busText.size() - 1).GetAsChar(&bus);
+  int rt = static_cast<int>(rtText.GetChar(rtText.size() - 1).GetValue() - '0');
+  int sa = static_cast<int>(saText.GetChar(saText.size() - 1).GetValue() - '0');
+
+  m_bm.setFilteredBus(bus);
+  m_bm.setFilteredRt(rt);
+  m_bm.setFilteredSa(sa);
+
+  m_bm.setFilter(true);
 }
 
 void MyFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
