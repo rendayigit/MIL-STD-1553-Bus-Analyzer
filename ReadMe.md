@@ -16,5 +16,5 @@
 1. rename all the .so files in this lib dir from ...`.so.0.3.0` to ...`.so.0`
 1. copy this `lib` dir into the projects `deps` dir
 1. copy the `include` dir from the zip downloaded earlier into the projects `deps` dir
-1. run `./wx-config --cxxflags` (`wx-config` was generated somewhere inside `gtk-build`)
+1. run `./wx-config --cxxflags` (`wx-config` was generated somewhere inside `gtk-build`) and use the outputs of this command to determine include directories, link libraries and compile definitions
 1. i know this is hideous but it works lol :P
