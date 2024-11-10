@@ -1,4 +1,8 @@
-## How I created deps/wxwidgets
+# MIL STD 1553 Bus Monitor with GUI using the wxWidgets framework and DDC drivers
+
+## For Developers
+
+### How I created deps/wxwidgets
 
 1. run `sudo apt install libgtk-3-dev`
 1. download and unzip https://github.com/wxWidgets/wxWidgets/releasesdownload/v3.2.6/wxWidgets-3.2.6.tar.bz2
