@@ -80,8 +80,10 @@ MyFrame::MyFrame()
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
   milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
 
+  deviceIdTextInput->SetValue(std::to_string(bm.getDevNum()));
+
   bm.setUpdateFilter([&](const std::string &text) {
-    // TODO(renda): implement
+    // TODO(renda): implement filter
     wxLogMessage("Filter set to: %s", text.c_str());
   });
 

@@ -14,20 +14,27 @@ public:
   BM();
   ~BM();
 
-  S16BIT startBm(S16BIT devNum);
+  S16BIT startBm(int devNum);
   S16BIT stopBm();
 
-  void setUpdateFilter(const std::function<void(const std::string &)> &updateFilter) { m_updateFilter = updateFilter; }
+  void setUpdateFilter(
+      const std::function<void(const std::string &)> &updateFilter) {
+    m_updateFilter = updateFilter;
+  }
 
-  void setUpdateMessages(const std::function<void(const std::string &)> &updateMessages) {
+  void setUpdateMessages(
+      const std::function<void(const std::string &)> &updateMessages) {
     m_updateMessages = updateMessages;
   }
 
-  void setUpdateSaState(const std::function<void(char bus, int rt, int sa, bool state)> &updateRtSaList) {
+  void setUpdateSaState(const std::function<void(char bus, int rt, int sa,
+                                                 bool state)> &updateRtSaList) {
     m_updateSaState = updateRtSaList;
   }
 
   void setLoop(bool loop) { m_loop = loop; }
+
+  int getDevNum() const { return m_devNum; }
 
 private:
   static Message getMessage(MSGSTRUCT *msg);
@@ -37,7 +44,7 @@ private:
   std::function<void(const std::string &)> m_updateMessages;
   std::function<void(char bus, int rt, int sa, bool state)> m_updateSaState;
 
-  S16BIT m_devNum;
+  int m_devNum;
   int m_monitorPollThreadSleepMs;
 
   bool m_loop;

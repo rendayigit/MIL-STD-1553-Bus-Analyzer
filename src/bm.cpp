@@ -6,19 +6,16 @@
 #include <string>
 
 BM::BM()
-    : m_devNum(Json(CONFIG_PATH)
-                   .getNode("DEFAULT_DEVICE_NUMBER")
-                   .getValue<S16BIT>()),
+    : m_devNum(
+          Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
       m_monitorPollThreadSleepMs(Json(CONFIG_PATH)
                                      .getNode("MONITOR_POLL_THREAD_SLEEP_MS")
                                      .getValue<int>()),
-      m_loop(false) {
-  // TODO(renda): set ui device number to m_devNum here
-}
+      m_loop(false) {}
 
 BM::~BM() { stopBm(); }
 
-S16BIT BM::startBm(S16BIT devNum) {
+S16BIT BM::startBm(int devNum) {
   S16BIT err = 0;
 
   m_devNum = devNum;
@@ -154,6 +151,6 @@ void BM::monitor() {
     std::this_thread::sleep_for(
         std::chrono::milliseconds(m_monitorPollThreadSleepMs));
 
-    // TODO(renda): implement rt sa filter functionality
+    // TODO(renda): implement filter
   }
 }
