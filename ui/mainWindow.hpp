@@ -17,8 +17,6 @@ private:
   BM bm;
   int m_uiRecentMessageCount;
   std::mutex m_mutex;
-  wxTreeCtrl *rtSaTree;
+  wxTreeCtrl *milStd1553Tree;
   wxTextCtrl *messageList;
-  std::array<wxTreeItemId, 32> rtTreeArray;
-  std::array<std::array<wxTreeItemId, 32>, 32> saTreeArray;
 };

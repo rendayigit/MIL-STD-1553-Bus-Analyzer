@@ -1,5 +1,6 @@
 #include "mainWindow.hpp"
 #include "common.hpp"
+#include "milStd1553.hpp"
 #include "wx/sizer.h"
 #include <array>
 #include <exception>
@@ -27,27 +28,26 @@ MyFrame::MyFrame()
   auto *connectButton = new wxButton(this, ID_CONNECT_BTN, "Connect",
                                      wxPoint(75, 10), wxSize(100, 50));
 
-  rtSaTree =
-      new wxTreeCtrl(this, ID_RT_SA_TREE, wxPoint(10, 65), wxSize(165, 195));
+  milStd1553Tree =
+      new wxTreeCtrl(this, ID_RT_SA_TREE, wxPoint(10, 65), wxSize(180, 195));
 
-  auto rtSaTreeRoot = rtSaTree->AddRoot("BUS A");
+  auto rtSaTreeRoot = milStd1553Tree->AddRoot("MIL-STD-1553");
 
-  for (int i = 0; i < 32; i++) {
-    wxTreeItemId rt =
-        rtSaTree->AppendItem(rtSaTreeRoot, "RT " + std::to_string(i));
-    rtTreeArray[i] = rt;
-    std::array<wxTreeItemId, 32> saArray;
+  for (auto &bus : MilStd1553::getInstance().busList) {
+    bus.setTreeObject(milStd1553Tree->AppendItem(rtSaTreeRoot, bus.getName()));
 
-    for (int j = 0; j < 32; j++) {
-      wxTreeItemId sa = rtSaTree->AppendItem(rt, "SA " + std::to_string(j));
+    for (auto &rt : bus.rtList) {
+      rt.setTreeObject(milStd1553Tree->AppendItem(bus.getTreeObject(), rt.getName()));
 
-      saArray[j] = sa;
+      for (auto &sa : rt.saList) {
+        sa.setTreeObject(
+            milStd1553Tree->AppendItem(rt.getTreeObject(), sa.getName()));
+      }
     }
-
-    saTreeArray[i] = saArray;
   }
 
-  rtSaTree->Expand(rtSaTreeRoot);
+  milStd1553Tree->Expand(rtSaTreeRoot);
+  milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
 
   messageList =
       new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250),
@@ -60,7 +60,7 @@ MyFrame::MyFrame()
   topHorizontalSizer->Add(deviceIdTextInput, 0, wxEXPAND | wxALL, 5);
   topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, 5);
 
-  bottomHorizontalSizer->Add(rtSaTree, 0, wxEXPAND | wxALL, 5);
+  bottomHorizontalSizer->Add(milStd1553Tree, 0, wxEXPAND | wxALL, 5);
   bottomHorizontalSizer->Add(messageList, 1, wxEXPAND | wxALL, 5);
 
   verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, 5);
@@ -76,7 +76,7 @@ MyFrame::MyFrame()
 
   Bind(wxEVT_BUTTON, &MyFrame::onConnectClicked, this, ID_CONNECT_BTN);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
-  rtSaTree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
+  milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
 
   bm.setUpdateFilter([&](const std::string &text) {
     // TODO(renda): implement
@@ -86,38 +86,36 @@ MyFrame::MyFrame()
   bm.setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, text] {
-      try {
-        wxString currentText = text + messageList->GetValue();
-        wxArrayString lines = wxSplit(currentText, '\n');
+      wxString currentText = text + messageList->GetValue();
+      wxArrayString lines = wxSplit(currentText, '\n');
 
-        // If the number of lines exceeds limit, trim the excess lines
-        if (lines.size() > m_uiRecentMessageCount) {
-          lines.RemoveAt(lines.size() - 1, 1);
-        }
-
-        // Join the lines back together
-        wxString newText = wxJoin(lines, '\n');
-        messageList->SetValue(newText);
-
-        // Auto-scroll to the end
-        // messageList->ShowPosition(messageList->GetLastPosition());
-      } catch (std::exception &e) {
-        // ignore
+      // If the number of lines exceeds limit, trim the excess lines
+      if (lines.size() > m_uiRecentMessageCount) {
+        lines.RemoveAt(lines.size() - 1, 1);
       }
+
+      // Join the lines back together
+      wxString newText = wxJoin(lines, '\n');
+      messageList->SetValue(newText);
+
+      // Auto-scroll to the end
+      // messageList->ShowPosition(messageList->GetLastPosition());
     });
   });
 
   bm.setUpdateSaState([&](int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, rt, sa, state] {
-      if (state) {
-        rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("green"));
-        rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa],
-                                          wxColour("green"));
-      } else {
-        rtSaTree->SetItemBackgroundColour(rtTreeArray[rt], wxColour("red"));
-        rtSaTree->SetItemBackgroundColour(saTreeArray[rt][sa], wxColour("red"));
-      }
+      milStd1553Tree->SetItemBackgroundColour(
+          MilStd1553::getInstance().busList.at(0).rtList.at(rt).getTreeObject(),
+          wxColour(state ? "green" : "red"));
+
+      milStd1553Tree->SetItemBackgroundColour(MilStd1553::getInstance()
+                                            .busList.at(0)
+                                            .rtList.at(rt)
+                                            .saList.at(sa)
+                                            .getTreeObject(),
+                                        wxColour(state ? "green" : "red"));
     });
   });
 }
@@ -138,14 +136,14 @@ void MyFrame::onSaClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
   // Retrieve the SA (Sub-Address) item text
-  wxString saText = rtSaTree->GetItemText(selectedItem);
+  wxString saText = milStd1553Tree->GetItemText(selectedItem);
 
   // Retrieve the parent item of the selected item (which should be the RT)
-  wxTreeItemId rtItem = rtSaTree->GetItemParent(selectedItem);
+  wxTreeItemId rtItem = milStd1553Tree->GetItemParent(selectedItem);
 
   // Check if the parent exists and retrieve its text
   wxString rtText =
-      rtSaTree->IsEmpty() ? "No RT" : rtSaTree->GetItemText(rtItem);
+      milStd1553Tree->IsEmpty() ? "No RT" : milStd1553Tree->GetItemText(rtItem);
 
   // Log both RT and SA information
   wxLogMessage("Selected item: %s, %s", rtText, saText);
