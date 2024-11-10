@@ -1,5 +1,7 @@
 # MIL STD 1553 Bus Monitor with GUI using the wxWidgets framework and DDC drivers
 
+![image](https://github.com/user-attachments/assets/75628cd3-0989-470d-a17d-7ff57160fb1b)
+
 ## For Developers
 
 ### How I created deps/wxwidgets
