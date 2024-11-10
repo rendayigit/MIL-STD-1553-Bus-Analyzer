@@ -14,10 +14,10 @@ private:
   void onSaClicked(wxTreeEvent &event);
   void onExit(wxCommandEvent &event);
 
-  BM bm;
+  BM m_bm;
   int m_uiRecentMessageCount;
   std::mutex m_mutex;
-  wxTextCtrl *deviceIdTextInput;
-  wxTreeCtrl *milStd1553Tree;
-  wxTextCtrl *messageList;
+  wxTextCtrl *m_deviceIdTextInput;
+  wxTreeCtrl *m_milStd1553Tree;
+  wxTextCtrl *m_messageList;
 };

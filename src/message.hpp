@@ -9,8 +9,8 @@
 
 class Message {
 public:
-  explicit Message(U16BIT rt, U16BIT sa, U16BIT rtRx, U16BIT saRx, U16BIT wc, char bus, const char *type, std::string time,
-                   U32BIT number, const U16BIT *data)
+  explicit Message(U16BIT rt, U16BIT sa, U16BIT rtRx, U16BIT saRx, U16BIT wc, char bus, const char *type,
+                   std::string time, U32BIT number, const U16BIT *data)
       : m_rt(rt), m_sa(sa), m_rtRx(rtRx), m_saRx(saRx), m_wc(wc), m_bus(bus), m_type(type), m_time(std::move(time)),
         m_number(number) {
     for (int i = 0; i < m_wc; i++) {

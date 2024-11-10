@@ -17,18 +17,13 @@ public:
   S16BIT startBm(int devNum);
   S16BIT stopBm();
 
-  void setUpdateFilter(
-      const std::function<void(const std::string &)> &updateFilter) {
-    m_updateFilter = updateFilter;
-  }
+  void setUpdateFilter(const std::function<void(const std::string &)> &updateFilter) { m_updateFilter = updateFilter; }
 
-  void setUpdateMessages(
-      const std::function<void(const std::string &)> &updateMessages) {
+  void setUpdateMessages(const std::function<void(const std::string &)> &updateMessages) {
     m_updateMessages = updateMessages;
   }
 
-  void setUpdateSaState(const std::function<void(char bus, int rt, int sa,
-                                                 bool state)> &updateRtSaList) {
+  void setUpdateSaState(const std::function<void(char bus, int rt, int sa, bool state)> &updateRtSaList) {
     m_updateSaState = updateRtSaList;
   }
 

@@ -14,17 +14,15 @@ class MilStd1553 {
 private:
   class MilStd1553Item {
   public:
-    std::string getName() const { return name; }
-    void setName(const std::string &name_) { name = name_; }
+    std::string getName() const { return m_name; }
+    void setName(const std::string &name) { m_name = name; }
 
-    wxTreeItemId getTreeObject() const { return treeObject; }
-    void setTreeObject(const wxTreeItemId &treeObject_) {
-      treeObject = treeObject_;
-    }
+    wxTreeItemId getTreeObject() const { return m_treeObject; }
+    void setTreeObject(const wxTreeItemId &treeObject) { m_treeObject = treeObject; }
 
   private:
-    std::string name;
-    wxTreeItemId treeObject;
+    std::string m_name;
+    wxTreeItemId m_treeObject;
   };
 
   class Sa : public MilStd1553Item {};

@@ -6,11 +6,8 @@
 #include <string>
 
 BM::BM()
-    : m_devNum(
-          Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
-      m_monitorPollThreadSleepMs(Json(CONFIG_PATH)
-                                     .getNode("MONITOR_POLL_THREAD_SLEEP_MS")
-                                     .getValue<int>()),
+    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
+      m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
       m_loop(false) {}
 
 BM::~BM() { stopBm(); }
@@ -28,7 +25,7 @@ S16BIT BM::startBm(int devNum) {
     m_monitorThread.join();
   }
 
-  err = aceFree(m_devNum);
+  err = aceFree(static_cast<S16BIT>(m_devNum));
 
   if (err != 0) {
     return err;
@@ -67,13 +64,13 @@ S16BIT BM::stopBm() {
     m_monitorThread.join();
   }
 
-  err = aceMTStop(m_devNum);
+  err = aceMTStop(static_cast<S16BIT>(m_devNum));
 
   if (err != 0) {
     return err;
   }
 
-  err = aceFree(m_devNum);
+  err = aceFree(static_cast<S16BIT>(m_devNum));
 
   if (err != 0) {
     return err;
@@ -94,21 +91,17 @@ Message BM::getMessage(MSGSTRUCT *msg) {
   std::fill(std::begin(aDataWrds), std::end(aDataWrds), 0);
   const char *type = "BC to RT";
 
-  return Message(rt, sa, -1, -1, wc, 'A', type, "00000000:00000000:00000000us",
-                 ++messageNumber, aDataWrds);
+  return Message(rt, sa, -1, -1, wc, 'A', type, "00000000:00000000:00000000us", ++messageNumber, aDataWrds);
 
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
 
   std::ostringstream time;
 
-  time << std::setw(8) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":"
-       << std::setw(8) << std::setfill('0') << (msg->wTimeTag2 * 2) << ":"
-       << std::setw(8) << std::setfill('0') << (msg->wTimeTag * 2) << "us";
+  time << std::setw(8) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":" << std::setw(8) << std::setfill('0')
+       << (msg->wTimeTag2 * 2) << ":" << std::setw(8) << std::setfill('0') << (msg->wTimeTag * 2) << "us";
 
-  Message message(rt, sa, -1, -1, wc,
-                  (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A',
-                  aceGetMsgTypeString(msg->wType), time.str(), ++messageNumber,
-                  msg->aDataWrds);
+  Message message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A',
+                  aceGetMsgTypeString(msg->wType), time.str(), ++messageNumber, msg->aDataWrds);
 
   return message;
 }
@@ -126,13 +119,10 @@ void BM::monitor() {
     // if (err == 1) {
     Message message = getMessage(&sMsg);
 
-    std::string messageString =
-        "message#: " + std::to_string(message.getNumber()) +
-        " time: " + message.getTime() + " bus: " + message.getBus() +
-        " type: " + message.getType() +
-        " rt: " + std::to_string(message.getRt()) +
-        " sa: " + std::to_string(message.getSa()) +
-        " wc: " + std::to_string(message.wc()) + " data: ";
+    std::string messageString = "message#: " + std::to_string(message.getNumber()) + " time: " + message.getTime() +
+                                " bus: " + message.getBus() + " type: " + message.getType() +
+                                " rt: " + std::to_string(message.getRt()) + " sa: " + std::to_string(message.getSa()) +
+                                " wc: " + std::to_string(message.wc()) + " data: ";
 
     std::vector<std::string> data = message.getData();
 
@@ -143,13 +133,12 @@ void BM::monitor() {
     m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
     m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
-    // TODO: implement false state
+    // TODO(renda): implement false state
 
     m_updateMessages(messageString + "\n");
     // }
 
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(m_monitorPollThreadSleepMs));
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
 
     // TODO(renda): implement filter
   }
