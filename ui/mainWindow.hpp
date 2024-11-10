@@ -17,6 +17,7 @@ private:
   BM bm;
   int m_uiRecentMessageCount;
   std::mutex m_mutex;
+  wxTextCtrl *deviceIdTextInput;
   wxTreeCtrl *milStd1553Tree;
   wxTextCtrl *messageList;
 };

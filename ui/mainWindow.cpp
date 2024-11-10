@@ -22,8 +22,8 @@ MyFrame::MyFrame()
   SetMenuBar(menuBar);
   menuBar->Append(menuFile, "&File");
 
-  auto *deviceIdTextInput = new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000",
-                                           wxPoint(10, 10), wxSize(60, 50));
+  deviceIdTextInput = new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000",
+                                     wxPoint(10, 10), wxSize(60, 50));
 
   auto *connectButton = new wxButton(this, ID_CONNECT_BTN, "Connect",
                                      wxPoint(75, 10), wxSize(100, 50));
@@ -37,7 +37,8 @@ MyFrame::MyFrame()
     bus.setTreeObject(milStd1553Tree->AppendItem(rtSaTreeRoot, bus.getName()));
 
     for (auto &rt : bus.rtList) {
-      rt.setTreeObject(milStd1553Tree->AppendItem(bus.getTreeObject(), rt.getName()));
+      rt.setTreeObject(
+          milStd1553Tree->AppendItem(bus.getTreeObject(), rt.getName()));
 
       for (auto &sa : rt.saList) {
         sa.setTreeObject(
@@ -47,7 +48,8 @@ MyFrame::MyFrame()
   }
 
   milStd1553Tree->Expand(rtSaTreeRoot);
-  milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
+  milStd1553Tree->Expand(
+      MilStd1553::getInstance().busList.at(0).getTreeObject());
 
   messageList =
       new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250),
@@ -103,26 +105,37 @@ MyFrame::MyFrame()
     });
   });
 
-  bm.setUpdateSaState([&](int rt, int sa, bool state) {
+  bm.setUpdateSaState([&](char bus, int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    wxTheApp->CallAfter([this, rt, sa, state] {
+    wxTheApp->CallAfter([this, bus, rt, sa, state] {
       milStd1553Tree->SetItemBackgroundColour(
-          MilStd1553::getInstance().busList.at(0).rtList.at(rt).getTreeObject(),
+          MilStd1553::getInstance()
+              .busList.at(bus == 'A' ? 0 : 1)
+              .getTreeObject(),
           wxColour(state ? "green" : "red"));
 
-      milStd1553Tree->SetItemBackgroundColour(MilStd1553::getInstance()
-                                            .busList.at(0)
-                                            .rtList.at(rt)
-                                            .saList.at(sa)
-                                            .getTreeObject(),
-                                        wxColour(state ? "green" : "red"));
+      milStd1553Tree->SetItemBackgroundColour(
+          MilStd1553::getInstance()
+              .busList.at(bus == 'A' ? 0 : 1)
+              .rtList.at(rt)
+              .getTreeObject(),
+          wxColour(state ? "green" : "red"));
+
+      milStd1553Tree->SetItemBackgroundColour(
+          MilStd1553::getInstance()
+              .busList.at(bus == 'A' ? 0 : 1)
+              .rtList.at(rt)
+              .saList.at(sa)
+              .getTreeObject(),
+          wxColour(state ? "green" : "red"));
     });
   });
 }
 
 void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
   S16BIT errorCode = 0;
-  S16BIT deviceNum = 0; // TODO(renda): get from ui
+  int deviceNum = 0;
+  deviceIdTextInput->GetValue().ToInt(&deviceNum);
   errorCode = bm.startBm(deviceNum);
 
   if (errorCode == 0) {

@@ -145,7 +145,7 @@ void BM::monitor() {
 
     m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
-    m_updateSaState(message.getRt(), message.getSa(), true);
+    m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
     // TODO: implement false state
 
     m_updateMessages(messageString + "\n");

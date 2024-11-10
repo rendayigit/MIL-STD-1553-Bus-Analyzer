@@ -23,7 +23,7 @@ public:
     m_updateMessages = updateMessages;
   }
 
-  void setUpdateSaState(const std::function<void(int rt, int sa, bool state)> &updateRtSaList) {
+  void setUpdateSaState(const std::function<void(char bus, int rt, int sa, bool state)> &updateRtSaList) {
     m_updateSaState = updateRtSaList;
   }
 
@@ -35,7 +35,7 @@ private:
 
   std::function<void(const std::string &)> m_updateFilter;
   std::function<void(const std::string &)> m_updateMessages;
-  std::function<void(int rt, int sa, bool state)> m_updateSaState;
+  std::function<void(char bus, int rt, int sa, bool state)> m_updateSaState;
 
   S16BIT m_devNum;
   int m_monitorPollThreadSleepMs;
