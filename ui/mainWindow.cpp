@@ -13,7 +13,7 @@
 enum { ID_CONNECT_BTN = 1, ID_FILTER_BTN, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
-  m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_MESSAGE_COUNT").getValue<int>();
+  m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_LINE_COUNT").getValue<int>();
 
   auto *menuFile = new wxMenu;
   menuFile->Append(wxID_EXIT);
@@ -107,7 +107,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
       wxArrayString lines = wxSplit(currentText, '\n');
 
       // If the number of lines exceeds limit, trim the excess lines
-      if (lines.size() > m_uiRecentMessageCount) {
+      while (lines.size() > m_uiRecentMessageCount) {
         lines.RemoveAt(lines.size() - 1, 1);
       }
 
