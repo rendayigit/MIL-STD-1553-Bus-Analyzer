@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+constexpr int US_TIME_LENGTH = 8;
+
 BM::BM()
     : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
       m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
@@ -80,28 +82,22 @@ S16BIT BM::stopBm() {
 }
 
 Message BM::getMessage(MSGSTRUCT *msg) {
-  static U64BIT messageNumber = 0;
   U16BIT rt = 0;
   U16BIT wTR1 = 0;
   U16BIT wTR2 = 0;
   U16BIT sa = 0;
   U16BIT wc = 0;
 
-  // U16BIT aDataWrds[32];
-  // std::fill(std::begin(aDataWrds), std::end(aDataWrds), 0);
-  // const char *type = "BC to RT";
-
-  // return Message(rt, sa, -1, -1, wc, 'A', type, "00000000:00000000:00000000us", ++messageNumber, aDataWrds);
-
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
 
   std::ostringstream time;
 
-  time << std::setw(8) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":" << std::setw(8) << std::setfill('0')
-       << (msg->wTimeTag2 * 2) << ":" << std::setw(8) << std::setfill('0') << (msg->wTimeTag * 2) << "us";
+  time << std::setw(US_TIME_LENGTH) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":" << std::setw(US_TIME_LENGTH)
+       << std::setfill('0') << (msg->wTimeTag2 * 2) << ":" << std::setw(US_TIME_LENGTH) << std::setfill('0')
+       << (msg->wTimeTag * 2) << "us";
 
-  Message message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A',
-                  aceGetMsgTypeString(msg->wType), time.str(), ++messageNumber, msg->aDataWrds);
+  Message message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
+                  aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds);
 
   return message;
 }
@@ -118,30 +114,30 @@ void BM::monitor() {
     err = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
     if (err == 1) {
-    Message message = getMessage(&sMsg);
+      Message message = getMessage(&sMsg);
 
-    std::string messageString = "Message: " + std::to_string(message.getNumber()) + "\t\t\t Time: " + message.getTime() +
-                                "\t Bus: " + message.getBus() + "\t Type: " + message.getType() +
-                                "\t RT: " + std::to_string(message.getRt()) + "\t SA: " + std::to_string(message.getSa()) +
-                                "\t WC: " + std::to_string(message.wc()) + "\t Data: ";
+      std::string messageString = "Time: " + message.getTime() + "\t Bus: " + message.getBus() +
+                                  "\t Type: " + message.getType() + "\t RT: " + std::to_string(message.getRt()) +
+                                  "\t SA: " + std::to_string(message.getSa()) +
+                                  "\t WC: " + std::to_string(message.wc()) + "\nData: ";
 
-    std::vector<std::string> data = message.getData();
+      std::vector<std::string> data = message.getData();
 
-    for (auto &d : data) {
-      messageString += d + " ";
-    }
+      for (auto &d : data) {
+        messageString += d + " ";
+      }
 
-    m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
+      m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
-    if (m_filter and not(m_filteredBus == message.getBus() and m_filteredRt == message.getRt() and
-                         m_filteredSa == message.getSa())) {
-      continue;
-    }
+      if (m_filter and not(m_filteredBus == message.getBus() and m_filteredRt == message.getRt() and
+                           m_filteredSa == message.getSa())) {
+        continue;
+      }
 
-    m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
-    // TODO(renda): implement false state
+      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
+      // TODO(renda): implement false state
 
-    m_updateMessages(messageString + "\n");
+      m_updateMessages(messageString + "\n\n");
     }
   }
 }

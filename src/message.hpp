@@ -10,12 +10,12 @@
 class Message {
 public:
   explicit Message(U16BIT rt, U16BIT sa, U16BIT rtRx, U16BIT saRx, U16BIT wc, char bus, const char *type,
-                   std::string time, U32BIT number, const U16BIT *data)
-      : m_rt(rt), m_sa(sa), m_rtRx(rtRx), m_saRx(saRx), m_wc(wc), m_bus(bus), m_type(type), m_time(std::move(time)),
-        m_number(number) {
-    for (int i = 0; i < m_wc; i++) {
+                   std::string time, const U16BIT *data)
+      : m_rt(rt), m_sa(sa), m_rtRx(rtRx), m_saRx(saRx), m_wc(wc), m_bus(bus), m_type(type), m_time(std::move(time)) {
+    for (int i = 0; i < RT_SA_MAX_COUNT; i++) {
       std::ostringstream stream;
-      stream << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << data[i];
+      stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase
+             << data[i]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       m_data.push_back(stream.str());
     }
   }
@@ -28,7 +28,6 @@ public:
   char getBus() const { return m_bus; }
   std::string getType() const { return m_type; }
   std::string getTime() const { return m_time; }
-  U64BIT getNumber() const { return m_number; }
   std::vector<std::string> getData() const { return m_data; }
 
 private:
@@ -40,7 +39,6 @@ private:
   char m_bus;
   const char *m_type;
   std::string m_time;
-  U64BIT m_number;
   std::vector<std::string> m_data;
 };
 

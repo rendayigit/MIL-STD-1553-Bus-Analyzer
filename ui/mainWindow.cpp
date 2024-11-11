@@ -22,15 +22,25 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   SetMenuBar(menuBar);
   menuBar->Append(menuFile, "&File");
 
-  m_deviceIdTextInput = new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000", wxPoint(10, 10), wxSize(60, 50));
+  m_deviceIdTextInput =
+      new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000",
+                     wxPoint(10, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+                     wxSize(60, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  auto *connectButton = new wxButton(this, ID_CONNECT_BTN, "Connect", wxPoint(75, 10), wxSize(100, 50));
+  auto *connectButton =
+      new wxButton(this, ID_CONNECT_BTN, "Connect",
+                   wxPoint(75, 10),  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+                   wxSize(100, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_filterButton =
-      new wxButton(this, ID_FILTER_BTN, "No filter set, displaying all messages.", wxPoint(340, 10), wxSize(420, 50));
+      new wxButton(this, ID_FILTER_BTN, "No filter set, displaying all messages.",
+                   wxPoint(340, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+                   wxSize(420, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   m_filterButton->Enable(false);
 
-  m_milStd1553Tree = new wxTreeCtrl(this, ID_RT_SA_TREE, wxPoint(10, 65), wxSize(180, 195));
+  m_milStd1553Tree = new wxTreeCtrl(
+      this, ID_RT_SA_TREE, wxPoint(10, 65), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      wxSize(180, 195));                    // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto rtSaTreeRoot = m_milStd1553Tree->AddRoot("MIL-STD-1553");
 
@@ -49,22 +59,31 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_milStd1553Tree->Expand(rtSaTreeRoot);
   m_milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
 
-  m_messageList =
-      new wxTextCtrl(this, wxID_ANY, "", wxPoint(180, 10), wxSize(250, 250), wxTE_READONLY | wxTE_MULTILINE);
+  m_messageList = new wxTextCtrl(
+      this, wxID_ANY, "", wxPoint(180, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      wxSize(250, 250),                     // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      wxTE_READONLY | wxTE_MULTILINE);      // NOLINT(hicpp-signed-bitwise)
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, 5);
-  topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, 5);
-  topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, 5);
+  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, 5);
-  bottomHorizontalSizer->Add(m_messageList, 1, wxEXPAND | wxALL, 5);
+  bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                             5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  bottomHorizontalSizer->Add(m_messageList, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                             5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, 5);
-  verticalSizer->Add(bottomHorizontalSizer, 1, wxEXPAND | wxALL, 5);
+  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  verticalSizer->Add(bottomHorizontalSizer, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   SetSizer(verticalSizer);
 
@@ -83,7 +102,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
 
   m_bm.setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    wxTheApp->CallAfter([this, text] {
+    wxTheApp->CallAfter([this, text] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
       wxString currentText = text + m_messageList->GetValue();
       wxArrayString lines = wxSplit(currentText, '\n');
 
@@ -103,7 +122,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
 
   m_bm.setUpdateSaState([&](char bus, int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    wxTheApp->CallAfter([this, bus, rt, sa, state] {
+    wxTheApp->CallAfter([this, bus, rt, sa, state] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
       m_milStd1553Tree->SetItemBackgroundColour(
           MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(), wxColour(state ? "green" : "red"));
 
