@@ -126,7 +126,13 @@ void BM::monitor() {
       std::string messageString = "Time: " + message.getTime() + "\t Bus: " + message.getBus() +
                                   "\t Type: " + message.getType() + "\t RT: " + std::to_string(message.getRt()) +
                                   "\t SA: " + std::to_string(message.getSa()) +
-                                  "\t WC: " + std::to_string(message.wc()) + "\nData: ";
+                                  "\t WC: " + std::to_string(message.wc());
+
+      if (not message.isResponded()) {
+        messageString += "\t (No Response)\n";
+      }
+
+      messageString += "Data: ";
 
       std::vector<std::string> data = message.getData();
 
