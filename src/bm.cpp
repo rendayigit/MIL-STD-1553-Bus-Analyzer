@@ -31,13 +31,13 @@ S16BIT BM::startBm(int devNum) {
     return err;
   }
 
-  // err = aceInitialize(m_devNum, ACE_ACCESS_CARD, ACE_MODE_MT, 0, 0, 0);
+  err = aceInitialize(static_cast<S16BIT>(m_devNum), ACE_ACCESS_CARD, ACE_MODE_MT, 0, 0, 0);
 
   if (err != 0) {
     return err;
   }
 
-  // err = aceMTStart(m_devNum);
+  err = aceMTStart(static_cast<S16BIT>(m_devNum));
 
   if (err != 0) {
     return err;
@@ -87,11 +87,11 @@ Message BM::getMessage(MSGSTRUCT *msg) {
   U16BIT sa = 0;
   U16BIT wc = 0;
 
-  U16BIT aDataWrds[32];
-  std::fill(std::begin(aDataWrds), std::end(aDataWrds), 0);
-  const char *type = "BC to RT";
+  // U16BIT aDataWrds[32];
+  // std::fill(std::begin(aDataWrds), std::end(aDataWrds), 0);
+  // const char *type = "BC to RT";
 
-  return Message(rt, sa, -1, -1, wc, 'A', type, "00000000:00000000:00000000us", ++messageNumber, aDataWrds);
+  // return Message(rt, sa, -1, -1, wc, 'A', type, "00000000:00000000:00000000us", ++messageNumber, aDataWrds);
 
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
 
@@ -115,9 +115,9 @@ void BM::monitor() {
   while (m_loop) {
     std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
 
-    // err = aceMTGetStkMsgDecoded(m_devNum, &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
+    err = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
-    // if (err == 1) {
+    if (err == 1) {
     Message message = getMessage(&sMsg);
 
     std::string messageString = "Message: " + std::to_string(message.getNumber()) + "\t\t\t Time: " + message.getTime() +
@@ -142,6 +142,6 @@ void BM::monitor() {
     // TODO(renda): implement false state
 
     m_updateMessages(messageString + "\n");
-    // }
+    }
   }
 }
