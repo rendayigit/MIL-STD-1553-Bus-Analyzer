@@ -87,6 +87,7 @@ Message BM::getMessage(MSGSTRUCT *msg) {
   U16BIT wTR2 = 0;
   U16BIT sa = 0;
   U16BIT wc = 0;
+  bool noRes = false;
 
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
 
@@ -96,8 +97,14 @@ Message BM::getMessage(MSGSTRUCT *msg) {
        << std::setfill('0') << (msg->wTimeTag2 * 2) << ":" << std::setw(US_TIME_LENGTH) << std::setfill('0')
        << (msg->wTimeTag * 2) << "us";
 
+  if ((msg->wBlkSts & ACE_MT_BSW_ERRFLG) != 0) { // NOLINT(hicpp-signed-bitwise)
+    if (std::strcmp(aceGetBSWErrString(ACE_MODE_MT, msg->wBlkSts), "NORES") != 0) {
+      noRes = true;
+    }
+  }
+
   Message message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
-                  aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds);
+                  aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, noRes);
 
   return message;
 }
@@ -134,8 +141,7 @@ void BM::monitor() {
         continue;
       }
 
-      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), true);
-      // TODO(renda): implement false state
+      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), not message.isResponded());
 
       m_updateMessages(messageString + "\n\n");
     }
