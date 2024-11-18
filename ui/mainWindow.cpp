@@ -173,9 +173,11 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
     m_startStopButton->SetLabelText("Start");
 
     // Default background color is wxSYS_COLOUR_BACKGROUND
-    m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
     // Default text color is wxSYS_COLOUR_WINDOWTEXT
-    m_startStopButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
+
+    m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
+    m_startStopButton->SetForegroundColour(
+        wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
   } else {
     m_bm.startBm(m_bm.getDevNum());
     m_startStopButton->SetLabelText("Stop");
