@@ -4,13 +4,14 @@
 #include "wx/debug.h"
 #include "wx/gdicmn.h"
 #include "wx/gtk/button.h"
+#include "wx/gtk/colour.h"
 #include "wx/sizer.h"
 #include <array>
 #include <exception>
 #include <iostream>
 #include <string>
 
-enum { ID_CONNECT_BTN = 1, ID_FILTER_BTN, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
+enum { ID_CONNECT_BTN = 1, ID_START_STOP_BTN, ID_FILTER_BTN, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_LINE_COUNT").getValue<int>();
@@ -31,6 +32,13 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
       new wxButton(this, ID_CONNECT_BTN, "Connect",
                    wxPoint(75, 10),  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
                    wxSize(100, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  m_startStopButton =
+      new wxButton(this, ID_START_STOP_BTN, "Start",
+                   wxPoint(185, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+                   wxSize(100, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  m_startStopButton->Enable(false);
 
   m_filterButton =
       new wxButton(this, ID_FILTER_BTN, "No filter set, displaying all messages.",
@@ -72,6 +80,8 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(m_startStopButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
@@ -94,6 +104,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   SetStatusText("Ready, press connect");
 
   Bind(wxEVT_BUTTON, &MyFrame::onConnectClicked, this, ID_CONNECT_BTN);
+  Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
   Bind(wxEVT_BUTTON, &MyFrame::onFilterClicked, this, ID_FILTER_BTN);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
   m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
@@ -145,8 +156,26 @@ void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
 
   if (errorCode == 0) {
     SetStatusText("Connected to device " + std::to_string(deviceNum));
+    m_startStopButton->Enable(true);
+    m_startStopButton->SetLabelText("Stop");
+    m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
+    m_startStopButton->SetForegroundColour(wxColour("white"));
   } else {
     SetStatusText(getStatus(errorCode).c_str());
+  }
+}
+
+void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
+  if (m_bm.isMonitoring()) {
+    m_bm.stopBm();
+    m_startStopButton->SetLabelText("Start");
+    m_startStopButton->SetBackgroundColour(wxColour("wxSYS_COLOUR_BACKGROUND"));
+    m_startStopButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
+  } else {
+    m_bm.startBm(m_bm.getDevNum());
+    m_startStopButton->SetLabelText("Stop");
+    m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
+    m_startStopButton->SetForegroundColour(wxColour("white"));
   }
 }
 
@@ -154,6 +183,7 @@ void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
   m_bm.setFilter(false);
   m_filterButton->SetLabelText("No filter set, displaying all messages.");
   m_filterButton->Enable(false);
+  m_filterButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
 }
 
 void MyFrame::onSaClicked(wxTreeEvent &event) {
@@ -187,6 +217,7 @@ void MyFrame::onSaClicked(wxTreeEvent &event) {
 
   m_filterButton->SetLabelText(logMessage + ". Click to clear filter.");
   m_filterButton->Enable(true);
+  m_filterButton->SetForegroundColour(wxColour("red"));
 
   m_messageList->Clear();
 }

@@ -32,6 +32,8 @@ public:
   void setFilteredRt(int filteredRt) { m_filteredRt = filteredRt; }
   void setFilteredSa(int filteredSa) { m_filteredSa = filteredSa; }
 
+  bool isMonitoring() const { return m_isMonitoring; }
+
 private:
   static Message getMessage(MSGSTRUCT *msg);
   void monitor();
@@ -42,7 +44,7 @@ private:
   int m_devNum;
   int m_monitorPollThreadSleepMs;
 
-  bool m_loop;
+  bool m_isMonitoring;
   bool m_filter;
 
   char m_filteredBus;

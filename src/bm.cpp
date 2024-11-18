@@ -10,7 +10,7 @@ constexpr int US_TIME_LENGTH = 8;
 BM::BM()
     : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
       m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
-      m_loop(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
+      m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
 
 BM::~BM() { stopBm(); }
 
@@ -21,7 +21,7 @@ S16BIT BM::startBm(int devNum) {
 
   m_logger.log(LOG_INFO, "start bm with dev: " + std::to_string(m_devNum));
 
-  m_loop = false;
+  m_isMonitoring = false;
 
   if (m_monitorThread.joinable()) {
     m_monitorThread.join();
@@ -46,7 +46,7 @@ S16BIT BM::startBm(int devNum) {
   }
 
   try {
-    m_loop = true;
+    m_isMonitoring = true;
     m_monitorThread = std::thread([&] { monitor(); });
   } catch (std::exception &e) {
     std::cout << e.what() << std::endl;
@@ -60,7 +60,7 @@ S16BIT BM::stopBm() {
 
   m_logger.log(LOG_INFO, "stop bm with dev: " + std::to_string(m_devNum));
 
-  m_loop = false;
+  m_isMonitoring = false;
 
   if (m_monitorThread.joinable()) {
     m_monitorThread.join();
@@ -115,7 +115,7 @@ void BM::monitor() {
   std::string messageBuffer;
 
   // Poll Messages
-  while (m_loop) {
+  while (m_isMonitoring) {
     std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
 
     err = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
