@@ -6,29 +6,21 @@
 #include "wx/gdicmn.h"
 #include "wx/gtk/button.h"
 #include "wx/gtk/colour.h"
+#include "wx/gtk/stattext.h"
 #include "wx/sizer.h"
 #include <array>
 #include <exception>
 #include <iostream>
 #include <string>
 
-enum {
-  ID_CONNECT_BTN = 1,
-  ID_CONNECT_MENU,
-  ID_START_STOP_BTN,
-  ID_START_STOP_MENU,
-  ID_FILTER_BTN,
-  ID_FILTER_MENU,
-  ID_DEVICE_ID_TXT,
-  ID_RT_SA_TREE
-};
+enum { ID_START_STOP_BTN = 1, ID_START_STOP_MENU, ID_FILTER_BTN, ID_FILTER_MENU, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
+constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_LINE_COUNT").getValue<int>();
 
   auto *menuFile = new wxMenu;
-  menuFile->Append(ID_CONNECT_MENU, "Connect", "Connect to selected device ");
-  menuFile->Append(ID_START_STOP_MENU, "Start/Stop", "Start or stop monitoring");
+  menuFile->Append(ID_START_STOP_MENU, "Start / Stop", "Start or stop monitoring on selected DDC device");
   menuFile->Append(ID_FILTER_MENU, "Clear filter", "Clear filtering of messages");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
@@ -37,32 +29,29 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   SetMenuBar(menuBar);
   menuBar->Append(menuFile, "&File");
 
-  m_deviceIdTextInput =
-      new wxTextCtrl(this, ID_DEVICE_ID_TXT, "0000",
-                     wxPoint(10, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                     wxSize(60, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
-  auto *connectButton =
-      new wxButton(this, ID_CONNECT_BTN, "Connect",
-                   wxPoint(75, 10),  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                   wxSize(100, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_deviceIdTextInput = new wxTextCtrl(
+      this, ID_DEVICE_ID_TXT, "00", {},
+      wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  m_startStopButton =
-      new wxButton(this, ID_START_STOP_BTN, "Start",
-                   wxPoint(185, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                   wxSize(100, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_startStopButton = new wxButton(
+      this, ID_START_STOP_BTN, "Start", {},
+      wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  m_startStopButton->Enable(false);
+  m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
+  m_startStopButton->SetForegroundColour(
+      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
-  m_filterButton =
-      new wxButton(this, ID_FILTER_BTN, "No filter set, displaying all messages.",
-                   wxPoint(340, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                   wxSize(420, 50)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_filterButton = new wxButton(
+      this, ID_FILTER_BTN, "No filter set, displaying all messages.", {},
+      wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
   m_filterButton->Enable(false);
 
-  m_milStd1553Tree = new wxTreeCtrl(
-      this, ID_RT_SA_TREE, wxPoint(10, 65), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      wxSize(180, 195));                    // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_milStd1553Tree =
+      new wxTreeCtrl(this, ID_RT_SA_TREE, {},
+                     wxSize(180, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto rtSaTreeRoot = m_milStd1553Tree->AddRoot("MIL-STD-1553");
 
@@ -81,18 +70,16 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_milStd1553Tree->Expand(rtSaTreeRoot);
   m_milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
 
-  m_messageList = new wxTextCtrl(
-      this, wxID_ANY, "", wxPoint(180, 10), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      wxSize(250, 250),                     // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      wxTE_READONLY | wxTE_MULTILINE);      // NOLINT(hicpp-signed-bitwise)
+  m_messageList = new wxTextCtrl(this, wxID_ANY, "", {}, {},
+                                 wxTE_READONLY | wxTE_MULTILINE); // NOLINT(hicpp-signed-bitwise)
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topHorizontalSizer->Add(deviceIdText, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(connectButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_startStopButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -115,10 +102,8 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   verticalSizer->SetSizeHints(this);
 
   CreateStatusBar();
-  SetStatusText("Ready, press connect");
+  SetStatusText("Ready, press Start");
 
-  Bind(wxEVT_BUTTON, &MyFrame::onConnectClicked, this, ID_CONNECT_BTN);
-  Bind(wxEVT_MENU, &MyFrame::onConnectClicked, this, ID_CONNECT_MENU);
   Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
   Bind(wxEVT_MENU, &MyFrame::onStartStopClicked, this, ID_START_STOP_MENU);
   Bind(wxEVT_BUTTON, &MyFrame::onFilterClicked, this, ID_FILTER_BTN);
@@ -179,26 +164,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   });
 }
 
-void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
+void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   S16BIT errorCode = 0;
   int deviceNum = 0;
-  m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
-  errorCode = m_bm.startBm(deviceNum);
 
-  if (errorCode == 0) {
-    SetStatusText("Connected to device " + std::to_string(deviceNum));
-    m_startStopButton->Enable(true);
-    m_startStopButton->SetLabelText("Stop");
-    m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
-    m_startStopButton->SetForegroundColour(wxColour("white"));
-  } else {
-    std::string errorString = getStatus(errorCode);
-    SetStatusText(errorString.c_str());
-    wxLogError(errorString.c_str());
-  }
-}
-
-void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   if (m_bm.isMonitoring()) {
     m_bm.stopBm();
     m_startStopButton->SetLabelText("Start");
@@ -210,14 +179,28 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
     m_startStopButton->SetForegroundColour(
         wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
   } else {
-    m_bm.startBm(m_bm.getDevNum());
-    m_startStopButton->SetLabelText("Stop");
-    m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
-    m_startStopButton->SetForegroundColour(wxColour("white"));
+    m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
+    errorCode = m_bm.startBm(deviceNum);
+
+    if (errorCode == 0) {
+      SetStatusText("Connected to device " + std::to_string(deviceNum));
+      m_startStopButton->Enable(true);
+      m_startStopButton->SetLabelText("Stop");
+      m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
+      m_startStopButton->SetForegroundColour(wxColour("white"));
+    } else {
+      std::string errorString = getStatus(errorCode);
+      SetStatusText(errorString.c_str());
+      wxLogError(errorString.c_str());
+    }
   }
 }
 
 void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
+  if (m_bm.isFiltered()) {
+    return;
+  }
+
   m_bm.setFilter(false);
   m_filterButton->SetLabelText("No filter set, displaying all messages.");
   m_filterButton->Enable(false);

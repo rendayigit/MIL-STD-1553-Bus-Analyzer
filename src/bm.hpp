@@ -16,7 +16,7 @@ public:
 
   S16BIT startBm(int devNum);
   S16BIT stopBm();
-  
+
   void setUpdateMessages(const std::function<void(const std::string &)> &updateMessages) {
     m_updateMessages = updateMessages;
   }
@@ -33,6 +33,7 @@ public:
   void setFilteredSa(int filteredSa) { m_filteredSa = filteredSa; }
 
   bool isMonitoring() const { return m_isMonitoring; }
+  bool isFiltered() const { return m_filter; }
 
 private:
   static Message getMessage(MSGSTRUCT *msg);
