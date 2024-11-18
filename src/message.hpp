@@ -30,7 +30,7 @@ public:
   std::string getType() const { return m_type; }
   std::string getTime() const { return m_time; }
   std::vector<std::string> getData() const { return m_data; }
-  bool isResponded() const { return m_noRes; }
+  bool isResponded() const { return not m_noRes; }
 
 private:
   U16BIT m_rt;

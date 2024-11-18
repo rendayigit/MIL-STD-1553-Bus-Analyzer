@@ -123,16 +123,12 @@ void BM::monitor() {
     if (err == 1) {
       Message message = getMessage(&sMsg);
 
-      std::string messageString = "Time: " + message.getTime() + "\t Bus: " + message.getBus() +
-                                  "\t Type: " + message.getType() + "\t RT: " + std::to_string(message.getRt()) +
-                                  "\t SA: " + std::to_string(message.getSa()) +
-                                  "\t WC: " + std::to_string(message.wc());
+      std::string messageString =
+          "Time: " + message.getTime() + "\t Bus: " + message.getBus() + "\t Type: " + message.getType() +
+          "\t RT: " + std::to_string(message.getRt()) + "\t SA: " + std::to_string(message.getSa()) +
+          "\t WC: " + std::to_string(message.wc()) + (message.isResponded() ? "" : "\t (No Response)");
 
-      if (not message.isResponded()) {
-        messageString += "\t (No Response)\n";
-      }
-
-      messageString += "Data: ";
+      messageString += "\nData: ";
 
       std::vector<std::string> data = message.getData();
 
@@ -147,7 +143,7 @@ void BM::monitor() {
         continue;
       }
 
-      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), not message.isResponded());
+      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
       m_updateMessages(messageString + "\n\n");
     }
