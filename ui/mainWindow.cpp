@@ -171,7 +171,10 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   if (m_bm.isMonitoring()) {
     m_bm.stopBm();
     m_startStopButton->SetLabelText("Start");
-    m_startStopButton->SetBackgroundColour(wxColour("wxSYS_COLOUR_BACKGROUND"));
+
+    // Default background color is wxSYS_COLOUR_BACKGROUND
+    m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
+    // Default text color is wxSYS_COLOUR_WINDOWTEXT
     m_startStopButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
   } else {
     m_bm.startBm(m_bm.getDevNum());
