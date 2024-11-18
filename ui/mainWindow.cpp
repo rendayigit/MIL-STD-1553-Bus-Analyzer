@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "milStd1553.hpp"
 #include "wx/debug.h"
+#include "wx/event.h"
 #include "wx/gdicmn.h"
 #include "wx/gtk/button.h"
 #include "wx/gtk/colour.h"
@@ -11,12 +12,25 @@
 #include <iostream>
 #include <string>
 
-enum { ID_CONNECT_BTN = 1, ID_START_STOP_BTN, ID_FILTER_BTN, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
+enum {
+  ID_CONNECT_BTN = 1,
+  ID_CONNECT_MENU,
+  ID_START_STOP_BTN,
+  ID_START_STOP_MENU,
+  ID_FILTER_BTN,
+  ID_FILTER_MENU,
+  ID_DEVICE_ID_TXT,
+  ID_RT_SA_TREE
+};
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_LINE_COUNT").getValue<int>();
 
   auto *menuFile = new wxMenu;
+  menuFile->Append(ID_CONNECT_MENU, "Connect", "Connect to selected device ");
+  menuFile->Append(ID_START_STOP_MENU, "Start/Stop", "Start or stop monitoring");
+  menuFile->Append(ID_FILTER_MENU, "Clear filter", "Clear filtering of messages");
+  menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
   auto *menuBar = new wxMenuBar;
@@ -104,8 +118,11 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   SetStatusText("Ready, press connect");
 
   Bind(wxEVT_BUTTON, &MyFrame::onConnectClicked, this, ID_CONNECT_BTN);
+  Bind(wxEVT_MENU, &MyFrame::onConnectClicked, this, ID_CONNECT_MENU);
   Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
+  Bind(wxEVT_MENU, &MyFrame::onStartStopClicked, this, ID_START_STOP_MENU);
   Bind(wxEVT_BUTTON, &MyFrame::onFilterClicked, this, ID_FILTER_BTN);
+  Bind(wxEVT_MENU, &MyFrame::onFilterClicked, this, ID_FILTER_MENU);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
   m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
 
