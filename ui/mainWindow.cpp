@@ -161,7 +161,9 @@ void MyFrame::onConnectClicked(wxCommandEvent & /*event*/) {
     m_startStopButton->SetBackgroundColour(wxColour("#ff4545"));
     m_startStopButton->SetForegroundColour(wxColour("white"));
   } else {
-    SetStatusText(getStatus(errorCode).c_str());
+    std::string errorString = getStatus(errorCode);
+    SetStatusText(errorString.c_str());
+    wxLogError(errorString.c_str());
   }
 }
 
