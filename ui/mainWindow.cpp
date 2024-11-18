@@ -151,16 +151,30 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_bm.setUpdateSaState([&](char bus, int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, bus, rt, sa, state] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+      // Default background color is wxSYS_COLOUR_BACKGROUND
+      // Default text color is wxSYS_COLOUR_WINDOWTEXT
+
       m_milStd1553Tree->SetItemBackgroundColour(
           MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(), wxColour(state ? "green" : "red"));
+
+      m_milStd1553Tree->SetItemTextColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(),
+                                          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
 
       m_milStd1553Tree->SetItemBackgroundColour(
           MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(),
           wxColour(state ? "green" : "red"));
 
+      m_milStd1553Tree->SetItemTextColour(
+          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(),
+          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
+
       m_milStd1553Tree->SetItemBackgroundColour(
           MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(),
           wxColour(state ? "green" : "red"));
+
+      m_milStd1553Tree->SetItemTextColour(
+          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(),
+          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
     });
   });
 }
