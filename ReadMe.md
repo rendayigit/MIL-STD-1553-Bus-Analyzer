@@ -10,7 +10,7 @@
 1. Run `./scripts/build.sh`
 1. Run `./scripts/run.sh`
 
-#### ! Don't forget to have the DDC drivers installed on your machine and have a valid DDC device connected to your machine. You should also make sure the DDC device is connected to a functioning MIL STD 1553 bus !
+#### ❗ Don't forget to have the DDC drivers installed on your machine and have a valid DDC device connected to your machine. You should also make sure the DDC device is connected to a functioning MIL STD 1553 bus ❗
 
 ## For Developers
 
