@@ -197,7 +197,7 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
 }
 
 void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
-  if (m_bm.isFiltered()) {
+  if (not m_bm.isFiltered()) {
     return;
   }
 
