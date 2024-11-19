@@ -10,7 +10,6 @@ public:
   MyFrame();
 
 private:
-  void onConnectClicked(wxCommandEvent &event);
   void onStartStopClicked(wxCommandEvent &event);
   void onFilterClicked(wxCommandEvent &event);
   void onSaClicked(wxTreeEvent &event);
