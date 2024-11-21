@@ -11,6 +11,7 @@
 #include <array>
 #include <exception>
 #include <iostream>
+#include <regex>
 #include <string>
 
 enum { ID_START_STOP_BTN = 1, ID_START_STOP_MENU, ID_FILTER_BTN, ID_FILTER_MENU, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
@@ -228,8 +229,24 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
 
     char bus = 'A';
     busText.GetChar(busText.size() - 1).GetAsChar(&bus);
-    int rt = static_cast<int>(rtText.GetChar(rtText.size() - 1).GetValue() - '0');
-    int sa = static_cast<int>(selectedItemText.GetChar(selectedItemText.size() - 1).GetValue() - '0');
+
+    std::regex digitRegex("\\d+");
+    std::smatch match;
+    std::string saString = selectedItemText.ToStdString();
+    std::string rtString = rtText.ToStdString();
+
+    int rt = 0;
+    int sa = 0;
+
+    if (std::regex_search(saString, match, digitRegex)) {
+      std::string numericPart = match[0];
+      sa = std::stoi(numericPart);
+    }
+
+    if (std::regex_search(rtString, match, digitRegex)) {
+      std::string numericPart = match[0];
+      rt = std::stoi(numericPart);
+    }
 
     m_bm.setFilteredBus(bus);
     m_bm.setFilteredRt(rt);
@@ -246,7 +263,17 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
 
     char bus = 'A';
     busText.GetChar(busText.size() - 1).GetAsChar(&bus);
-    int rt = static_cast<int>(selectedItemText.GetChar(selectedItemText.size() - 1).GetValue() - '0');
+
+    std::regex digitRegex("\\d+");
+    std::smatch match;
+    std::string rtString = selectedItemText.ToStdString();
+
+    int rt = 0;
+
+    if (std::regex_search(rtString, match, digitRegex)) {
+      std::string numericPart = match[0];
+      rt = std::stoi(numericPart);
+    }
 
     m_bm.setFilteredBus(bus);
     m_bm.setFilteredRt(rt);

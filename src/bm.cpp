@@ -83,13 +83,19 @@ S16BIT BM::stopBm() {
 
 Message BM::getMessage(MSGSTRUCT *msg) {
   U16BIT rt = 0;
+  U16BIT sa = 0;
+  U16BIT rtRx = -1;
+  U16BIT saRx = -1;
+  U16BIT wc = 0;
   U16BIT wTR1 = 0;
   U16BIT wTR2 = 0;
-  U16BIT sa = 0;
-  U16BIT wc = 0;
   bool noRes = false;
 
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
+
+  if (msg->wCmdWrd2Flg != 0U) {
+    aceCmdWordParse(msg->wCmdWrd2, &rtRx, &wTR2, &saRx, &wc);
+  }
 
   std::ostringstream time;
 
@@ -103,8 +109,9 @@ Message BM::getMessage(MSGSTRUCT *msg) {
     }
   }
 
-  return Message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
-                 aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, noRes);
+  return Message(rt, sa, rtRx, saRx, wc,
+                 (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
+                 aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, msg->wCmdWrd2Flg != 0U, noRes);
 }
 
 void BM::monitor() {
@@ -124,6 +131,9 @@ void BM::monitor() {
       std::string messageString =
           "Time: " + message.getTime() + "\t Bus: " + message.getBus() + "\t Type: " + message.getType() +
           "\t RT: " + std::to_string(message.getRt()) + "\t SA: " + std::to_string(message.getSa()) +
+          (message.isCmdWord2()
+               ? "\t RT2: " + std::to_string(message.getRtRx()) + "\t SA2: " + std::to_string(message.getSaRx())
+               : "") +
           "\t WC: " + std::to_string(message.wc()) + (message.isResponded() ? "" : "\t (No Response)");
 
       messageString += "\nData: ";
