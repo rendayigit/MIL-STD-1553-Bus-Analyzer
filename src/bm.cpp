@@ -138,8 +138,9 @@ void BM::monitor() {
 
       m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
-      if (m_filter and not(m_filteredBus == message.getBus() and m_filteredRt == message.getRt() and
-                           m_filteredSa == message.getSa())) {
+      if (m_filter and
+          not(m_filteredBus == message.getBus() and (m_filteredRt == message.getRt() or m_filteredRt == -1) and
+              (m_filteredSa == message.getSa() or m_filteredSa == -1))) {
         continue;
       }
 

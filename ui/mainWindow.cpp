@@ -106,10 +106,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
 
   Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
   Bind(wxEVT_MENU, &MyFrame::onStartStopClicked, this, ID_START_STOP_MENU);
-  Bind(wxEVT_BUTTON, &MyFrame::onFilterClicked, this, ID_FILTER_BTN);
-  Bind(wxEVT_MENU, &MyFrame::onFilterClicked, this, ID_FILTER_MENU);
+  Bind(wxEVT_BUTTON, &MyFrame::onClearFilterClicked, this, ID_FILTER_BTN);
+  Bind(wxEVT_MENU, &MyFrame::onClearFilterClicked, this, ID_FILTER_MENU);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
-  m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onSaClicked, this);
+  m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onTreeItemClicked, this);
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bm.getDevNum()));
 
@@ -196,7 +196,7 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   }
 }
 
-void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
+void MyFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
   if (not m_bm.isFiltered()) {
     return;
   }
@@ -207,33 +207,67 @@ void MyFrame::onFilterClicked(wxCommandEvent & /*event*/) {
   m_filterButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
 }
 
-void MyFrame::onSaClicked(wxTreeEvent &event) {
+void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
-  wxString saText = m_milStd1553Tree->GetItemText(selectedItem);
+  wxString selectedItemText = m_milStd1553Tree->GetItemText(selectedItem);
 
-  if (not saText.Contains("SA")) {
+  wxString logMessage;
+
+  // SA selected
+  if (selectedItemText.Contains("SA")) {
+    wxTreeItemId rtItem = m_milStd1553Tree->GetItemParent(selectedItem);
+    wxString rtText = m_milStd1553Tree->IsEmpty() ? "No RT" : m_milStd1553Tree->GetItemText(rtItem);
+
+    wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(rtItem);
+    wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
+
+    logMessage = wxString::Format("Filtering messages for: %s, %s, %s", busText, rtText, selectedItemText);
+
+    wxLogMessage(logMessage);
+
+    char bus = 'A';
+    busText.GetChar(busText.size() - 1).GetAsChar(&bus);
+    int rt = static_cast<int>(rtText.GetChar(rtText.size() - 1).GetValue() - '0');
+    int sa = static_cast<int>(selectedItemText.GetChar(selectedItemText.size() - 1).GetValue() - '0');
+
+    m_bm.setFilteredBus(bus);
+    m_bm.setFilteredRt(rt);
+    m_bm.setFilteredSa(sa);
+  }
+  // RT selected
+  else if (selectedItemText.Contains("RT")) {
+    wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(selectedItem);
+    wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
+
+    logMessage = wxString::Format("Filtering messages for: %s, %s", busText, selectedItemText);
+
+    wxLogMessage(logMessage);
+
+    char bus = 'A';
+    busText.GetChar(busText.size() - 1).GetAsChar(&bus);
+    int rt = static_cast<int>(selectedItemText.GetChar(selectedItemText.size() - 1).GetValue() - '0');
+
+    m_bm.setFilteredBus(bus);
+    m_bm.setFilteredRt(rt);
+    m_bm.setFilteredSa(-1);
+  }
+  // BUS selected
+  else if (selectedItemText.Contains("BUS")) {
+    logMessage = wxString::Format("Filtering messages for: %s", selectedItemText);
+
+    wxLogMessage(logMessage);
+
+    char bus = 'A';
+    selectedItemText.GetChar(selectedItemText.size() - 1).GetAsChar(&bus);
+
+    m_bm.setFilteredBus(bus);
+    m_bm.setFilteredRt(-1);
+    m_bm.setFilteredSa(-1);
+  } else {
     return;
   }
 
-  wxTreeItemId rtItem = m_milStd1553Tree->GetItemParent(selectedItem);
-  wxString rtText = m_milStd1553Tree->IsEmpty() ? "No RT" : m_milStd1553Tree->GetItemText(rtItem);
-
-  wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(rtItem);
-  wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
-
-  wxString logMessage = wxString::Format("Filtering messages for: %s, %s, %s", busText, rtText, saText);
-
-  wxLogMessage(logMessage);
-
-  char bus = 'A';
-  busText.GetChar(busText.size() - 1).GetAsChar(&bus);
-  int rt = static_cast<int>(rtText.GetChar(rtText.size() - 1).GetValue() - '0');
-  int sa = static_cast<int>(saText.GetChar(saText.size() - 1).GetValue() - '0');
-
-  m_bm.setFilteredBus(bus);
-  m_bm.setFilteredRt(rt);
-  m_bm.setFilteredSa(sa);
   m_bm.setFilter(true);
 
   m_filterButton->SetLabelText(logMessage + ". Click to clear filter.");
