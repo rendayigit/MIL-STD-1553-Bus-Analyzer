@@ -39,7 +39,7 @@ private:
   U16BIT m_saRx;
   U16BIT m_wc;
   char m_bus;
-  const char *m_type;
+  std::string m_type;
   std::string m_time;
   std::vector<std::string> m_data;
   bool m_noRes;
