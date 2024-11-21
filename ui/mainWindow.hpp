@@ -11,8 +11,8 @@ public:
 
 private:
   void onStartStopClicked(wxCommandEvent &event);
-  void onFilterClicked(wxCommandEvent &event);
-  void onSaClicked(wxTreeEvent &event);
+  void onClearFilterClicked(wxCommandEvent &event);
+  void onTreeItemClicked(wxTreeEvent &event);
   void onExit(wxCommandEvent &event);
 
   BM m_bm;
