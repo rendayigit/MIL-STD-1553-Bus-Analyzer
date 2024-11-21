@@ -103,10 +103,8 @@ Message BM::getMessage(MSGSTRUCT *msg) {
     }
   }
 
-  Message message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
-                  aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, noRes);
-
-  return message;
+  return Message(rt, sa, -1, -1, wc, (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
+                 aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, noRes);
 }
 
 void BM::monitor() {
@@ -138,13 +136,13 @@ void BM::monitor() {
 
       m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
 
+      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
+
       if (m_filter and
           not(m_filteredBus == message.getBus() and (m_filteredRt == message.getRt() or m_filteredRt == -1) and
               (m_filteredSa == message.getSa() or m_filteredSa == -1))) {
         continue;
       }
-
-      m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
       m_updateMessages(messageString + "\n\n");
     }
