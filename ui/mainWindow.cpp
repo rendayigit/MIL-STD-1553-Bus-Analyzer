@@ -43,11 +43,11 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
   m_deviceIdTextInput = new wxTextCtrl(
-      this, ID_DEVICE_ID_TXT, "00", {},
+      this, ID_DEVICE_ID_TXT, "00", wxDefaultPosition,
       wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_startStopButton = new wxButton(
-      this, ID_START_STOP_BTN, "Start", {},
+      this, ID_START_STOP_BTN, "Start", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
@@ -55,17 +55,17 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
       wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
   m_filterButton = new wxButton(
-      this, ID_FILTER_BTN, "No filter set, displaying all messages.", {},
+      this, ID_FILTER_BTN, "No filter set, displaying all messages.", wxDefaultPosition,
       wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_filterButton->Enable(false);
 
   auto *clearButton = new wxButton(
-      this, ID_CLEAR_BTN, "Clear", {},
+      this, ID_CLEAR_BTN, "Clear", wxDefaultPosition,
       wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_milStd1553Tree =
-      new wxTreeCtrl(this, ID_RT_SA_TREE, {},
+      new wxTreeCtrl(this, ID_RT_SA_TREE, wxDefaultPosition,
                      wxSize(180, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto rtSaTreeRoot = m_milStd1553Tree->AddRoot("MIL-STD-1553");
@@ -85,7 +85,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   m_milStd1553Tree->Expand(rtSaTreeRoot);
   m_milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
 
-  m_messageList = new wxTextCtrl(this, wxID_ANY, "", {}, {},
+  m_messageList = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize,
                                  wxTE_READONLY | wxTE_MULTILINE); // NOLINT(hicpp-signed-bitwise)
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
