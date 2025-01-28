@@ -14,7 +14,16 @@
 #include <regex>
 #include <string>
 
-enum { ID_START_STOP_BTN = 1, ID_START_STOP_MENU, ID_FILTER_BTN, ID_FILTER_MENU, ID_DEVICE_ID_TXT, ID_RT_SA_TREE };
+enum {
+  ID_START_STOP_BTN = 1,
+  ID_START_STOP_MENU,
+  ID_FILTER_BTN,
+  ID_CLEAR_BTN,
+  ID_FILTER_MENU,
+  ID_CLEAR_MENU,
+  ID_DEVICE_ID_TXT,
+  ID_RT_SA_TREE
+};
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
@@ -23,6 +32,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   auto *menuFile = new wxMenu;
   menuFile->Append(ID_START_STOP_MENU, "Start / Stop", "Start or stop monitoring on selected DDC device");
   menuFile->Append(ID_FILTER_MENU, "Clear filter", "Clear filtering of messages");
+  menuFile->Append(ID_CLEAR_MENU, "Clear messages", "Clear messages");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
@@ -49,6 +59,10 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
       wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_filterButton->Enable(false);
+
+  auto *clearButton = new wxButton(
+      this, ID_CLEAR_BTN, "Clear", {},
+      wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_milStd1553Tree =
       new wxTreeCtrl(this, ID_RT_SA_TREE, {},
@@ -86,6 +100,8 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(clearButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                              5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -108,9 +124,11 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
   Bind(wxEVT_MENU, &MyFrame::onStartStopClicked, this, ID_START_STOP_MENU);
   Bind(wxEVT_BUTTON, &MyFrame::onClearFilterClicked, this, ID_FILTER_BTN);
+  Bind(wxEVT_BUTTON, &MyFrame::onClearClicked, this, ID_CLEAR_BTN);
   Bind(wxEVT_MENU, &MyFrame::onClearFilterClicked, this, ID_FILTER_MENU);
+  Bind(wxEVT_MENU, &MyFrame::onClearClicked, this, ID_CLEAR_MENU);
   Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
-  m_milStd1553Tree->Bind(wxEVT_TREE_SEL_CHANGED, &MyFrame::onTreeItemClicked, this);
+  m_milStd1553Tree->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::onTreeItemClicked, this);
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bm.getDevNum()));
 
@@ -208,6 +226,8 @@ void MyFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
   m_filterButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
 }
 
+void MyFrame::onClearClicked(wxCommandEvent & /*event*/) { m_messageList->Clear(); }
+
 void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
@@ -223,9 +243,7 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
     wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(rtItem);
     wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
 
-    logMessage = wxString::Format("Filtering messages for: %s, %s, %s", busText, rtText, selectedItemText);
-
-    wxLogMessage(logMessage);
+    logMessage = busText + ", " + rtText + ", " + selectedItemText;
 
     char bus = 'A';
     busText.GetChar(busText.size() - 1).GetAsChar(&bus);
@@ -257,9 +275,7 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
     wxTreeItemId busItem = m_milStd1553Tree->GetItemParent(selectedItem);
     wxString busText = m_milStd1553Tree->IsEmpty() ? "No Bus" : m_milStd1553Tree->GetItemText(busItem);
 
-    logMessage = wxString::Format("Filtering messages for: %s, %s", busText, selectedItemText);
-
-    wxLogMessage(logMessage);
+    logMessage = busText + ", " + selectedItemText;
 
     char bus = 'A';
     busText.GetChar(busText.size() - 1).GetAsChar(&bus);
@@ -281,9 +297,7 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
   }
   // BUS selected
   else if (selectedItemText.Contains("BUS")) {
-    logMessage = wxString::Format("Filtering messages for: %s", selectedItemText);
-
-    wxLogMessage(logMessage);
+    logMessage = selectedItemText;
 
     char bus = 'A';
     selectedItemText.GetChar(selectedItemText.size() - 1).GetAsChar(&bus);
@@ -297,7 +311,7 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
 
   m_bm.setFilter(true);
 
-  m_filterButton->SetLabelText(logMessage + ". Click to clear filter.");
+  m_filterButton->SetLabelText("Filtering messages for: " + logMessage + ". Click to clear filter.");
   m_filterButton->Enable(true);
   m_filterButton->SetForegroundColour(wxColour("red"));
 
