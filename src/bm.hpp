@@ -1,7 +1,6 @@
 #ifndef BM_HPP
 #define BM_HPP
 
-#include <array>
 #include <functional>
 #include <string>
 #include <thread>

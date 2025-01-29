@@ -1,15 +1,12 @@
 #include "bm.hpp"
-#include "logger/logger.hpp"
 
 #include <chrono>
 #include <exception>
-#include <iostream>
-#include <string>
+
+#include "common.hpp"
+#include "logger/logger.hpp"
 
 constexpr int US_TIME_LENGTH = 8;
-
-// TODO(renda): use spdlog
-// TODO(renda): log all errors and events
 
 BM::BM()
     : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
@@ -23,7 +20,7 @@ S16BIT BM::start(int devNum) {
 
   m_devNum = devNum;
 
-  Logger::info("Start BM with Device Id: " + std::to_string(m_devNum));
+  Logger::debug("Starting bus monitor with device: " + std::to_string(m_devNum));
 
   m_isMonitoring = false;
 
@@ -34,18 +31,21 @@ S16BIT BM::start(int devNum) {
   status = aceFree(static_cast<S16BIT>(m_devNum));
 
   if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
     return status;
   }
 
   status = aceInitialize(static_cast<S16BIT>(m_devNum), ACE_ACCESS_CARD, ACE_MODE_MT, 0, 0, 0);
 
   if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
     return status;
   }
 
   status = aceMTStart(static_cast<S16BIT>(m_devNum));
 
   if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
     return status;
   }
 
@@ -53,7 +53,7 @@ S16BIT BM::start(int devNum) {
     m_isMonitoring = true;
     m_monitorThread = std::thread([&] { monitor(); });
   } catch (std::exception &e) {
-    std::cout << e.what() << std::endl;
+    Logger::error("Failed to start monitoring thread, " + std::string(e.what()));
   }
 
   return status;
@@ -62,7 +62,7 @@ S16BIT BM::start(int devNum) {
 S16BIT BM::stop() {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::info("Stop BM with Device Id: " + std::to_string(m_devNum));
+  Logger::debug("Stopping bus monitor with device: " + std::to_string(m_devNum));
 
   m_isMonitoring = false;
 
@@ -72,13 +72,15 @@ S16BIT BM::stop() {
 
   status = aceMTStop(static_cast<S16BIT>(m_devNum));
 
-  if (status != ACE_ERR_SUCCESS) {
+  if (status != ACE_ERR_SUCCESS and status != ACE_ERR_INVALID_STATE) {
+    Logger::error(getStatus(status));
     return status;
   }
 
   status = aceFree(static_cast<S16BIT>(m_devNum));
 
   if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
     return status;
   }
 

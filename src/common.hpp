@@ -4,8 +4,6 @@
 #include "stdemace.h"
 
 #include "fileOperations/fileOperations.hpp"
-#include "logger/logger.hpp"
-
 #include "json/json.hpp"
 
 #include <string>
@@ -22,12 +20,6 @@ static std::string getStatus(S16BIT statusCode) {
                                    // cppcoreguidelines-avoid-c-arrays)
 
   aceErrorStr(statusCode, buf, ACE_ERROR_BUFFER_SIZE);
-
-  if (statusCode == ACE_ERR_SUCCESS) {
-    Logger::info(buf);
-  } else {
-    Logger::error(buf);
-  }
 
   return buf;
 }
