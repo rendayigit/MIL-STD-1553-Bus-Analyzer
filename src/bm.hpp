@@ -1,21 +1,20 @@
 #ifndef BM_HPP
 #define BM_HPP
 
-#include "logger/logger.hpp"
-#include "message.hpp"
-#include "stdemace.h"
-#include <array>
 #include <functional>
 #include <string>
 #include <thread>
+
+#include "message.hpp"
+#include "stdemace.h"
 
 class BM {
 public:
   BM();
   ~BM();
 
-  S16BIT startBm(int devNum);
-  S16BIT stopBm();
+  S16BIT start(int devNum);
+  S16BIT stop();
 
   void setUpdateMessages(const std::function<void(const std::string &)> &updateMessages) {
     m_updateMessages = updateMessages;
@@ -43,7 +42,6 @@ private:
   std::function<void(char bus, int rt, int sa, bool state)> m_updateSaState;
 
   int m_devNum;
-  int m_monitorPollThreadSleepMs;
 
   bool m_isMonitoring;
   bool m_filter;
@@ -53,7 +51,6 @@ private:
   int m_filteredSa;
 
   std::thread m_monitorThread;
-  Logger m_logger;
 };
 
 #endif // BM_HPP

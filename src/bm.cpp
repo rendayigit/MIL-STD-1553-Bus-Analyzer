@@ -2,24 +2,24 @@
 
 #include <chrono>
 #include <exception>
-#include <iostream>
-#include <string>
+
+#include "common.hpp"
+#include "logger/logger.hpp"
 
 constexpr int US_TIME_LENGTH = 8;
 
 BM::BM()
-    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
-      m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
-      m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
+    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()), m_isMonitoring(false),
+      m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
 
-BM::~BM() { stopBm(); }
+BM::~BM() { stop(); }
 
-S16BIT BM::startBm(int devNum) {
-  S16BIT err = 0;
+S16BIT BM::start(int devNum) {
+  S16BIT status = ACE_ERR_SUCCESS;
 
   m_devNum = devNum;
 
-  m_logger.log(LOG_INFO, "start bm with dev: " + std::to_string(m_devNum));
+  Logger::debug("Starting bus monitor with device: " + std::to_string(m_devNum));
 
   m_isMonitoring = false;
 
@@ -27,38 +27,41 @@ S16BIT BM::startBm(int devNum) {
     m_monitorThread.join();
   }
 
-  err = aceFree(static_cast<S16BIT>(m_devNum));
+  status = aceFree(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceInitialize(static_cast<S16BIT>(m_devNum), ACE_ACCESS_CARD, ACE_MODE_MT, 0, 0, 0);
+  status = aceInitialize(static_cast<S16BIT>(m_devNum), ACE_ACCESS_CARD, ACE_MODE_MT, 0, 0, 0);
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceMTStart(static_cast<S16BIT>(m_devNum));
+  status = aceMTStart(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   try {
     m_isMonitoring = true;
     m_monitorThread = std::thread([&] { monitor(); });
   } catch (std::exception &e) {
-    std::cout << e.what() << std::endl;
+    Logger::error("Failed to start monitoring thread, " + std::string(e.what()));
   }
 
-  return 0;
+  return status;
 }
 
-S16BIT BM::stopBm() {
-  S16BIT err = 0;
+S16BIT BM::stop() {
+  S16BIT status = ACE_ERR_SUCCESS;
 
-  m_logger.log(LOG_INFO, "stop bm with dev: " + std::to_string(m_devNum));
+  Logger::debug("Stopping bus monitor with device: " + std::to_string(m_devNum));
 
   m_isMonitoring = false;
 
@@ -66,19 +69,21 @@ S16BIT BM::stopBm() {
     m_monitorThread.join();
   }
 
-  err = aceMTStop(static_cast<S16BIT>(m_devNum));
+  status = aceMTStop(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS and status != ACE_ERR_INVALID_STATE) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceFree(static_cast<S16BIT>(m_devNum));
+  status = aceFree(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  return 0;
+  return status;
 }
 
 Message BM::getMessage(MSGSTRUCT *msg) {
@@ -89,7 +94,7 @@ Message BM::getMessage(MSGSTRUCT *msg) {
   U16BIT wc = 0;
   U16BIT wTR1 = 0;
   U16BIT wTR2 = 0;
-  bool noRes = false;
+  bool noRes = true;
 
   aceCmdWordParse(msg->wCmdWrd1, &rt, &wTR1, &sa, &wc);
 
@@ -115,17 +120,16 @@ Message BM::getMessage(MSGSTRUCT *msg) {
 }
 
 void BM::monitor() {
-  S16BIT err = 0;
+  S16BIT status = 0;
   MSGSTRUCT sMsg;
   std::string messageBuffer;
 
   // Poll Messages
   while (m_isMonitoring) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
+    status =
+        aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
-    err = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
-
-    if (err == 1) {
+    if (status == ACE_ERR_MTI_EOB) {
       Message message = getMessage(&sMsg);
 
       std::string messageString =
@@ -144,7 +148,7 @@ void BM::monitor() {
         messageString += d + " ";
       }
 
-      m_logger.log(LOG_INFO, "Bus Activity: \n " + messageString);
+      Logger::info("Bus Activity: \n " + messageString);
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
