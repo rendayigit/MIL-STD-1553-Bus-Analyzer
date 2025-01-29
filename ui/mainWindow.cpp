@@ -188,7 +188,7 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   int deviceNum = 0;
 
   if (m_bm.isMonitoring()) {
-    m_bm.stopBm();
+    m_bm.stop();
     m_startStopButton->SetLabelText("Start");
 
     // Default background color is wxSYS_COLOUR_BACKGROUND
@@ -199,7 +199,7 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
         wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
   } else {
     m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
-    errorCode = m_bm.startBm(deviceNum);
+    errorCode = m_bm.start(deviceNum);
 
     if (errorCode == 0) {
       SetStatusText("Connected to device " + std::to_string(deviceNum));
