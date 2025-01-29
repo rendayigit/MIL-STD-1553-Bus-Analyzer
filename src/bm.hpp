@@ -1,5 +1,4 @@
-#ifndef BM_HPP
-#define BM_HPP
+#pragma once
 
 #include <functional>
 #include <string>
@@ -52,5 +51,3 @@ private:
 
   std::thread m_monitorThread;
 };
-
-#endif // BM_HPP

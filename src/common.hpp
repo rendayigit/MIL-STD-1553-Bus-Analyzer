@@ -1,18 +1,34 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#pragma once
 
 #include "stdemace.h"
 
-#include "fileOperations/fileOperations.hpp"
 #include "json/json.hpp"
 
+#include <climits>
+#include <filesystem>
+#include <linux/limits.h>
 #include <string>
+#include <unistd.h>
 
 constexpr int ACE_ERROR_BUFFER_SIZE = 80;
 constexpr int HEX_BYTE = 16;
 constexpr int RT_SA_MAX_COUNT = 32;
 
-const std::string CONFIG_PATH = FileOperations::getInstance().getExecutableDirectory() + "../config.json";
+static std::string getExecutableDirectory() {
+  char result[PATH_MAX]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
+                         // cppcoreguidelines-avoid-c-arrays)
+
+  // Get the path of the executable
+  (void)readlink("/proc/self/exe", result, PATH_MAX);
+
+  // Get the path of the executable's parent directory
+  std::filesystem::path exePath(result);
+
+  // Get the path of the executable's parent directory
+  return (exePath.parent_path().string() + '/');
+}
+
+const std::string CONFIG_PATH = getExecutableDirectory() + "../config.json";
 
 static std::string getStatus(S16BIT statusCode) {
   char buf[ACE_ERROR_BUFFER_SIZE]; // NOLINT(hicpp-avoid-c-arrays,
@@ -23,5 +39,3 @@ static std::string getStatus(S16BIT statusCode) {
 
   return buf;
 }
-
-#endif // COMMON_HPP
