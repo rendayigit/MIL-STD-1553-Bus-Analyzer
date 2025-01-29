@@ -9,9 +9,8 @@
 constexpr int US_TIME_LENGTH = 8;
 
 BM::BM()
-    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()),
-      m_monitorPollThreadSleepMs(Json(CONFIG_PATH).getNode("MONITOR_POLL_THREAD_SLEEP_MS").getValue<int>()),
-      m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
+    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()), m_isMonitoring(false),
+      m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
 
 BM::~BM() { stop(); }
 
@@ -127,8 +126,6 @@ void BM::monitor() {
 
   // Poll Messages
   while (m_isMonitoring) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(m_monitorPollThreadSleepMs));
-
     status =
         aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 

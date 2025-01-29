@@ -42,7 +42,6 @@ private:
   std::function<void(char bus, int rt, int sa, bool state)> m_updateSaState;
 
   int m_devNum;
-  int m_monitorPollThreadSleepMs;
 
   bool m_isMonitoring;
   bool m_filter;
