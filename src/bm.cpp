@@ -6,6 +6,7 @@
 #include "logger.hpp"
 
 constexpr int US_TIME_LENGTH = 8;
+constexpr int DATA_LINE_LENGTH = 8;
 
 BM::BM()
     : m_devNum(getDefaultDeviceNumber()), m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(-1),
@@ -150,16 +151,14 @@ void BM::monitor() {
         messageString += "(No Response)";
       }
 
-      messageString += "\nData: ";
+      messageString += "\nData:";
 
       std::vector<std::string> data = message.getData();
 
       for (int i = 0; i < data.size(); ++i) {
-        messageString += data.at(i) + " ";
-        if ((i + 1) % 8 == 0) {
-          messageString += "\n\t ";
-        } else {
-          messageString += " ";
+        messageString += " " + data.at(i);
+        if ((i + 1) % DATA_LINE_LENGTH == 0) {
+          messageString += "\n\t";
         }
       }
 
