@@ -1,6 +1,5 @@
 #pragma once
 
-#include "milStd1553.hpp"
 #include "wx/treebase.h"
 #include <array>
 #include <string>

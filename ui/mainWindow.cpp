@@ -9,8 +9,6 @@
 #include "wx/gtk/stattext.h"
 #include "wx/sizer.h"
 #include <array>
-#include <exception>
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
