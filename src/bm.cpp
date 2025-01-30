@@ -151,8 +151,8 @@ void BM::monitor() {
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
-      if (m_filter and
-          (m_filteredBus != message.getBus() or m_filteredRt != message.getRt() or m_filteredSa != message.getSa())) {
+      if (m_filter and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1) or
+                        (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
         continue;
       }
 
