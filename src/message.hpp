@@ -1,5 +1,4 @@
-#ifndef MESSAGE_HPP
-#define MESSAGE_HPP
+#pragma once
 
 #include "common.hpp"
 #include <iomanip>
@@ -46,5 +45,3 @@ private:
   bool m_cmdWord2;
   bool m_noRes;
 };
-
-#endif // MESSAGE_HPP

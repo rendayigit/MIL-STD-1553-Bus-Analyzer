@@ -16,7 +16,7 @@ add_executable(bm-gui
     ${CMAKE_SOURCE_DIR}/ui/mainWindow.cpp
     ${CMAKE_SOURCE_DIR}/src/app.cpp
     ${CMAKE_SOURCE_DIR}/src/bm.cpp
-    ${CMAKE_SOURCE_DIR}/src/logger/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
 )
 
 target_compile_definitions(bm-gui PUBLIC

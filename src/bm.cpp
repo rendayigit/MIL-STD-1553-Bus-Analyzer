@@ -4,13 +4,13 @@
 #include <exception>
 
 #include "common.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 constexpr int US_TIME_LENGTH = 8;
 
 BM::BM()
-    : m_devNum(Json(CONFIG_PATH).getNode("DEFAULT_DEVICE_NUMBER").getValue<int>()), m_isMonitoring(false),
-      m_filter(false), m_filteredBus('A'), m_filteredRt(0), m_filteredSa(0) {}
+    : m_devNum(getDefaultDeviceNumber()), m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(0),
+      m_filteredSa(0) {}
 
 BM::~BM() { stop(); }
 

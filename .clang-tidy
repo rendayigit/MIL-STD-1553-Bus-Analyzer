@@ -30,7 +30,8 @@ Checks: '
     -misc-definitions-in-headers,
     -hicpp-no-array-decay,
     -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-    -cppcoreguidelines-pro-type-reinterpret-cast
+    -cppcoreguidelines-pro-type-reinterpret-cast,
+    -misc-no-recursion
 '
 
 CheckOptions:
