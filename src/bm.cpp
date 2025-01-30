@@ -131,20 +131,36 @@ void BM::monitor() {
     if (status == ACE_ERR_MTI_EOB) {
       Message message = getMessage(&sMsg);
 
-      std::string messageString =
-          "Time: " + message.getTime() + "\t Bus: " + message.getBus() + "\t Type: " + message.getType() +
-          "\t RT: " + std::to_string(message.getRt()) + "\t SA: " + std::to_string(message.getSa()) +
-          (message.isCmdWord2()
-               ? "\t RT2: " + std::to_string(message.getRtRx()) + "\t SA2: " + std::to_string(message.getSaRx())
-               : "") +
-          "\t WC: " + std::to_string(message.wc()) + (message.isResponded() ? "" : "\t (No Response)");
+      std::string messageString;
+
+      messageString += "Time: " + message.getTime() + "\n";
+      messageString += "Bus: " + std::string(1, message.getBus()) + "  ";
+      messageString += "Type: " + message.getType() + "  ";
+      messageString += "RT: " + std::to_string(message.getRt()) + "  ";
+      messageString += "SA: " + std::to_string(message.getSa()) + "  ";
+
+      if (message.isCmdWord2()) {
+        messageString += "RT2: " + std::to_string(message.getRtRx()) + "  ";
+        messageString += "SA2: " + std::to_string(message.getSaRx()) + "  ";
+      }
+
+      messageString += "WC: " + std::to_string(message.wc()) + "  ";
+
+      if (not message.isResponded()) {
+        messageString += "(No Response)";
+      }
 
       messageString += "\nData: ";
 
       std::vector<std::string> data = message.getData();
 
-      for (auto &d : data) {
-        messageString += d + " ";
+      for (int i = 0; i < data.size(); ++i) {
+        messageString += data.at(i) + " ";
+        if ((i + 1) % 8 == 0) {
+          messageString += "\n\t ";
+        } else {
+          messageString += " ";
+        }
       }
 
       Logger::info("Bus Activity: \n " + messageString);
