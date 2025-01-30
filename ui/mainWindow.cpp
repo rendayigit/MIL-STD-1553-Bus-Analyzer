@@ -39,7 +39,7 @@ MyFrame::MyFrame()
 
   auto *menuBar = new wxMenuBar;
   SetMenuBar(menuBar);
-  menuBar->Append(menuFile, "&File");
+  menuBar->Append(menuFile, "&Commands");
 
   auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
