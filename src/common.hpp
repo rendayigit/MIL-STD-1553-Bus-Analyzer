@@ -21,7 +21,7 @@ static std::string getExecutableDirectory() {
                          // cppcoreguidelines-avoid-c-arrays)
 
   // Get the path of the executable
-  (void)readlink("/proc/self/exe", result, PATH_MAX);
+  (void)readlink("/proc/self/exe", result, PATH_MAX); // NOLINT(bugprone-unused-return-value)
 
   // Get the path of the executable's parent directory
   std::filesystem::path exePath(result);
