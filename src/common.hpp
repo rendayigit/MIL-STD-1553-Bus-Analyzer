@@ -42,7 +42,7 @@ static std::string getStatus(S16BIT statusCode) {
   return buf;
 }
 
-int getDefaultDeviceNumber() {
+static int getDefaultDeviceNumber() {
   nlohmann::json config;
 
   // Load the JSON file
@@ -70,7 +70,7 @@ int getDefaultDeviceNumber() {
   return -1;
 }
 
-int getMaxRecentLineCount() {
+static int getMaxRecentLineCount() {
   nlohmann::json config;
 
   // Load the JSON file
