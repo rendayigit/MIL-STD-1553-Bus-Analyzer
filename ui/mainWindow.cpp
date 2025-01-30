@@ -310,7 +310,7 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
 
   m_bm.setFilter(true);
 
-  m_filterButton->SetLabelText("Filtering messages for: " + logMessage + ". Click to clear filter.");
+  m_filterButton->SetLabelText("Filtering: " + logMessage + ", Clear filter?");
   m_filterButton->Enable(true);
   m_filterButton->SetForegroundColour(wxColour("red"));
 
