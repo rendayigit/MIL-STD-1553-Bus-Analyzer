@@ -31,9 +31,9 @@ MyFrame::MyFrame()
     : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(getMaxRecentLineCount()) {
 
   auto *menuFile = new wxMenu;
-  menuFile->Append(ID_START_STOP_MENU, "Start / Stop", "Start or stop monitoring on selected DDC device");
-  menuFile->Append(ID_FILTER_MENU, "Clear filter", "Clear filtering of messages");
-  menuFile->Append(ID_CLEAR_MENU, "Clear messages", "Clear messages");
+  menuFile->Append(ID_START_STOP_MENU, "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
+  menuFile->Append(ID_FILTER_MENU, "Clear filter\tCtrl-F", "Clear filtering of messages");
+  menuFile->Append(ID_CLEAR_MENU, "Clear messages\tCtrl-M", "Clear messages");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
