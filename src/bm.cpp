@@ -163,7 +163,7 @@ void BM::monitor() {
         }
       }
 
-      Logger::info("Bus Activity: \n " + messageString);
+      Logger::info("Bus Activity: \n" + messageString);
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
