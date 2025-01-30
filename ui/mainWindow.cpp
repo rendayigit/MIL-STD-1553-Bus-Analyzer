@@ -11,6 +11,7 @@
 #include <array>
 #include <exception>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
 
@@ -27,7 +28,7 @@ enum {
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
-  m_uiRecentMessageCount = Json(CONFIG_PATH).getNode("UI_RECENT_LINE_COUNT").getValue<int>();
+  m_uiRecentMessageCount = getMaxRecentLineCount();
 
   auto *menuFile = new wxMenu;
   menuFile->Append(ID_START_STOP_MENU, "Start / Stop", "Start or stop monitoring on selected DDC device");
