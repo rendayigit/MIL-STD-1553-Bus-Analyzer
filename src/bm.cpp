@@ -1,6 +1,5 @@
 #include "bm.hpp"
 
-#include <chrono>
 #include <exception>
 
 #include "common.hpp"
@@ -152,9 +151,8 @@ void BM::monitor() {
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
-      if (m_filter and
-          not(m_filteredBus == message.getBus() and (m_filteredRt == message.getRt() or m_filteredRt == -1) and
-              (m_filteredSa == message.getSa() or m_filteredSa == -1))) {
+      if (m_filter and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1) or
+                        (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
         continue;
       }
 
