@@ -14,8 +14,8 @@
 #include <string>
 
 enum {
-  ID_START_STOP_BTN = 1,
-  ID_START_STOP_MENU,
+  ID_ADD_BTN = 1,
+  ID_ADD_MENU,
   ID_FILTER_BTN,
   ID_CLEAR_BTN,
   ID_FILTER_MENU,
@@ -29,7 +29,7 @@ BusMonitorFrame::BusMonitorFrame()
     : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(getMaxRecentLineCount()) {
 
   auto *menuFile = new wxMenu;
-  menuFile->Append(ID_START_STOP_MENU, "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
+  menuFile->Append(ID_ADD_MENU, "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
   menuFile->Append(ID_FILTER_MENU, "Clear filter\tCtrl-F", "Clear filtering of messages");
   menuFile->Append(ID_CLEAR_MENU, "Clear messages\tCtrl-M", "Clear messages");
   menuFile->AppendSeparator();
@@ -46,7 +46,7 @@ BusMonitorFrame::BusMonitorFrame()
       wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_startStopButton = new wxButton(
-      this, ID_START_STOP_BTN, "Start", wxDefaultPosition,
+      this, ID_ADD_BTN, "Start", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
@@ -120,8 +120,8 @@ BusMonitorFrame::BusMonitorFrame()
   CreateStatusBar();
   SetStatusText("Ready, press Start");
 
-  Bind(wxEVT_BUTTON, &BusMonitorFrame::onStartStopClicked, this, ID_START_STOP_BTN);
-  Bind(wxEVT_MENU, &BusMonitorFrame::onStartStopClicked, this, ID_START_STOP_MENU);
+  Bind(wxEVT_BUTTON, &BusMonitorFrame::onStartStopClicked, this, ID_ADD_BTN);
+  Bind(wxEVT_MENU, &BusMonitorFrame::onStartStopClicked, this, ID_ADD_MENU);
   Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_BTN);
   Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearClicked, this, ID_CLEAR_BTN);
   Bind(wxEVT_MENU, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_MENU);

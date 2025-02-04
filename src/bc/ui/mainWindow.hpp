@@ -9,11 +9,13 @@ public:
   BusControllerFrame();
 
 private:
-  void onStartStopClicked(wxCommandEvent &event);
+  void onAddClicked(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);
 
   BC m_bc;
   std::mutex m_mutex;
   wxTextCtrl *m_deviceIdTextInput;
-  wxButton *m_startStopButton;
+  wxButton *m_addButton;
+  wxScrolledWindow *m_scrolledWindow;
+  wxBoxSizer *m_scrolledSizer;
 };

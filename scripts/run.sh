@@ -8,4 +8,4 @@ export LD_LIBRARY_PATH
 
 # Run application
 cd $SCRIPTDIR/../bin/
-./bus-monitor
+./bus-controller
