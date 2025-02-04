@@ -1,0 +1,4 @@
+#pragma once
+
+enum { ID_ADD_BTN = 1, ID_ACCEPT_FRAME_BTN, ID_SEND_ACTIVE_BTN, ID_ADD_MENU, ID_DEVICE_ID_TXT };
+constexpr int TOP_BAR_COMP_HEIGHT = 30;

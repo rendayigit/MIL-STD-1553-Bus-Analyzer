@@ -1,30 +1,31 @@
 #include "mainWindow.hpp"
-#include "createFrameWindow.hpp"
-#include "wx/debug.h"
-#include "wx/event.h"
-#include "wx/gdicmn.h"
-#include "wx/gtk/button.h"
-#include "wx/gtk/colour.h"
-#include "wx/gtk/stattext.h"
-#include "wx/scrolwin.h"
-#include "wx/sizer.h"
-#include "wx/wx.h"
+
 #include <nlohmann/json.hpp>
 #include <string>
-#include <wx/tglbtn.h>
 
-enum { ID_ADD_BTN = 1, ID_SEND_ACTIVE_BTN, ID_ADD_MENU, ID_DEVICE_ID_TXT };
-constexpr int TOP_BAR_COMP_HEIGHT = 30;
+#include <wx/debug.h>
+#include <wx/event.h>
+#include <wx/gdicmn.h>
+#include <wx/gtk/button.h>
+#include <wx/gtk/colour.h>
+#include <wx/gtk/stattext.h>
+#include <wx/scrolwin.h>
+#include <wx/sizer.h>
+#include <wx/tglbtn.h>
+#include <wx/wx.h>
+
+#include "bcGuiCommon.hpp"
+#include "createFrameWindow.hpp"
 
 class CustomComponent : public wxPanel {
 public:
   CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode)
       : wxPanel(parent, wxID_ANY) {
-    std::string text =
-        name + "\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
-        "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
-        "\nData: 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-        "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n";
+    std::string text = name + "\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
+                       "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
+                       "\nData: 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+                       "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+                       "\t 0000 0000 0000 0000 0000 0000 0000 0000\n";
 
     auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     auto *orderSizer = new wxBoxSizer(wxVERTICAL);
