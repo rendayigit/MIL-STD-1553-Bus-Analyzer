@@ -1,13 +1,29 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "App",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/bm-gui",
-            "args": [],
-            "cwd": "${workspaceFolder}/bin/"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Bus Monitor",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/bus-monitor",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/"
+    },
+    {
+      "name": "Bus Controller",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/bus-controller",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/"
+    },
+    {
+      "name": "RT Emulator",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/rt-emulator",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/"
+    }
+  ]
 }

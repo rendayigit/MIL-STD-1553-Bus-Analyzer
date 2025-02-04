@@ -60,13 +60,13 @@ static int getDefaultDeviceNumber() {
     return -1;
   }
 
-  // Check if the key exists and is of the correct type
-  if (config.contains("DEFAULT_DEVICE_NUMBER") && config["DEFAULT_DEVICE_NUMBER"].is_number_integer()) {
-    int deviceNumber = config["DEFAULT_DEVICE_NUMBER"].get<int>();
-    return deviceNumber;
+  // Check if the Bus_Monitor key exists and contains Default_Device_Number
+  if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number") and
+      config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
+    return config["Bus_Monitor"]["Default_Device_Number"].get<int>();
   }
 
-  Logger::error("Key 'DEFAULT_DEVICE_NUMBER' not found or is not an integer.");
+  Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
   return -1;
 }
 
@@ -88,12 +88,12 @@ static int getMaxRecentLineCount() {
     return -1;
   }
 
-  // Check if the key exists and is of the correct type
-  if (config.contains("UI_RECENT_LINE_COUNT") && config["UI_RECENT_LINE_COUNT"].is_number_integer()) {
-    int deviceNumber = config["UI_RECENT_LINE_COUNT"].get<int>();
-    return deviceNumber;
+  // Check if the Bus_Monitor key exists and contains UI_Recent_Line_Count
+  if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count") and
+      config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
+    return config["Bus_Monitor"]["UI_Recent_Line_Count"].get<int>();
   }
 
-  Logger::error("Key 'UI_RECENT_LINE_COUNT' not found or is not an integer.");
+  Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");
   return -1;
 }
