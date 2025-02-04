@@ -49,7 +49,8 @@ public:
   }
 };
 
-BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
+BusControllerFrame::BusControllerFrame()
+    : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
@@ -101,13 +102,14 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   verticalSizer->SetSizeHints(this);
 
   CreateStatusBar();
-  SetStatusText("Ready, press Start");
+  SetStatusText("Ready, add frames to send");
 
   Bind(wxEVT_BUTTON, &BusControllerFrame::onAddClicked, this, ID_ADD_BTN);
   Bind(wxEVT_MENU, &BusControllerFrame::onAddClicked, this, ID_ADD_MENU);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bc.getDevNum()));
+  SetSize(600, 400);
 }
 
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
