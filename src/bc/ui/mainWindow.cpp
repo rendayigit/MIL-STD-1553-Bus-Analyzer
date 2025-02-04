@@ -7,21 +7,42 @@
 #include "wx/gtk/stattext.h"
 #include "wx/scrolwin.h"
 #include "wx/sizer.h"
+#include "wx/wx.h"
 #include <nlohmann/json.hpp>
 #include <string>
+#include <wx/tglbtn.h>
 
 enum { ID_ADD_BTN = 1, ID_ADD_MENU, ID_DEVICE_ID_TXT };
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 class CustomComponent : public wxPanel {
 public:
-  CustomComponent(wxWindow *parent, const wxString &label) : wxPanel(parent, wxID_ANY) {
-    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticText *lbl = new wxStaticText(this, wxID_ANY, label);
-    wxButton *btn = new wxButton(this, wxID_ANY, "Button");
-    sizer->Add(lbl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    sizer->Add(btn, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    SetSizer(sizer);
+  CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode)
+      : wxPanel(parent, wxID_ANY) {
+    std::string text = "Message: " + name + " Bus: " + bus + " RT: " + std::to_string(rt) +
+                       " SA: " + std::to_string(sa) + " WC: " + std::to_string(wc) + " Mode: " + std::to_string(mode);
+
+    std::string data = std::string("Data: 0000 0000 0000 0000 0000 0000 0000 0000 0000\n") +
+                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n";
+
+    auto *horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
+    auto *repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat");
+    auto *sendButton = new wxButton(this, wxID_ANY, "Send");
+    auto *dataLabel = new wxStaticText(this, wxID_ANY, data);
+
+    horizontalSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    horizontalSizer->Add(repeatToggle, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    horizontalSizer->Add(sendButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    verticalSizer->Add(horizontalSizer);
+    verticalSizer->Add(dataLabel, 0, wxALIGN_LEFT | wxALL, 5);
+
+    SetSizer(verticalSizer);
   }
 };
 
@@ -87,8 +108,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 }
 
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
-  wxString label = m_deviceIdTextInput->GetValue();
-  auto *component = new CustomComponent(m_scrolledWindow, label);
+  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", 'A', 1, 1, 8, 0);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
   m_scrolledWindow->FitInside(); // Update scrollable area
 }
