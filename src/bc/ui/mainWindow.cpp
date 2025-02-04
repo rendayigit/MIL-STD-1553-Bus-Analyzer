@@ -12,7 +12,7 @@
 #include <string>
 #include <wx/tglbtn.h>
 
-enum { ID_ADD_BTN = 1, ID_ADD_MENU, ID_DEVICE_ID_TXT };
+enum { ID_ADD_BTN = 1, ID_SEND_ACTIVE_BTN, ID_ADD_MENU, ID_DEVICE_ID_TXT };
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 class CustomComponent : public wxPanel {
@@ -32,13 +32,13 @@ public:
     auto *upButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
     auto *downButton = new wxButton(this, wxID_ANY, "v", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
-    auto *repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat");
-    auto *sendButton = new wxButton(this, wxID_ANY, "Send");
+    auto *activeToggle = new wxToggleButton(this, wxID_ANY, "Frame Active");
+    auto *sendButton = new wxButton(this, wxID_ANY, "Send Single");
 
     orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 5);
     orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 5);
 
-    repeatSendSizer->Add(repeatToggle, 0, wxALIGN_LEFT | wxALL, 5);
+    repeatSendSizer->Add(activeToggle, 0, wxALIGN_LEFT | wxALL, 5);
     repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
     mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -49,8 +49,7 @@ public:
   }
 };
 
-BusControllerFrame::BusControllerFrame()
-    : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
+BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
@@ -64,6 +63,12 @@ BusControllerFrame::BusControllerFrame()
   m_deviceIdTextInput = new wxTextCtrl(
       this, ID_DEVICE_ID_TXT, "00", wxDefaultPosition,
       wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  auto *repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeated Send");
+
+  auto *sendActiveFramesButton = new wxButton(
+      this, ID_SEND_ACTIVE_BTN, "Send Active Frames", wxDefaultPosition,
+      wxSize(150, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_addButton = new wxButton(
       this, ID_ADD_BTN, "Add Frame", wxDefaultPosition,
@@ -88,6 +93,10 @@ BusControllerFrame::BusControllerFrame()
   topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->AddStretchSpacer();
+  topHorizontalSizer->Add(repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(sendActiveFramesButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
