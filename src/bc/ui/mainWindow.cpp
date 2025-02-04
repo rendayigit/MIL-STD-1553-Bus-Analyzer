@@ -23,8 +23,8 @@ public:
     std::string text =
         name + "\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
         "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
-        "\nData: 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-        "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n";
+        "\nData: 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+        "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n";
 
     auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     auto *orderSizer = new wxBoxSizer(wxVERTICAL);
