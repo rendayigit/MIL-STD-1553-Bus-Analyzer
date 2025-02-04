@@ -19,30 +19,33 @@ class CustomComponent : public wxPanel {
 public:
   CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode)
       : wxPanel(parent, wxID_ANY) {
-    std::string text = "Message: " + name + " Bus: " + bus + " RT: " + std::to_string(rt) +
-                       " SA: " + std::to_string(sa) + " WC: " + std::to_string(wc) + " Mode: " + std::to_string(mode);
+    std::string text =
+        name + "\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
+        "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
+        "\nData: 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
+        "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000 0000\n";
 
-    std::string data = std::string("Data: 0000 0000 0000 0000 0000 0000 0000 0000 0000\n") +
-                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-                       "\t0000 0000 0000 0000 0000 0000 0000 0000 0000\n";
+    auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto *orderSizer = new wxBoxSizer(wxVERTICAL);
+    auto *repeatSendSizer = new wxBoxSizer(wxVERTICAL);
 
-    auto *horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
-
+    auto *upButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
+    auto *downButton = new wxButton(this, wxID_ANY, "v", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
     auto *repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat");
     auto *sendButton = new wxButton(this, wxID_ANY, "Send");
-    auto *dataLabel = new wxStaticText(this, wxID_ANY, data);
 
-    horizontalSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    horizontalSizer->Add(repeatToggle, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    horizontalSizer->Add(sendButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 5);
+    orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 5);
 
-    verticalSizer->Add(horizontalSizer);
-    verticalSizer->Add(dataLabel, 0, wxALIGN_LEFT | wxALL, 5);
+    repeatSendSizer->Add(repeatToggle, 0, wxALIGN_LEFT | wxALL, 5);
+    repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
-    SetSizer(verticalSizer);
+    mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    mainSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    SetSizer(mainSizer);
   }
 };
 
