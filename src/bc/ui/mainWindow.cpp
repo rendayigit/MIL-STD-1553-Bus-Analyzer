@@ -1,4 +1,5 @@
 #include "mainWindow.hpp"
+#include "createFrameWindow.hpp"
 #include "wx/debug.h"
 #include "wx/event.h"
 #include "wx/gdicmn.h"
@@ -125,6 +126,9 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
   auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", 'A', 1, 1, 8, 0);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
   m_scrolledWindow->FitInside(); // Update scrollable area
+
+  auto *frame = new FrameCreationFrame(this);
+  frame->Show(true);
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
