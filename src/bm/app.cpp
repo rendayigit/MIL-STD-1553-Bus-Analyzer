@@ -2,10 +2,10 @@
 #include "mainWindow.hpp"
 
 // Main function is set here
-wxIMPLEMENT_APP(MyApp); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+wxIMPLEMENT_APP(BusMonitorApp); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 
-bool MyApp::OnInit() {
-  auto *frame = new MyFrame();
+bool BusMonitorApp::OnInit() {
+  auto *frame = new BusMonitorFrame();
   frame->Show(true);
   return true;
 }

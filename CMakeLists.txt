@@ -5,7 +5,7 @@ project(ddc-bus-analyzer)
 add_subdirectory(src/bm/)
 
 # Bus Controller
-# add_subdirectory(src/bc/)
+add_subdirectory(src/bc/)
 
 # RT Emulator
 # add_subdirectory(src/rt/)

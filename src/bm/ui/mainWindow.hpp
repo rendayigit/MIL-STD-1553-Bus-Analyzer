@@ -5,9 +5,9 @@
 #include <wx/treectrl.h>
 #include <wx/wx.h>
 
-class MyFrame : public wxFrame {
+class BusMonitorFrame : public wxFrame {
 public:
-  MyFrame();
+  BusMonitorFrame();
 
 private:
   void onStartStopClicked(wxCommandEvent &event);

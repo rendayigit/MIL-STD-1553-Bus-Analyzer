@@ -25,7 +25,7 @@ enum {
 };
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
-MyFrame::MyFrame()
+BusMonitorFrame::BusMonitorFrame()
     : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(getMaxRecentLineCount()) {
 
   auto *menuFile = new wxMenu;
@@ -120,14 +120,14 @@ MyFrame::MyFrame()
   CreateStatusBar();
   SetStatusText("Ready, press Start");
 
-  Bind(wxEVT_BUTTON, &MyFrame::onStartStopClicked, this, ID_START_STOP_BTN);
-  Bind(wxEVT_MENU, &MyFrame::onStartStopClicked, this, ID_START_STOP_MENU);
-  Bind(wxEVT_BUTTON, &MyFrame::onClearFilterClicked, this, ID_FILTER_BTN);
-  Bind(wxEVT_BUTTON, &MyFrame::onClearClicked, this, ID_CLEAR_BTN);
-  Bind(wxEVT_MENU, &MyFrame::onClearFilterClicked, this, ID_FILTER_MENU);
-  Bind(wxEVT_MENU, &MyFrame::onClearClicked, this, ID_CLEAR_MENU);
-  Bind(wxEVT_MENU, &MyFrame::onExit, this, wxID_EXIT);
-  m_milStd1553Tree->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::onTreeItemClicked, this);
+  Bind(wxEVT_BUTTON, &BusMonitorFrame::onStartStopClicked, this, ID_START_STOP_BTN);
+  Bind(wxEVT_MENU, &BusMonitorFrame::onStartStopClicked, this, ID_START_STOP_MENU);
+  Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_BTN);
+  Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearClicked, this, ID_CLEAR_BTN);
+  Bind(wxEVT_MENU, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_MENU);
+  Bind(wxEVT_MENU, &BusMonitorFrame::onClearClicked, this, ID_CLEAR_MENU);
+  Bind(wxEVT_MENU, &BusMonitorFrame::onExit, this, wxID_EXIT);
+  m_milStd1553Tree->Bind(wxEVT_TREE_ITEM_ACTIVATED, &BusMonitorFrame::onTreeItemClicked, this);
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bm.getDevNum()));
 
@@ -182,7 +182,7 @@ MyFrame::MyFrame()
   });
 }
 
-void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
+void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   S16BIT errorCode = 0;
   int deviceNum = 0;
 
@@ -214,7 +214,7 @@ void MyFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   }
 }
 
-void MyFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
+void BusMonitorFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
   if (not m_bm.isFiltered()) {
     return;
   }
@@ -225,9 +225,9 @@ void MyFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
   m_filterButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
 }
 
-void MyFrame::onClearClicked(wxCommandEvent & /*event*/) { m_messageList->Clear(); }
+void BusMonitorFrame::onClearClicked(wxCommandEvent & /*event*/) { m_messageList->Clear(); }
 
-void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
+void BusMonitorFrame::onTreeItemClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
 
   wxString selectedItemText = m_milStd1553Tree->GetItemText(selectedItem);
@@ -317,4 +317,4 @@ void MyFrame::onTreeItemClicked(wxTreeEvent &event) {
   m_messageList->Clear();
 }
 
-void MyFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
+void BusMonitorFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
