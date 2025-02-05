@@ -99,10 +99,12 @@ private:
     BC::getInstance().startBc(1);
 
     if (m_mode == BcMode::BC_TO_RT) {
-      status = BC::getInstance().bcToRt(m_rt, m_sa, m_wc, ACE_BCCTRL_CHL_A, m_data, false);
+      status =
+          BC::getInstance().bcToRt(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, m_data, false);
     } else if (m_mode == BcMode::RT_TO_BC) {
-      status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, ACE_BCCTRL_CHL_A, false);
+      status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, false);
     } else if (m_mode == BcMode::RT_TO_RT) {
+      // TODO: implement rt2 and sa 2
       status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, false);
     }
 
