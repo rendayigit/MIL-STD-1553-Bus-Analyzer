@@ -14,15 +14,18 @@
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
+#include "bc.hpp"
 #include "bcGuiCommon.hpp"
 #include "createFrameWindow.hpp"
 #include "wx/colour.h"
+#include "wx/gtk/frame.h"
 
 class CustomComponent : public wxPanel {
 public:
-  CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
-                  std::array<std::string, RT_SA_MAX_COUNT> data)
-      : wxPanel(parent, wxID_ANY) {
+  explicit CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
+                           std::array<std::string, RT_SA_MAX_COUNT> data)
+      : wxPanel(parent, wxID_ANY), m_parent(parent), m_bus(bus), m_rt(rt), m_sa(sa), m_wc(wc), m_mode(mode),
+        m_data(data) {
     std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
                        "\tWC: " + std::to_string(wc) + "\tMode: ";
 
@@ -82,9 +85,45 @@ public:
     mainSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
     mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+    sendButton->Bind(wxEVT_BUTTON, &CustomComponent::onSendSingle, this);
+
     SetBackgroundColour(this->GetBackgroundColour());
     SetSizer(mainSizer);
   }
+
+private:
+  void onSendSingle(wxCommandEvent & /*event*/) {
+    S16BIT status = ACE_ERR_SUCCESS;
+
+    BC::getInstance().stopBc();
+    BC::getInstance().startBc(1);
+
+    if (m_mode == BcMode::BC_TO_RT) {
+      status = BC::getInstance().bcToRt(m_rt, m_sa, m_wc, ACE_BCCTRL_CHL_A, m_data, false);
+    } else if (m_mode == BcMode::RT_TO_BC) {
+      status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, ACE_BCCTRL_CHL_A, false);
+    } else if (m_mode == BcMode::RT_TO_RT) {
+      status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, false);
+    }
+
+    // FIXME: cannot print status to gui
+    if (status != ACE_ERR_SUCCESS) {
+      Logger::error(getStatus(status));
+      auto *parent = dynamic_cast<BusControllerFrame *>(m_parent);
+
+      if (parent != nullptr) {
+        parent->setStatusText("Error" + getStatus(status));
+      }
+    }
+  }
+
+  wxWindow *m_parent;
+  char m_bus;
+  int m_rt;
+  int m_sa;
+  int m_wc;
+  BcMode m_mode;
+  std::array<std::string, RT_SA_MAX_COUNT> m_data;
 };
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
@@ -157,7 +196,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   Bind(wxEVT_MENU, &BusControllerFrame::onAddClicked, this, ID_ADD_MENU);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
-  m_deviceIdTextInput->SetValue(std::to_string(m_bc.getDevNum()));
+  m_deviceIdTextInput->SetValue(std::to_string(BC::getInstance().getDevNum()));
   SetSize(650, 400);
 }
 
@@ -167,6 +206,8 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
+
+void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(status); }
 
 void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {

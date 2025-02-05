@@ -1,16 +1,20 @@
 #ifndef BC_HPP
 #define BC_HPP
 
+#include <array>
+#include <stdemace.h>
+#include <string>
+
 #include "common.hpp"
 #include "configData.hpp"
-#include "stdemace.h"
-#include <array>
-#include <string>
 
 class BC {
 public:
-  BC();
-  ~BC();
+  // TODO: make bm singleton as well
+  static BC &getInstance() {
+    static BC instance;
+    return instance;
+  }
 
   ConfigData getConfigData() const { return *m_configData; }
 
@@ -26,6 +30,9 @@ public:
   int getDevNum() const { return m_devNum; }
 
 private:
+  BC();
+  ~BC();
+
   ConfigData *m_configData;
   U16BIT m_messageBuffer[RT_SA_MAX_COUNT]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
                                            // cppcoreguidelines-avoid-c-arrays)
