@@ -21,6 +21,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   auto *dataSizer2 = new wxBoxSizer(wxHORIZONTAL);
   auto *dataSizer3 = new wxBoxSizer(wxHORIZONTAL);
   auto *dataSizer4 = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
   auto *saveButton = new wxButton(
@@ -74,7 +75,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
 
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     auto *data = new wxTextCtrl(
-        this, ID_DEVICE_ID_TXT, "", wxDefaultPosition,
+        this, wxID_ANY, "", wxDefaultPosition,
         wxSize(70, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
     data->SetHint("Data " + std::to_string(i));
@@ -82,8 +83,12 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
     m_dataTextCtrls.push_back(data);
   }
 
-  m_rtCombo->SetSelection(0);
-  m_saCombo->SetSelection(0);
+  m_labelTextCtrl = new wxTextCtrl(this, wxID_ANY,
+                                   ""); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_labelTextCtrl->SetHint("Set frame label");
+
+  // m_rtCombo->SetSelection(0);
+  // m_saCombo->SetSelection(0);
 
   topSizer->Add(busLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -136,6 +141,10 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   }
 
+  labelSizer->Add(m_labelTextCtrl, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  labelSizer->AddStretchSpacer();
+
   bottomSizer->Add(randomizeButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   bottomSizer->AddStretchSpacer();
@@ -156,6 +165,8 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   mainSizer->Add(dataSizer4, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  mainSizer->Add(labelSizer, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   mainSizer->AddStretchSpacer();
   mainSizer->Add(bottomSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
@@ -168,7 +179,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
 
   SetSizer(mainSizer);
 
-  SetSize(650, 370);
+  SetSize(650, 400);
 }
 
 void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
@@ -184,7 +195,10 @@ void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
     data.at(i) = m_dataTextCtrls.at(i)->GetValue();
   }
 
-  parentFrame->addFrameToList(m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
+  std::string label = m_labelTextCtrl->GetValue().ToStdString();
+
+  parentFrame->addFrameToList(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0],
+                              wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
                               wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), data);
 }
 

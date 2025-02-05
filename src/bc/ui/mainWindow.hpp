@@ -6,7 +6,8 @@
 class BusControllerFrame : public wxFrame {
 public:
   BusControllerFrame();
-  void addFrameToList(char bus, int rt, int sa, int wc, int mode, std::array<std::string, RT_SA_MAX_COUNT> data);
+  void addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, int mode,
+                      std::array<std::string, RT_SA_MAX_COUNT> data);
 
 private:
   void onAddClicked(wxCommandEvent &event);

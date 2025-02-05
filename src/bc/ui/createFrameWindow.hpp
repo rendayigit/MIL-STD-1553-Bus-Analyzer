@@ -21,4 +21,5 @@ private:
   wxComboBox *m_modeCombo;
 
   std::vector<wxTextCtrl *> m_dataTextCtrls;
+  wxTextCtrl *m_labelTextCtrl;
 };

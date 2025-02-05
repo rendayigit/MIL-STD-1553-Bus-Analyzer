@@ -20,17 +20,17 @@
 
 class CustomComponent : public wxPanel {
 public:
-  CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode,
+  CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, int mode,
                   std::array<std::string, RT_SA_MAX_COUNT> data)
       : wxPanel(parent, wxID_ANY) {
-    std::string text = name + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
+    std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
                        "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) + "\nData: ";
 
     for (int i = 0; i < data.size(); ++i) {
       if (i % 8 == 0) {
         text += "\n\t " + data.at(i);
       } else {
-        text += " " + data.at(i);
+        text += "   " + data.at(i);
       }
     }
 
@@ -148,7 +148,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
   m_deviceIdTextInput->SetValue(std::to_string(m_bc.getDevNum()));
-  SetSize(600, 400);
+  SetSize(650, 400);
 }
 
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
@@ -158,9 +158,9 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
 
-void BusControllerFrame::addFrameToList(char bus, int rt, int sa, int wc, int mode,
+void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, int mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {
-  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", bus, rt, sa, wc, mode, data);
+  auto *component = new CustomComponent(m_scrolledWindow, label, bus, rt, sa, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
   m_scrolledWindow->FitInside(); // Update scrollable area
 }
