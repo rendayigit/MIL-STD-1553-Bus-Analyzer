@@ -32,12 +32,15 @@ public:
     auto *repeatSendSizer = new wxBoxSizer(wxVERTICAL);
 
     auto *upButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
+    auto *removeButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
     auto *downButton = new wxButton(this, wxID_ANY, "v", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
+
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
     auto *activeToggle = new wxToggleButton(this, wxID_ANY, "Frame Active");
     auto *sendButton = new wxButton(this, wxID_ANY, "Send Single");
 
     orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 5);
+    orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 5);
     orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 5);
 
     repeatSendSizer->Add(activeToggle, 0, wxALIGN_LEFT | wxALL, 5);
