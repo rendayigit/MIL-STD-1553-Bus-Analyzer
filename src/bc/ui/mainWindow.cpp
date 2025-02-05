@@ -124,12 +124,14 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 }
 
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
-  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", 'A', 1, 1, 8, 0);
-  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
-  m_scrolledWindow->FitInside(); // Update scrollable area
-
   auto *frame = new FrameCreationFrame(this);
   frame->Show(true);
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
+
+void BusControllerFrame::addFrameToList(char bus, int rt, int sa, int wc, int mode, int data) {
+  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", bus, rt, sa, wc, mode);
+  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
+  m_scrolledWindow->FitInside(); // Update scrollable area
+}

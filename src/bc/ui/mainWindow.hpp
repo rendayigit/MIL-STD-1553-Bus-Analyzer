@@ -6,6 +6,7 @@
 class BusControllerFrame : public wxFrame {
 public:
   BusControllerFrame();
+  void addFrameToList(char bus, int rt, int sa, int wc, int mode, int data);
 
 private:
   void onAddClicked(wxCommandEvent &event);

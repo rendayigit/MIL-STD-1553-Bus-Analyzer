@@ -10,8 +10,10 @@
 
 #include "bcGuiCommon.hpp"
 #include "common.hpp"
+#include "mainWindow.hpp"
 
-FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_ANY, "Create 1553 Frame") {
+FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
+    : wxFrame(parent, wxID_ANY, "Create 1553 Frame"), m_parent(parent) {
   auto *mainSizer = new wxBoxSizer(wxVERTICAL);
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *middleSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -45,18 +47,18 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
 
   auto *busLabel = new wxStaticText(this, wxID_ANY, "Bus: ");
 
-  auto *busCombo = new wxComboBox(this, wxID_ANY, "A", wxDefaultPosition, wxDefaultSize, WXSIZEOF(busOptions),
-                                  busOptions, wxCB_READONLY);
+  m_busCombo = new wxComboBox(this, wxID_ANY, "A", wxDefaultPosition, wxDefaultSize, WXSIZEOF(busOptions), busOptions,
+                              wxCB_READONLY);
 
   auto *rtLabel = new wxStaticText(this, wxID_ANY, "RT: ");
 
-  auto *rtCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
-                                 rtSaWcOptions, wxCB_READONLY);
+  m_rtCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
+                             rtSaWcOptions, wxCB_READONLY);
 
   auto *saLabel = new wxStaticText(this, wxID_ANY, "SA: ");
 
-  auto *saCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
-                                 rtSaWcOptions, wxCB_READONLY);
+  m_saCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
+                             rtSaWcOptions, wxCB_READONLY);
 
   auto *wcLabel = new wxStaticText(this, wxID_ANY, "WC: ");
 
@@ -65,8 +67,8 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
 
   auto *modeLabel = new wxStaticText(this, wxID_ANY, "Mode: ");
 
-  auto *modeCombo = new wxComboBox(this, wxID_ANY, "BC->RT", wxDefaultPosition, wxDefaultSize, WXSIZEOF(modeOptions),
-                                   modeOptions, wxCB_READONLY);
+  m_modeCombo = new wxComboBox(this, wxID_ANY, "BC->RT", wxDefaultPosition, wxDefaultSize, WXSIZEOF(modeOptions),
+                               modeOptions, wxCB_READONLY);
 
   auto *dataLabel = new wxStaticText(this, wxID_ANY, "Data: ");
 
@@ -80,22 +82,22 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
     m_dataTextCtrls.push_back(data);
   }
 
-  rtCombo->SetSelection(0);
-  saCombo->SetSelection(0);
+  m_rtCombo->SetSelection(0);
+  m_saCombo->SetSelection(0);
 
   topSizer->Add(busLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topSizer->Add(busCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topSizer->Add(m_busCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                 5);        // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->AddSpacer(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->Add(rtLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topSizer->Add(rtCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topSizer->Add(m_rtCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                 5);        // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->AddSpacer(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->Add(saLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topSizer->Add(saCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topSizer->Add(m_saCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                 5);        // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->AddSpacer(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->Add(wcLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
@@ -105,7 +107,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
   topSizer->AddSpacer(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->Add(modeLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topSizer->Add(modeCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  topSizer->Add(m_modeCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   middleSizer->Add(dataLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
@@ -169,7 +171,11 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
   SetSize(650, 370);
 }
 
-void FrameCreationFrame::onAddClicked(wxCommandEvent &event) {}
+void FrameCreationFrame::onAddClicked(wxCommandEvent & /*event*/) {
+  auto *parentFrame = dynamic_cast<BusControllerFrame *>(m_parent);
+  parentFrame->addFrameToList(m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
+                              wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), 0);
+}
 
 void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {
   if (wxAtoi(m_wcCombo->GetValue()) == 0) {
