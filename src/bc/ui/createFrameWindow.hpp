@@ -7,7 +7,7 @@ public:
   explicit FrameCreationFrame(wxWindow *parent);
 
 private:
-  void onAddClicked(wxCommandEvent &event);
+  void onSaveClicked(wxCommandEvent &event);
   void onWcChanged(wxCommandEvent &event);
   void onRandomize(wxCommandEvent &event);
   void onClose(wxCommandEvent &event);

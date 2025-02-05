@@ -23,8 +23,8 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   auto *dataSizer4 = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  auto *addButton = new wxButton(
-      this, ID_ACCEPT_FRAME_BTN, "Add Frame", wxDefaultPosition,
+  auto *saveButton = new wxButton(
+      this, ID_SAVE_FRAME_BTN, "Save Frame", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto *closeButton = new wxButton(
@@ -141,7 +141,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   bottomSizer->AddStretchSpacer();
   bottomSizer->Add(closeButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  bottomSizer->Add(addButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  bottomSizer->Add(saveButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   mainSizer->Add(topSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -162,7 +162,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   Bind(wxEVT_COMBOBOX, &FrameCreationFrame::onWcChanged, this, ID_WC_COMBO);
-  Bind(wxEVT_BUTTON, &FrameCreationFrame::onAddClicked, this, ID_ACCEPT_FRAME_BTN);
+  Bind(wxEVT_BUTTON, &FrameCreationFrame::onSaveClicked, this, ID_SAVE_FRAME_BTN);
   Bind(wxEVT_BUTTON, &FrameCreationFrame::onRandomize, this, ID_RANDOMIZE_DATA_BTN);
   Bind(wxEVT_BUTTON, &FrameCreationFrame::onClose, this, ID_CANCEL_FRAME_BTN);
 
@@ -171,8 +171,13 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   SetSize(650, 370);
 }
 
-void FrameCreationFrame::onAddClicked(wxCommandEvent & /*event*/) {
+void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
   auto *parentFrame = dynamic_cast<BusControllerFrame *>(m_parent);
+
+  if (parentFrame == nullptr) {
+    return;
+  }
+
   parentFrame->addFrameToList(m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
                               wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), 0);
 }

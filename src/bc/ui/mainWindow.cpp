@@ -16,6 +16,7 @@
 
 #include "bcGuiCommon.hpp"
 #include "createFrameWindow.hpp"
+#include "wx/colour.h"
 
 class CustomComponent : public wxPanel {
 public:
@@ -31,25 +32,33 @@ public:
     auto *orderSizer = new wxBoxSizer(wxVERTICAL);
     auto *repeatSendSizer = new wxBoxSizer(wxVERTICAL);
 
-    auto *upButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
-    auto *removeButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
-    auto *downButton = new wxButton(this, wxID_ANY, "v", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
+    wxBitmap upImg(getExecutableDirectory() + "../src/bc/icons/up_arrow.png", wxBITMAP_TYPE_PNG);
+    wxBitmap downImg(getExecutableDirectory() + "../src/bc/icons/down_arrow.png", wxBITMAP_TYPE_PNG);
+    wxBitmap removeImg(getExecutableDirectory() + "../src/bc/icons/remove.png", wxBITMAP_TYPE_PNG);
+
+    auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(48,48));
+    auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(48,48));
+    auto *removeButton = new wxBitmapButton(this, wxID_ANY, removeImg, wxDefaultPosition, wxSize(48,48));
+
+    upButton->SetBackgroundColour(wxTransparentColour);
+    removeButton->SetBackgroundColour(wxTransparentColour);
+    downButton->SetBackgroundColour(wxTransparentColour);
 
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
-    
+
     auto *activeToggle = new wxToggleButton(this, wxID_ANY, "Frame Active");
     auto *editFrameButton = new wxButton(this, wxID_ANY, "Edit Frame");
     auto *sendButton = new wxButton(this, wxID_ANY, "Send Single");
 
-    orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 5);
-    orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 5);
-    orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 5);
+    orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0);
+    orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 0);
+    orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 0);
 
     repeatSendSizer->Add(activeToggle, 0, wxALIGN_LEFT | wxALL, 5);
     repeatSendSizer->Add(editFrameButton, 0, wxALIGN_LEFT | wxALL, 5);
     repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
-    mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 0);
     mainSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
     mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
