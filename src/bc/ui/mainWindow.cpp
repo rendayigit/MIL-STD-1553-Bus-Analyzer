@@ -22,7 +22,7 @@ class CustomComponent : public wxPanel {
 public:
   CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode)
       : wxPanel(parent, wxID_ANY) {
-    std::string text = name + "\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
+    std::string text = name + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
                        "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
                        "\nData: 0000 0000 0000 0000 0000 0000 0000 0000\n" +
                        "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" +
@@ -36,9 +36,9 @@ public:
     wxBitmap downImg(getExecutableDirectory() + "../src/bc/icons/down_arrow.png", wxBITMAP_TYPE_PNG);
     wxBitmap removeImg(getExecutableDirectory() + "../src/bc/icons/remove.png", wxBITMAP_TYPE_PNG);
 
-    auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(48,48));
-    auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(48,48));
-    auto *removeButton = new wxBitmapButton(this, wxID_ANY, removeImg, wxDefaultPosition, wxSize(48,48));
+    auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);
+    auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);
+    auto *removeButton = new wxBitmapButton(this, wxID_ANY, removeImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);
 
     upButton->SetBackgroundColour(wxTransparentColour);
     removeButton->SetBackgroundColour(wxTransparentColour);
@@ -46,9 +46,11 @@ public:
 
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
 
-    auto *activeToggle = new wxToggleButton(this, wxID_ANY, "Frame Active");
-    auto *editFrameButton = new wxButton(this, wxID_ANY, "Edit Frame");
-    auto *sendButton = new wxButton(this, wxID_ANY, "Send Single");
+    auto *activeToggle =
+        new wxToggleButton(this, wxID_ANY, "Frame Active", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+    auto *editFrameButton =
+        new wxButton(this, wxID_ANY, "Edit Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+    auto *sendButton = new wxButton(this, wxID_ANY, "Send Single", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
 
     orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0);
     orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 0);
@@ -58,10 +60,13 @@ public:
     repeatSendSizer->Add(editFrameButton, 0, wxALIGN_LEFT | wxALL, 5);
     repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
+    mainSizer->AddSpacer(15);
     mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 0);
+    mainSizer->AddSpacer(30);
     mainSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
     mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+    SetBackgroundColour(this->GetBackgroundColour());
     SetSizer(mainSizer);
   }
 };
@@ -100,7 +105,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   // Replace bottomHorizontalSizer with scrolled window
   m_scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
-  m_scrolledWindow->SetBackgroundColour(wxColour(0, 0, 0));
+  m_scrolledWindow->SetBackgroundColour(this->GetBackgroundColour());
   m_scrolledSizer = new wxBoxSizer(wxVERTICAL);
   m_scrolledWindow->SetSizer(m_scrolledSizer);
   m_scrolledWindow->SetScrollRate(10, 10); // Set scroll speed
@@ -112,8 +117,10 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   topHorizontalSizer->AddStretchSpacer();
   topHorizontalSizer->Add(repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->AddSpacer(5);
   topHorizontalSizer->Add(sendActiveFramesButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->AddSpacer(5);
   topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
