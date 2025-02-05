@@ -1,11 +1,15 @@
 #include "createFrameWindow.hpp"
-#include "bcGuiCommon.hpp"
-#include "common.hpp"
-#include "wx/event.h"
-#include "wx/sizer.h"
-#include "wx/wx.h"
+
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <wx/event.h>
+#include <wx/sizer.h>
+#include <wx/wx.h>
+
+#include "bcGuiCommon.hpp"
+#include "common.hpp"
 
 FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_ANY, "Create 1553 Frame") {
   auto *mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -156,7 +160,9 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   Bind(wxEVT_COMBOBOX, &FrameCreationFrame::onWcChanged, this, ID_WC_COMBO);
-  // Bind(wxEVT_MENU, &FrameCreationFrame::onClose, this, ID_CANCEL_FRAME_BTN);
+  Bind(wxEVT_BUTTON, &FrameCreationFrame::onAddClicked, this, ID_ACCEPT_FRAME_BTN);
+  Bind(wxEVT_BUTTON, &FrameCreationFrame::onRandomize, this, ID_RANDOMIZE_DATA_BTN);
+  Bind(wxEVT_BUTTON, &FrameCreationFrame::onClose, this, ID_CANCEL_FRAME_BTN);
 
   SetSizer(mainSizer);
 
@@ -165,7 +171,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent) : wxFrame(parent, wxID_
 
 void FrameCreationFrame::onAddClicked(wxCommandEvent &event) {}
 
-void FrameCreationFrame::onWcChanged(wxCommandEvent &event) {
+void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {
   if (wxAtoi(m_wcCombo->GetValue()) == 0) {
     for (auto &dataTextCtrl : m_dataTextCtrls) {
       dataTextCtrl->Enable(true);
@@ -183,4 +189,21 @@ void FrameCreationFrame::onWcChanged(wxCommandEvent &event) {
   }
 }
 
-void FrameCreationFrame::onClose(wxCloseEvent & /*event*/) { Close(true); }
+void FrameCreationFrame::onRandomize(wxCommandEvent & /*event*/) {
+  for (auto &dataTextCtrl : m_dataTextCtrls) {
+    // Generate a random number between 0 and 65535
+    std::random_device rd;                           // Obtain a random number from hardware
+    std::mt19937 eng(rd());                          // Seed the generator
+    std::uniform_int_distribution<> distr(0, 65535); // Define the range
+
+    int randomValue = distr(eng); // Generate the random number
+
+    // Convert the random number to a hexadecimal string
+    std::stringstream ss;
+    ss << std::uppercase << std::setw(4) << std::setfill('0') << std::hex << randomValue;
+
+    dataTextCtrl->SetValue(ss.str());
+  }
+}
+
+void FrameCreationFrame::onClose(wxCommandEvent & /*event*/) { Close(true); }
