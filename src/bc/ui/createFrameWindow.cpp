@@ -178,8 +178,14 @@ void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
     return;
   }
 
+  std::array<std::string, RT_SA_MAX_COUNT> data;
+
+  for (int i = 0; i < data.size(); ++i) {
+    data.at(i) = m_dataTextCtrls.at(i)->GetValue();
+  }
+
   parentFrame->addFrameToList(m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
-                              wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), 0);
+                              wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), data);
 }
 
 void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {

@@ -20,13 +20,19 @@
 
 class CustomComponent : public wxPanel {
 public:
-  CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode)
+  CustomComponent(wxWindow *parent, const std::string &name, char bus, int rt, int sa, int wc, int mode,
+                  std::array<std::string, RT_SA_MAX_COUNT> data)
       : wxPanel(parent, wxID_ANY) {
     std::string text = name + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
-                       "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) +
-                       "\nData: 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-                       "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" + "\t 0000 0000 0000 0000 0000 0000 0000 0000\n" +
-                       "\t 0000 0000 0000 0000 0000 0000 0000 0000\n";
+                       "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) + "\nData: ";
+
+    for (int i = 0; i < data.size(); ++i) {
+      if (i % 8 == 0) {
+        text += "\n\t " + data.at(i);
+      } else {
+        text += " " + data.at(i);
+      }
+    }
 
     auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     auto *orderSizer = new wxBoxSizer(wxVERTICAL);
@@ -152,8 +158,9 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
 
-void BusControllerFrame::addFrameToList(char bus, int rt, int sa, int wc, int mode, int data) {
-  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", bus, rt, sa, wc, mode);
+void BusControllerFrame::addFrameToList(char bus, int rt, int sa, int wc, int mode,
+                                        std::array<std::string, RT_SA_MAX_COUNT> data) {
+  auto *component = new CustomComponent(m_scrolledWindow, "Sample Message", bus, rt, sa, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
   m_scrolledWindow->FitInside(); // Update scrollable area
 }
