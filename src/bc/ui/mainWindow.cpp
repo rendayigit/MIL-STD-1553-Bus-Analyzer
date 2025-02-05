@@ -36,7 +36,9 @@ public:
     auto *downButton = new wxButton(this, wxID_ANY, "v", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT));
 
     auto *nameLabel = new wxStaticText(this, wxID_ANY, text);
+    
     auto *activeToggle = new wxToggleButton(this, wxID_ANY, "Frame Active");
+    auto *editFrameButton = new wxButton(this, wxID_ANY, "Edit Frame");
     auto *sendButton = new wxButton(this, wxID_ANY, "Send Single");
 
     orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 5);
@@ -44,6 +46,7 @@ public:
     orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 5);
 
     repeatSendSizer->Add(activeToggle, 0, wxALIGN_LEFT | wxALL, 5);
+    repeatSendSizer->Add(editFrameButton, 0, wxALIGN_LEFT | wxALL, 5);
     repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
     mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
