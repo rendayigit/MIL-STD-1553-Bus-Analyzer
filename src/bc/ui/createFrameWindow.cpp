@@ -199,7 +199,7 @@ void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
 
   parentFrame->addFrameToList(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0],
                               wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
-                              wxAtoi(m_wcCombo->GetValue()), wxAtoi(m_modeCombo->GetValue()), data);
+                              wxAtoi(m_wcCombo->GetValue()), static_cast<BcMode>(m_modeCombo->GetSelection()), data);
 }
 
 void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {

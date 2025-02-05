@@ -10,4 +10,7 @@ enum {
   ID_ADD_MENU,
   ID_DEVICE_ID_TXT
 };
+
+enum BcMode { BC_TO_RT, RT_TO_BC, RT_TO_RT };
+
 constexpr int TOP_BAR_COMP_HEIGHT = 30;

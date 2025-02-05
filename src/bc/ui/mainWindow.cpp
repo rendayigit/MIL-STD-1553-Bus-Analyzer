@@ -20,11 +20,21 @@
 
 class CustomComponent : public wxPanel {
 public:
-  CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, int mode,
+  CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                   std::array<std::string, RT_SA_MAX_COUNT> data)
       : wxPanel(parent, wxID_ANY) {
     std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
-                       "\tWC: " + std::to_string(wc) + "\tMode: " + std::to_string(mode) + "\nData: ";
+                       "\tWC: " + std::to_string(wc) + "\tMode: ";
+
+    if (mode == BcMode::BC_TO_RT) {
+      text += "BC->RT";
+    } else if (mode == BcMode::RT_TO_BC) {
+      text += "RT->BC";
+    } else if (mode == BcMode::RT_TO_RT) {
+      text += "RT->RT";
+    }
+
+    text += "\nData: ";
 
     for (int i = 0; i < data.size(); ++i) {
       if (i % 8 == 0) {
@@ -158,7 +168,7 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
 
-void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, int mode,
+void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {
   auto *component = new CustomComponent(m_scrolledWindow, label, bus, rt, sa, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
