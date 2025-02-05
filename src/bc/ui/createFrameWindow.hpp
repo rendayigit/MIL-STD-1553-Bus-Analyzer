@@ -8,5 +8,9 @@ public:
 
 private:
   void onAddClicked(wxCommandEvent &event);
+  void onWcChanged(wxCommandEvent &event);
   void onClose(wxCloseEvent &event);
+
+  wxComboBox *m_wcCombo;
+  std::vector<wxTextCtrl *> m_dataTextCtrls;
 };
