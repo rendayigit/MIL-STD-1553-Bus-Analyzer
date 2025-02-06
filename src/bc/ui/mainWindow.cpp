@@ -3,22 +3,12 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-#include <wx/debug.h>
-#include <wx/event.h>
-#include <wx/gdicmn.h>
-#include <wx/gtk/button.h>
-#include <wx/gtk/colour.h>
-#include <wx/gtk/stattext.h>
-#include <wx/scrolwin.h>
-#include <wx/sizer.h>
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
 #include "bc.hpp"
 #include "bcGuiCommon.hpp"
 #include "createFrameWindow.hpp"
-#include "wx/colour.h"
-#include "wx/gtk/frame.h"
 
 class CustomComponent : public wxPanel {
 public:
@@ -95,8 +85,10 @@ private:
   void onSendSingle(wxCommandEvent & /*event*/) {
     S16BIT status = ACE_ERR_SUCCESS;
 
+    auto *mainWindow = dynamic_cast<BusControllerFrame *>(m_parent->GetParent());
+
     BC::getInstance().stopBc();
-    BC::getInstance().startBc(1);
+    BC::getInstance().startBc(mainWindow->getDeviceId());
 
     if (m_mode == BcMode::BC_TO_RT) {
       status =
@@ -108,14 +100,12 @@ private:
       status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, false);
     }
 
-    // FIXME: cannot print status to gui
     if (status != ACE_ERR_SUCCESS) {
       Logger::error(getStatus(status));
-      auto *parent = dynamic_cast<BusControllerFrame *>(m_parent);
-
-      if (parent != nullptr) {
-        parent->setStatusText("Error" + getStatus(status));
-      }
+      mainWindow->setStatusText("Error: " + getStatus(status));
+    } else {
+      Logger::debug("Sent single: ");                 // TODO: improve log message
+      mainWindow->setStatusText("Success sending: "); // TODO: improve log message
     }
   }
 
@@ -137,7 +127,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   SetMenuBar(menuBar);
   menuBar->Append(menuFile, "&Commands");
 
-  auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
+  auto *deviceIdLabel = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
   m_deviceIdTextInput = new wxTextCtrl(
       this, ID_DEVICE_ID_TXT, "00", wxDefaultPosition,
@@ -167,7 +157,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   m_scrolledWindow->SetSizer(m_scrolledSizer);
   m_scrolledWindow->SetScrollRate(10, 10); // Set scroll speed
 
-  topHorizontalSizer->Add(deviceIdText, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+  topHorizontalSizer->Add(deviceIdLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -210,6 +200,8 @@ void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
 
 void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(status); }
+
+int BusControllerFrame::getDeviceId() { return wxAtoi(m_deviceIdTextInput->GetValue()); }
 
 void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {

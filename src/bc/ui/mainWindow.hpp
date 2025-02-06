@@ -12,6 +12,7 @@ public:
   void addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                       std::array<std::string, RT_SA_MAX_COUNT> data);
   void setStatusText(const wxString &status);
+  int getDeviceId();
 
 private:
   void onAddClicked(wxCommandEvent &event);
