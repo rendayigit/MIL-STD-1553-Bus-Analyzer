@@ -112,6 +112,7 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
     }
   } else {
     m_sendActiveFramesToggle->SetLabel("Send Active Frames");
+    stopSending();
   }
 }
 
