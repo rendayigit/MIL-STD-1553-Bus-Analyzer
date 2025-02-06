@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wx/string.h>
+#include <wx/tglbtn.h>
 #include <wx/wx.h>
 
 #include "bcGuiCommon.hpp"
@@ -17,10 +17,14 @@ public:
 
 private:
   void onAddClicked(wxCommandEvent &event);
+  void onRepeatToggle(wxCommandEvent &event);
+  void onSendActiveFrames(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);
 
   wxTextCtrl *m_deviceIdTextInput;
   wxButton *m_addButton;
+  wxToggleButton *m_repeatToggle;
+  wxToggleButton *m_sendActiveFramesToggle;
   wxScrolledWindow *m_scrolledWindow;
   wxBoxSizer *m_scrolledSizer;
 };

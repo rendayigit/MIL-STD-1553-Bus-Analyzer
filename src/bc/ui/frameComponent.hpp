@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wx/tglbtn.h>
 #include <wx/wx.h>
 
 #include "bc/ui/mainWindow.hpp"
@@ -17,9 +18,13 @@ private:
   void onSendSingle(wxCommandEvent &event);
   void onRemove(wxCommandEvent &event);
   void onEdit(wxCommandEvent &event);
+  void onActivateToggle(wxCommandEvent &event);
 
   BusControllerFrame *m_mainWindow;
+
   wxStaticText *m_label{};
+  wxToggleButton *m_activateToggle{};
+
   char m_bus{};
   int m_rt{};
   int m_sa{};

@@ -1,7 +1,5 @@
 #include "frameComponent.hpp"
 
-#include <wx/tglbtn.h>
-
 #include "bc.hpp"
 #include "createFrameWindow.hpp"
 
@@ -9,7 +7,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
                                BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
     : wxPanel(parent, wxID_ANY), m_mainWindow(dynamic_cast<BusControllerFrame *>(parent->GetParent())) {
   m_label = new wxStaticText(this, wxID_ANY, "");
-  
+
   updateValues(label, bus, rt, sa, wc, mode, data);
 
   auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -28,17 +26,17 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   removeButton->SetBackgroundColour(wxTransparentColour);
   downButton->SetBackgroundColour(wxTransparentColour);
 
-  auto *activeToggle =
-      new wxToggleButton(this, wxID_ANY, "Frame Active", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+  m_activateToggle =
+      new wxToggleButton(this, wxID_ANY, "Activate Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
   auto *editFrameButton =
       new wxButton(this, wxID_ANY, "Edit Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
-  auto *sendButton = new wxButton(this, wxID_ANY, "Send Single", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+  auto *sendButton = new wxButton(this, wxID_ANY, "Send Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
 
   orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0);
   orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 0);
   orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 0);
 
-  repeatSendSizer->Add(activeToggle, 0, wxALIGN_LEFT | wxALL, 5);
+  repeatSendSizer->Add(m_activateToggle, 0, wxALIGN_LEFT | wxALL, 5);
   repeatSendSizer->Add(editFrameButton, 0, wxALIGN_LEFT | wxALL, 5);
   repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);
 
@@ -51,6 +49,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   sendButton->Bind(wxEVT_BUTTON, &FrameComponent::onSendSingle, this);
   removeButton->Bind(wxEVT_BUTTON, &FrameComponent::onRemove, this);
   editFrameButton->Bind(wxEVT_BUTTON, &FrameComponent::onEdit, this);
+  m_activateToggle->Bind(wxEVT_TOGGLEBUTTON, &FrameComponent::onActivateToggle, this);
 
   SetBackgroundColour(this->GetBackgroundColour());
   SetSizer(mainSizer);
@@ -122,4 +121,12 @@ void FrameComponent::onRemove(wxCommandEvent & /*event*/) {
 void FrameComponent::onEdit(wxCommandEvent & /*event*/) {
   auto *frame = new FrameCreationFrame(m_mainWindow, this);
   frame->Show(true);
+}
+
+void FrameComponent::onActivateToggle(wxCommandEvent &event) {
+  if (m_activateToggle->GetValue()) {
+    m_activateToggle->SetLabel("Frame Active");
+  } else {
+    m_activateToggle->SetLabel("Activate Frame");
+  }
 }

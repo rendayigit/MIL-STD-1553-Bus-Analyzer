@@ -3,7 +3,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-#include <wx/tglbtn.h>
 #include <wx/wx.h>
 
 #include "bc.hpp"
@@ -25,9 +24,9 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
       this, wxID_ANY, "00", wxDefaultPosition,
       wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  auto *repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeated Send");
+  m_repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat Off");
 
-  auto *sendActiveFramesButton = new wxButton(
+  m_sendActiveFramesToggle = new wxToggleButton(
       this, wxID_ANY, "Send Active Frames", wxDefaultPosition,
       wxSize(150, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
@@ -54,10 +53,11 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->AddStretchSpacer();
-  topHorizontalSizer->Add(repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+  topHorizontalSizer->Add(m_repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->AddSpacer(5);
-  topHorizontalSizer->Add(sendActiveFramesButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+  topHorizontalSizer->Add(m_sendActiveFramesToggle, 0,
+                          wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->AddSpacer(5);
   topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
@@ -76,8 +76,11 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   CreateStatusBar();
   SetStatusText("Ready, add frames to send");
 
-  m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddClicked, this);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
+
+  m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddClicked, this);
+  m_repeatToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onRepeatToggle, this);
+  m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
   m_deviceIdTextInput->SetValue(std::to_string(BC::getInstance().getDevNum()));
   SetSize(650, 400);
@@ -86,6 +89,22 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
   auto *frame = new FrameCreationFrame(this);
   frame->Show(true);
+}
+
+void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
+  if (m_repeatToggle->GetValue()) {
+    m_repeatToggle->SetLabel("Repeat On");
+  } else {
+    m_repeatToggle->SetLabel("Repeat Off");
+  }
+}
+
+void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
+  if (m_sendActiveFramesToggle->GetValue()) {
+    m_sendActiveFramesToggle->SetLabel("Sending Active Frames");
+  } else {
+    m_sendActiveFramesToggle->SetLabel("Send Active Frames");
+  }
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
