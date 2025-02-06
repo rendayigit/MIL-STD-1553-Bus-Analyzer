@@ -6,7 +6,7 @@
 FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc,
                                BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
     : wxPanel(parent, wxID_ANY), m_mainWindow(dynamic_cast<BusControllerFrame *>(parent->GetParent())) {
-  m_label = new wxStaticText(this, wxID_ANY, "");
+  m_allText = new wxStaticText(this, wxID_ANY, "");
 
   updateValues(label, bus, rt, sa, wc, mode, data);
 
@@ -43,7 +43,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   mainSizer->AddSpacer(15);
   mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 0);
   mainSizer->AddSpacer(30);
-  mainSizer->Add(m_label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+  mainSizer->Add(m_allText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
   mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
   sendButton->Bind(wxEVT_BUTTON, &FrameComponent::onSend, this);
@@ -57,6 +57,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
 
 void FrameComponent::updateValues(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                   std::array<std::string, RT_SA_MAX_COUNT> data) {
+  m_label = label;
   m_bus = bus;
   m_rt = rt;
   m_sa = sa;
@@ -85,7 +86,7 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
     }
   }
 
-  m_label->SetLabel(text);
+  m_allText->SetLabel(text);
 }
 
 void FrameComponent::sendFrame() {

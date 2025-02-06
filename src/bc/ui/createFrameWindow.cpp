@@ -23,6 +23,17 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent, FrameComponent *frame)
     : wxFrame(parent, wxID_ANY, "Editing 1553 Frame"), m_parent(parent) {
   createFrame();
 
+  m_labelTextCtrl->SetValue(frame->getLabel());
+  m_busCombo->SetValue(frame->getBus());
+  m_rtCombo->SetValue(std::to_string(frame->getRt()));
+  m_saCombo->SetValue(std::to_string(frame->getSa()));
+  m_wcCombo->SetValue(std::to_string(frame->getWc()));
+  m_modeCombo->SetSelection(frame->getMode());
+
+  for (int i = 0; i < m_dataTextCtrls.size(); ++i) {
+    m_dataTextCtrls.at(i)->SetValue(frame->getData().at(i));
+  }
+
   m_saveButton->Bind(wxEVT_BUTTON, [this, frame](wxCommandEvent &event) { onSaveEdit(event, frame); });
 }
 
