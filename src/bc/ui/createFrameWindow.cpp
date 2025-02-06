@@ -226,6 +226,8 @@ void FrameCreationFrame::onSaveEdit(wxCommandEvent & /*event*/, FrameComponent *
   frame->updateValues(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()),
                       wxAtoi(m_saCombo->GetValue()), wxAtoi(m_wcCombo->GetValue()),
                       static_cast<BcMode>(m_modeCombo->GetSelection()), data);
+
+  Close(true);
 }
 
 void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {
