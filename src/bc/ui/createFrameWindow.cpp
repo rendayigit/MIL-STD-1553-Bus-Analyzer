@@ -14,6 +14,19 @@
 
 FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
     : wxFrame(parent, wxID_ANY, "Create 1553 Frame"), m_parent(parent) {
+  createFrame();
+
+  m_saveButton->Bind(wxEVT_BUTTON, &FrameCreationFrame::onSaveAdd, this);
+}
+
+FrameCreationFrame::FrameCreationFrame(wxWindow *parent, FrameComponent *frame)
+    : wxFrame(parent, wxID_ANY, "Editing 1553 Frame"), m_parent(parent) {
+  createFrame();
+
+  m_saveButton->Bind(wxEVT_BUTTON, [this, frame](wxCommandEvent &event) { onSaveEdit(event, frame); });
+}
+
+void FrameCreationFrame::createFrame() {
   auto *mainSizer = new wxBoxSizer(wxVERTICAL);
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *middleSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -24,16 +37,16 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  auto *saveButton = new wxButton(
-      this, ID_SAVE_FRAME_BTN, "Save Frame", wxDefaultPosition,
+  m_saveButton = new wxButton(
+      this, wxID_ANY, "Save Frame", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto *closeButton = new wxButton(
-      this, ID_CANCEL_FRAME_BTN, "Cancel", wxDefaultPosition,
+      this, wxID_ANY, "Cancel", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto *randomizeButton = new wxButton(
-      this, ID_RANDOMIZE_DATA_BTN, "Randomize Data", wxDefaultPosition,
+      this, wxID_ANY, "Randomize Data", wxDefaultPosition,
       wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   wxString rtSaWcOptions[] = // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-avoid-c-arrays)
@@ -63,7 +76,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
 
   auto *wcLabel = new wxStaticText(this, wxID_ANY, "WC: ");
 
-  m_wcCombo = new wxComboBox(this, ID_WC_COMBO, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
+  m_wcCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
                              rtSaWcOptions, wxCB_READONLY);
 
   auto *modeLabel = new wxStaticText(this, wxID_ANY, "Mode: ");
@@ -150,7 +163,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   bottomSizer->AddStretchSpacer();
   bottomSizer->Add(closeButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  bottomSizer->Add(saveButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  bottomSizer->Add(m_saveButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   mainSizer->Add(topSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -172,17 +185,16 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent)
   mainSizer->Add(bottomSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  Bind(wxEVT_COMBOBOX, &FrameCreationFrame::onWcChanged, this, ID_WC_COMBO);
-  Bind(wxEVT_BUTTON, &FrameCreationFrame::onSaveClicked, this, ID_SAVE_FRAME_BTN);
-  Bind(wxEVT_BUTTON, &FrameCreationFrame::onRandomize, this, ID_RANDOMIZE_DATA_BTN);
-  Bind(wxEVT_BUTTON, &FrameCreationFrame::onClose, this, ID_CANCEL_FRAME_BTN);
+  m_wcCombo->Bind(wxEVT_COMBOBOX, &FrameCreationFrame::onWcChanged, this);
+  randomizeButton->Bind(wxEVT_BUTTON, &FrameCreationFrame::onRandomize, this);
+  closeButton->Bind(wxEVT_BUTTON, &FrameCreationFrame::onClose, this);
 
   SetSizer(mainSizer);
 
   SetSize(650, 400);
 }
 
-void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
+void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
   auto *parentFrame = dynamic_cast<BusControllerFrame *>(m_parent);
 
   if (parentFrame == nullptr) {
@@ -200,6 +212,20 @@ void FrameCreationFrame::onSaveClicked(wxCommandEvent & /*event*/) {
   parentFrame->addFrameToList(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0],
                               wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
                               wxAtoi(m_wcCombo->GetValue()), static_cast<BcMode>(m_modeCombo->GetSelection()), data);
+}
+
+void FrameCreationFrame::onSaveEdit(wxCommandEvent & /*event*/, FrameComponent *frame) {
+  std::array<std::string, RT_SA_MAX_COUNT> data;
+
+  for (int i = 0; i < data.size(); ++i) {
+    data.at(i) = m_dataTextCtrls.at(i)->GetValue();
+  }
+
+  std::string label = m_labelTextCtrl->GetValue().ToStdString();
+
+  frame->updateValues(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()),
+                      wxAtoi(m_saCombo->GetValue()), wxAtoi(m_wcCombo->GetValue()),
+                      static_cast<BcMode>(m_modeCombo->GetSelection()), data);
 }
 
 void FrameCreationFrame::onWcChanged(wxCommandEvent & /*event*/) {

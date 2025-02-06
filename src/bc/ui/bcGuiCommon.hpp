@@ -1,16 +1,5 @@
 #pragma once
 
-enum {
-  ID_ADD_BTN = 1,
-  ID_WC_COMBO,
-  ID_SAVE_FRAME_BTN,
-  ID_CANCEL_FRAME_BTN,
-  ID_RANDOMIZE_DATA_BTN,
-  ID_SEND_ACTIVE_BTN,
-  ID_ADD_MENU,
-  ID_DEVICE_ID_TXT
-};
-
 enum BcMode { BC_TO_RT, RT_TO_BC, RT_TO_RT };
 
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
