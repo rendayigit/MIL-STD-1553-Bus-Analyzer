@@ -30,6 +30,8 @@ private:
   void onEdit(wxCommandEvent &event);
   void onActivateToggle(wxCommandEvent &event);
 
+  void updateData(std::array<std::string, RT_SA_MAX_COUNT> data);
+
   BusControllerFrame *m_mainWindow;
 
   wxStaticText *m_allText{};

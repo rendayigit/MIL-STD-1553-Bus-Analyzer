@@ -20,9 +20,9 @@ public:
 
   S16BIT startBc(S16BIT devNum);
   S16BIT stopBc();
-  S16BIT bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data, bool isRepeat);
-  S16BIT rtToBc(int rt, int sa, int wc, U8BIT bus, bool isRepeat);
-  S16BIT rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus, bool isRepeat);
+  S16BIT bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data);
+  S16BIT rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data);
+  S16BIT rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data);
   S16BIT configRun();
 
   void setCommandFilePath(const std::string &commandFilePath) { m_commandFilePath = commandFilePath; }

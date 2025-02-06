@@ -95,14 +95,17 @@ void FrameComponent::sendFrame() {
   BC::getInstance().stopBc();
   BC::getInstance().startBc(m_mainWindow->getDeviceId());
 
+  std::array<std::string, RT_SA_MAX_COUNT> data;
+
   if (m_mode == BcMode::BC_TO_RT) {
-    status =
-        BC::getInstance().bcToRt(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, m_data, false);
+    status = BC::getInstance().bcToRt(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, m_data);
   } else if (m_mode == BcMode::RT_TO_BC) {
-    status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, false);
+    status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
+    updateData(data);
   } else if (m_mode == BcMode::RT_TO_RT) {
     // TODO: implement rt2 and sa 2
-    status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, false);
+    status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, &data);
+    updateData(data);
   }
 
   if (status != ACE_ERR_SUCCESS) {
@@ -112,6 +115,10 @@ void FrameComponent::sendFrame() {
     Logger::debug("Sent frame: ");                    // TODO: improve log message
     m_mainWindow->setStatusText("Success sending: "); // TODO: improve log message
   }
+}
+
+void FrameComponent::updateData(std::array<std::string, RT_SA_MAX_COUNT> data) {
+  updateValues(m_label, m_bus, m_rt, m_sa, m_wc, m_mode, data);
 }
 
 bool FrameComponent::isActive() { return m_activateToggle->GetValue(); }

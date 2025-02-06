@@ -176,7 +176,7 @@ S16BIT BC::startBc(S16BIT devNum) {
 S16BIT BC::stopBc() {
   S16BIT err = 0;
 
-  Logger::debug( "stop bc with dev: " + std::to_string(m_devNum));
+  Logger::debug("stop bc with dev: " + std::to_string(m_devNum));
 
   err = aceBCStop(m_devNum);
 
@@ -187,7 +187,7 @@ S16BIT BC::stopBc() {
   return 0;
 }
 
-S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data, bool isRepeat) {
+S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
   S16BIT err = 0;
 
   std::string dataString;
@@ -196,9 +196,9 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     dataString += item;
   }
 
-  Logger::debug("bc->rt with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) + " sa: " +
-                             std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
-                             " data: " + dataString + " is repeat: " + std::to_string(static_cast<int>(isRepeat)));
+  Logger::debug("bc->rt with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
+                " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
+                " data: " + dataString);
 
   stopBc();
 
@@ -218,14 +218,8 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return err;
   }
 
-  int repeatCount = 1;
-
-  if (isRepeat) {
-    repeatCount = -1;
-  }
-
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_1, repeatCount);
+  err = aceBCStart(m_devNum, MJR_FRAME_1, 1);
   if (err != 0) {
     return err;
   }
@@ -233,12 +227,11 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   return 0;
 }
 
-S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, bool isRepeat) {
+S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT err = 0;
 
-  Logger::debug("rt->bc with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) + " sa: " +
-                             std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
-                             " is repeat: " + std::to_string(static_cast<int>(isRepeat)));
+  Logger::debug("rt->bc with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
+                " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
 
   stopBc();
 
@@ -252,28 +245,29 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, bool isRepeat) {
     return err;
   }
 
-  int repeatCount = 1;
-
-  if (isRepeat) {
-    repeatCount = -1;
-  }
-
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_2, repeatCount);
+  err = aceBCStart(m_devNum, MJR_FRAME_2, 1);
   if (err != 0) {
     return err;
+  }
+
+  for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
+    std::stringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << m_messageBuffer[i];
+
+    data->at(i) = ss.str();
   }
 
   return 0;
 }
 
-S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus, bool isRepeat) {
+S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
+                  std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT err = 0;
 
   Logger::debug("rt->rt with dev: " + std::to_string(m_devNum) + " rt tx: " + std::to_string(rtTx) +
-                             " sa tx: " + std::to_string(saTx) + " rt rx: " + std::to_string(rtRx) + " sa rx: " +
-                             std::to_string(saRx) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
-                             " is repeat: " + std::to_string(static_cast<int>(isRepeat)));
+                " sa tx: " + std::to_string(saTx) + " rt rx: " + std::to_string(rtRx) +
+                " sa rx: " + std::to_string(saRx) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
 
   stopBc();
 
@@ -288,16 +282,17 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus, boo
     return err;
   }
 
-  int repeatCount = 1;
-
-  if (isRepeat) {
-    repeatCount = -1;
-  }
-
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_3, repeatCount);
+  err = aceBCStart(m_devNum, MJR_FRAME_3, 1);
   if (err != 0) {
     return err;
+  }
+
+  for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
+    std::stringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << m_messageBuffer[i];
+
+    data->at(i) = ss.str();
   }
 
   return 0;
