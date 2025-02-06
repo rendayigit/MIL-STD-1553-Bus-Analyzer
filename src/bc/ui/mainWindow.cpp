@@ -96,18 +96,34 @@ void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
     m_repeatToggle->SetLabel("Repeat On");
   } else {
     m_repeatToggle->SetLabel("Repeat Off");
+
+    //TODO: stop sending active frames
   }
 }
 
 void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
   if (m_sendActiveFramesToggle->GetValue()) {
     m_sendActiveFramesToggle->SetLabel("Sending Active Frames");
+
+    sendActiveFrames(m_repeatToggle->GetValue());
   } else {
     m_sendActiveFramesToggle->SetLabel("Send Active Frames");
+
+    //TODO: stop sending active frames
   }
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
+
+void BusControllerFrame::sendActiveFrames(bool isRepeat) {
+  for (auto &child : m_scrolledSizer->GetChildren()) {
+    auto *frame = dynamic_cast<FrameComponent *>(child->GetWindow());
+    
+    if (frame->isActive()) {
+      frame->sendFrame();
+    }
+  }
+}
 
 void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(status); }
 

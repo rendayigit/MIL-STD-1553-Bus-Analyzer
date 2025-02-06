@@ -46,7 +46,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   mainSizer->Add(m_label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
   mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-  sendButton->Bind(wxEVT_BUTTON, &FrameComponent::onSendSingle, this);
+  sendButton->Bind(wxEVT_BUTTON, &FrameComponent::onSend, this);
   removeButton->Bind(wxEVT_BUTTON, &FrameComponent::onRemove, this);
   editFrameButton->Bind(wxEVT_BUTTON, &FrameComponent::onEdit, this);
   m_activateToggle->Bind(wxEVT_TOGGLEBUTTON, &FrameComponent::onActivateToggle, this);
@@ -88,7 +88,7 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
   m_label->SetLabel(text);
 }
 
-void FrameComponent::onSendSingle(wxCommandEvent & /*event*/) {
+void FrameComponent::sendFrame() {
   S16BIT status = ACE_ERR_SUCCESS;
 
   BC::getInstance().stopBc();
@@ -108,10 +108,14 @@ void FrameComponent::onSendSingle(wxCommandEvent & /*event*/) {
     Logger::error(getStatus(status));
     m_mainWindow->setStatusText("Error: " + getStatus(status));
   } else {
-    Logger::debug("Sent single: ");                   // TODO: improve log message
+    Logger::debug("Sent frame: ");                    // TODO: improve log message
     m_mainWindow->setStatusText("Success sending: "); // TODO: improve log message
   }
 }
+
+bool FrameComponent::isActive() { return m_activateToggle->GetValue(); }
+
+void FrameComponent::onSend(wxCommandEvent & /*event*/) { sendFrame(); }
 
 void FrameComponent::onRemove(wxCommandEvent & /*event*/) {
   this->Destroy();

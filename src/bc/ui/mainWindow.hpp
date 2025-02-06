@@ -21,6 +21,8 @@ private:
   void onSendActiveFrames(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);
 
+  void sendActiveFrames(bool isRepeat);
+
   wxTextCtrl *m_deviceIdTextInput;
   wxButton *m_addButton;
   wxToggleButton *m_repeatToggle;

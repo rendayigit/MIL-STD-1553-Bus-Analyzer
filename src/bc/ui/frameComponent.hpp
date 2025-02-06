@@ -13,9 +13,11 @@ public:
 
   void updateValues(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                     std::array<std::string, RT_SA_MAX_COUNT> data);
+  void sendFrame();
+  bool isActive();
 
 private:
-  void onSendSingle(wxCommandEvent &event);
+  void onSend(wxCommandEvent &event);
   void onRemove(wxCommandEvent &event);
   void onEdit(wxCommandEvent &event);
   void onActivateToggle(wxCommandEvent &event);
