@@ -1,5 +1,6 @@
 #pragma once
 
+#include <thread>
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
@@ -21,7 +22,9 @@ private:
   void onSendActiveFrames(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);
 
-  void sendActiveFrames(bool isRepeat);
+  void sendActiveFrames();
+  void startSendingThread();
+  void stopSending();
 
   wxTextCtrl *m_deviceIdTextInput;
   wxButton *m_addButton;
@@ -29,4 +32,7 @@ private:
   wxToggleButton *m_sendActiveFramesToggle;
   wxScrolledWindow *m_scrolledWindow;
   wxBoxSizer *m_scrolledSizer;
+
+  std::thread m_repeatedSendThread;
+  bool m_isSending = false;
 };

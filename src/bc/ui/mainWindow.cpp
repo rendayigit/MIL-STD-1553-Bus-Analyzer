@@ -96,8 +96,7 @@ void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
     m_repeatToggle->SetLabel("Repeat On");
   } else {
     m_repeatToggle->SetLabel("Repeat Off");
-
-    // TODO: stop sending active frames
+    stopSending();
   }
 }
 
@@ -105,23 +104,46 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
   if (m_sendActiveFramesToggle->GetValue()) {
     m_sendActiveFramesToggle->SetLabel("Sending Active Frames");
 
-    sendActiveFrames(m_repeatToggle->GetValue());
+    if (m_repeatToggle->GetValue()) {
+      startSendingThread();
+    } else {
+      sendActiveFrames();
+      stopSending();
+    }
   } else {
     m_sendActiveFramesToggle->SetLabel("Send Active Frames");
-
-    // TODO: stop sending active frames
   }
 }
 
 void BusControllerFrame::onExit(wxCommandEvent & /*event*/) { Close(true); }
 
-void BusControllerFrame::sendActiveFrames(bool isRepeat) {
+void BusControllerFrame::sendActiveFrames() {
   for (auto &child : m_scrolledSizer->GetChildren()) {
     auto *frame = dynamic_cast<FrameComponent *>(child->GetWindow());
 
     if (frame->isActive()) {
       frame->sendFrame();
     }
+  }
+}
+
+void BusControllerFrame::startSendingThread() {
+  try {
+    m_isSending = true;
+    m_repeatedSendThread = std::thread([&] {
+      while (m_isSending) {
+        sendActiveFrames();
+      }
+    });
+  } catch (std::exception &e) {
+    Logger::error("Failed to start sending thread, " + std::string(e.what()));
+  }
+}
+
+void BusControllerFrame::stopSending() {
+  m_isSending = false;
+  if (m_repeatedSendThread.joinable()) {
+    m_repeatedSendThread.join();
   }
 
   m_sendActiveFramesToggle->SetValue(false);
