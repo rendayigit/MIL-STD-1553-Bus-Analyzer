@@ -13,6 +13,7 @@ public:
                       std::array<std::string, RT_SA_MAX_COUNT> data);
   void setStatusText(const wxString &status);
   int getDeviceId();
+  void updateList();
 
 private:
   void onAddClicked(wxCommandEvent &event);

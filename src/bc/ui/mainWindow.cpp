@@ -14,8 +14,8 @@ class CustomComponent : public wxPanel {
 public:
   explicit CustomComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                            std::array<std::string, RT_SA_MAX_COUNT> data)
-      : wxPanel(parent, wxID_ANY), m_parent(parent), m_bus(bus), m_rt(rt), m_sa(sa), m_wc(wc), m_mode(mode),
-        m_data(data) {
+      : wxPanel(parent, wxID_ANY), m_mainWindow(dynamic_cast<BusControllerFrame *>(parent->GetParent())), m_bus(bus),
+        m_rt(rt), m_sa(sa), m_wc(wc), m_mode(mode), m_data(data) {
     std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
                        "\tWC: " + std::to_string(wc) + "\tMode: ";
 
@@ -75,6 +75,7 @@ public:
     mainSizer->Add(nameLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
     mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+    removeButton->Bind(wxEVT_BUTTON, &CustomComponent::onRemove, this);
     sendButton->Bind(wxEVT_BUTTON, &CustomComponent::onSendSingle, this);
 
     SetBackgroundColour(this->GetBackgroundColour());
@@ -85,10 +86,8 @@ private:
   void onSendSingle(wxCommandEvent & /*event*/) {
     S16BIT status = ACE_ERR_SUCCESS;
 
-    auto *mainWindow = dynamic_cast<BusControllerFrame *>(m_parent->GetParent());
-
     BC::getInstance().stopBc();
-    BC::getInstance().startBc(mainWindow->getDeviceId());
+    BC::getInstance().startBc(m_mainWindow->getDeviceId());
 
     if (m_mode == BcMode::BC_TO_RT) {
       status =
@@ -102,14 +101,19 @@ private:
 
     if (status != ACE_ERR_SUCCESS) {
       Logger::error(getStatus(status));
-      mainWindow->setStatusText("Error: " + getStatus(status));
+      m_mainWindow->setStatusText("Error: " + getStatus(status));
     } else {
-      Logger::debug("Sent single: ");                 // TODO: improve log message
-      mainWindow->setStatusText("Success sending: "); // TODO: improve log message
+      Logger::debug("Sent single: ");                   // TODO: improve log message
+      m_mainWindow->setStatusText("Success sending: "); // TODO: improve log message
     }
   }
 
-  wxWindow *m_parent;
+  void onRemove(wxCommandEvent & /*event*/) {
+    this->Destroy();
+    m_mainWindow->updateList();
+  }
+
+  BusControllerFrame *m_mainWindow;
   char m_bus;
   int m_rt;
   int m_sa;
@@ -203,9 +207,13 @@ void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(s
 
 int BusControllerFrame::getDeviceId() { return wxAtoi(m_deviceIdTextInput->GetValue()); }
 
+void BusControllerFrame::updateList() {
+  m_scrolledWindow->FitInside(); // Update scrollable area
+}
+
 void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {
   auto *component = new CustomComponent(m_scrolledWindow, label, bus, rt, sa, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
-  m_scrolledWindow->FitInside(); // Update scrollable area
+  updateList();
 }
