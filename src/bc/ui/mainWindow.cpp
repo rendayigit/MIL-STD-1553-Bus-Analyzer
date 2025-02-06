@@ -26,7 +26,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   m_repeatToggle = new wxToggleButton(
       this, wxID_ANY, "Repeat Off", wxDefaultPosition,
-      wxSize(150, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_sendActiveFramesToggle = new wxToggleButton(
       this, wxID_ANY, "Send Active Frames", wxDefaultPosition,
