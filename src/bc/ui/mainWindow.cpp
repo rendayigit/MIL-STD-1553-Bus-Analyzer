@@ -124,11 +124,11 @@ void BusControllerFrame::sendActiveFrames() {
   for (auto &child : m_scrolledSizer->GetChildren()) {
     auto *frame = dynamic_cast<FrameComponent *>(child->GetWindow());
 
-    if (frame->isActive()) {
+    if (frame != nullptr and frame->isActive()) {
       frame->sendFrame();
 
       std::this_thread::sleep_for(
-          std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+          std::chrono::milliseconds(100)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
   }
 }
