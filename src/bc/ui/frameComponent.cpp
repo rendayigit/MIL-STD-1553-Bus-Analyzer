@@ -89,6 +89,8 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
   }
 
   m_allText->SetLabel(text);
+
+  m_mainWindow->updateList();
 }
 
 void FrameComponent::sendFrame() {

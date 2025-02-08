@@ -85,7 +85,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
   m_deviceIdTextInput->SetValue(std::to_string(BC::getInstance().getDevNum()));
-  SetSize(650, 400);
+  SetSize(650, 650);
 }
 
 void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
