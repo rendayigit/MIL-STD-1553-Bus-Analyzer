@@ -50,6 +50,8 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   removeButton->Bind(wxEVT_BUTTON, &FrameComponent::onRemove, this);
   editFrameButton->Bind(wxEVT_BUTTON, &FrameComponent::onEdit, this);
   m_activateToggle->Bind(wxEVT_TOGGLEBUTTON, &FrameComponent::onActivateToggle, this);
+  upButton->Bind(wxEVT_BUTTON, &FrameComponent::onUp, this);
+  downButton->Bind(wxEVT_BUTTON, &FrameComponent::onDown, this);
 
   SetBackgroundColour(this->GetBackgroundColour());
   SetSizer(mainSizer);
@@ -142,3 +144,7 @@ void FrameComponent::onActivateToggle(wxCommandEvent &event) {
     m_activateToggle->SetLabel("Activate Frame");
   }
 }
+
+void FrameComponent::onUp(wxCommandEvent & /*event*/) { m_mainWindow->moveUp(this); }
+
+void FrameComponent::onDown(wxCommandEvent & /*event*/) { m_mainWindow->moveDown(this); }

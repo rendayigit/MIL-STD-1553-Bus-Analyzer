@@ -3,8 +3,8 @@
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
-#include "bc/ui/mainWindow.hpp"
 #include "common.hpp"
+#include "mainWindow.hpp"
 
 class FrameComponent : public wxPanel {
 public:
@@ -29,6 +29,8 @@ private:
   void onRemove(wxCommandEvent &event);
   void onEdit(wxCommandEvent &event);
   void onActivateToggle(wxCommandEvent &event);
+  void onUp(wxCommandEvent &event);
+  void onDown(wxCommandEvent &event);
 
   void updateData(std::array<std::string, RT_SA_MAX_COUNT> data);
 

@@ -7,6 +7,8 @@
 #include "bcGuiCommon.hpp"
 #include "common.hpp"
 
+class FrameComponent;
+
 class BusControllerFrame : public wxFrame {
 public:
   BusControllerFrame();
@@ -14,6 +16,10 @@ public:
                       std::array<std::string, RT_SA_MAX_COUNT> data);
   void setStatusText(const wxString &status);
   int getDeviceId();
+
+  void moveUp(FrameComponent *item);
+  void moveDown(FrameComponent *item);
+  int getFrameIndex(FrameComponent *frame);
   void updateList();
 
 private:

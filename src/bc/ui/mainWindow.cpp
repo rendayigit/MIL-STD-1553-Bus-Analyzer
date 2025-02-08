@@ -157,13 +157,52 @@ void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(s
 
 int BusControllerFrame::getDeviceId() { return wxAtoi(m_deviceIdTextInput->GetValue()); }
 
+void BusControllerFrame::moveUp(FrameComponent *item) {
+  int index = getFrameIndex(item);
+
+  if (index == 0) {
+    return;
+  }
+
+  m_scrolledSizer->Remove(index);
+  m_scrolledSizer->Insert(index - 1, item, 0, wxEXPAND | wxALL, 5);
+
+  updateList();
+}
+
+void BusControllerFrame::moveDown(FrameComponent *item) {
+  int index = getFrameIndex(item);
+
+  if (index == m_scrolledSizer->GetItemCount() - 1) {
+    return;
+  }
+
+  m_scrolledSizer->Remove(index);
+  m_scrolledSizer->Insert(index + 1, item, 0, wxEXPAND | wxALL, 5);
+
+  updateList();
+}
+
 void BusControllerFrame::updateList() {
   m_scrolledWindow->FitInside(); // Update scrollable area
+}
+
+int BusControllerFrame::getFrameIndex(FrameComponent *frame) {
+  auto *item = m_scrolledSizer->GetItem(frame);
+
+  for (int i = 0; i < m_scrolledSizer->GetItemCount(); ++i) {
+    if (m_scrolledSizer->GetItem(i) == item) {
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
                                         std::array<std::string, RT_SA_MAX_COUNT> data) {
   auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, sa, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
+
   updateList();
 }
