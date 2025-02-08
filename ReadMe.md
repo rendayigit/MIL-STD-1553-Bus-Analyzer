@@ -1,4 +1,4 @@
-# MIL STD 1553 Bus Monitor with GUI using the [wxWidgets framework](https://wxwidgets.org/) and [DDC drivers](https://www.ddc-web.com/en/connectivity/databus/milstd1553-1)
+# MIL STD 1553 Bus Monitor, Bus Controller and RT Emulator with GUI using the [wxWidgets framework](https://wxwidgets.org/) and [DDC drivers](https://www.ddc-web.com/en/connectivity/databus/milstd1553-1)
 
 ![image](https://github.com/user-attachments/assets/6f846b98-4fcd-4fb0-85a4-964397017ee9)
 
