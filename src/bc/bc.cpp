@@ -104,7 +104,7 @@ S16BIT BC::startBc(S16BIT devNum) {
   }
 
   // Create RT -> BC message block
-  err = aceBCMsgCreateBCtoRT(m_devNum, MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, 0, 0, 0, 0, ACE_BCCTRL_CHL_A);
+  err = aceBCMsgCreateRTtoBC(m_devNum, MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, 0, 0, 0, 0, ACE_BCCTRL_CHL_A);
   if (err != 0) {
     return err;
   }
@@ -166,6 +166,12 @@ S16BIT BC::startBc(S16BIT devNum) {
   // Create RT -> RT Major Frame
   aOpCodes[0] = OP_CODE_4;
   err = aceBCFrameCreate(m_devNum, MJR_FRAME_3, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
+  if (err != 0) {
+    return err;
+  }
+
+  // Create Host Buffer
+  err = aceBCInstallHBuf(m_devNum, ACE_MSGSIZE_BC * 1024);
   if (err != 0) {
     return err;
   }
@@ -240,7 +246,7 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return err;
   }
 
-  err = aceBCDataBlkWrite(m_devNum, DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  err = aceBCDataBlkWrite(m_devNum, DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT * sizeof(U16BIT), 0);
   if (err != 0) {
     return err;
   }
@@ -251,12 +257,39 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return err;
   }
 
+  // TODO:refactor
+
+  MSGSTRUCT sMsg;
+
+  U32BIT dwMsgCount;
+  U32BIT dwHBufLost;
+
+  /* Check host buffer for msgs */
+  std::cout << "hbuf: " << aceBCGetHBufMsgDecoded(m_devNum, &sMsg, &dwMsgCount, &dwHBufLost, ACE_BC_MSGLOC_NEXT_NPURGE)
+            << std::endl;
+
+  std::cout << dwMsgCount << " " << dwHBufLost << std::endl;
+
+  // aceBCDecodeRawMsg(m_devNum, m_messageBuffer, &sMsg);
+
+  U16BIT _rt = 0;
+  U16BIT _tr = 0;
+  U16BIT _sa = 0;
+  U16BIT _wc = 0;
+
+  aceCmdWordParse(sMsg.wCmdWrd1, &_rt, &_tr, &_sa, &_wc);
+
+  std::cout << _rt << " " << _tr << " " << _sa << " " << _wc << std::endl;
+
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     std::stringstream ss;
-    ss << std::hex << std::setw(4) << std::setfill('0') << m_messageBuffer[i];
+    ss << std::hex << std::setw(4) << std::setfill('0') << sMsg.aDataWrds[i];
+    std::cout << ss.str() << " ";
 
     data->at(i) = ss.str();
   }
+
+  std::cout << '\n';
 
   return 0;
 }

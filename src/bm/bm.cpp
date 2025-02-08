@@ -120,9 +120,8 @@ Message BM::getMessage(MSGSTRUCT *msg) {
 }
 
 void BM::monitor() {
-  S16BIT status = 0;
+  S16BIT status = ACE_ERR_SUCCESS;
   MSGSTRUCT sMsg;
-  std::string messageBuffer;
 
   // Poll Messages
   while (m_isMonitoring) {
