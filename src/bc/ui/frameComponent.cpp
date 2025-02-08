@@ -113,11 +113,11 @@ void FrameComponent::sendFrame() {
   }
 
   if (status != ACE_ERR_SUCCESS) {
-    Logger::error(getStatus(status));
-    m_mainWindow->setStatusText("Error: " + getStatus(status));
+    Logger::error("Error sending frame: " + m_label + ", " + getStatus(status));
+    m_mainWindow->setStatusText("Error sending frame: " + m_label + ", " + getStatus(status));
   } else {
-    Logger::debug("Sent frame: ");                    // TODO: improve log message
-    m_mainWindow->setStatusText("Success sending: "); // TODO: improve log message
+    Logger::debug("Sent frame: " + m_label);
+    m_mainWindow->setStatusText("Sent frame: " + m_label);
   }
 }
 
