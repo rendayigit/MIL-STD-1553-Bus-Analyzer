@@ -126,6 +126,9 @@ void BusControllerFrame::sendActiveFrames() {
 
     if (frame->isActive()) {
       frame->sendFrame();
+
+      std::this_thread::sleep_for(
+          std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
   }
 }
