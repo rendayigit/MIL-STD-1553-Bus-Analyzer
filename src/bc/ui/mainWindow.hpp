@@ -23,7 +23,8 @@ public:
   void updateList();
 
 private:
-  void onAddClicked(wxCommandEvent &event);
+  void onAddFrameClicked(wxCommandEvent &event);
+  void onClearFramesClicked(wxCommandEvent &event);
   void onRepeatToggle(wxCommandEvent &event);
   void onSendActiveFrames(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);

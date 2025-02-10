@@ -12,6 +12,13 @@
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
+
+  int addFrameId = wxNewId();
+  menuFile->Append(addFrameId, "Add Frame\tCtrl-A", "Add a frame to the frame list");
+  
+  int clearFramesId = wxNewId();
+  menuFile->Append(clearFramesId, "Clear All Frames\tCtrl-W", "Clear all frames from the frame list");
+  
   menuFile->Append(wxID_EXIT);
 
   auto *menuBar = new wxMenuBar;
@@ -78,9 +85,11 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   CreateStatusBar();
   SetStatusText("Ready, add frames to send");
 
+  Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, addFrameId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
-  m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddClicked, this);
+  m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddFrameClicked, this);
   m_repeatToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onRepeatToggle, this);
   m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
@@ -88,9 +97,13 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   SetSize(650, 650);
 }
 
-void BusControllerFrame::onAddClicked(wxCommandEvent & /*event*/) {
+void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
   auto *frame = new FrameCreationFrame(this);
   frame->Show(true);
+}
+
+void BusControllerFrame::onClearFramesClicked(wxCommandEvent & /*event*/) {
+  m_scrolledSizer->Clear(true);
 }
 
 void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
