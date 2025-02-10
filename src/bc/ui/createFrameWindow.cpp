@@ -202,7 +202,7 @@ void FrameCreationFrame::createFrame() {
 
   SetSizer(mainSizer);
 
-  SetSize(650, 400);
+  SetSize(650, 420);
 }
 
 void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
