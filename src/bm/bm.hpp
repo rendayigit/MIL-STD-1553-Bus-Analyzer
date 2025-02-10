@@ -9,8 +9,10 @@
 
 class BM {
 public:
-  BM();
-  ~BM();
+  static BM &getInstance() {
+    static BM instance;
+    return instance;
+  }
 
   S16BIT start(int devNum);
   S16BIT stop();
@@ -23,8 +25,6 @@ public:
     m_updateSaState = updateRtSaList;
   }
 
-  int getDevNum() const { return m_devNum; }
-
   void setFilter(bool filter) { m_filter = filter; }
   void setFilteredBus(char filteredBus) { m_filteredBus = filteredBus; }
   void setFilteredRt(int filteredRt) { m_filteredRt = filteredRt; }
@@ -34,13 +34,16 @@ public:
   bool isFiltered() const { return m_filter; }
 
 private:
+  BM();
+  ~BM();
+
   static Message getMessage(MSGSTRUCT *msg);
   void monitor();
 
   std::function<void(const std::string &)> m_updateMessages;
   std::function<void(char bus, int rt, int sa, bool state)> m_updateSaState;
 
-  int m_devNum;
+  int m_devNum{};
 
   bool m_isMonitoring;
   bool m_filter;

@@ -1,17 +1,22 @@
 #include "mainWindow.hpp"
-#include "common.hpp"
-#include "milStd1553.hpp"
-#include "wx/debug.h"
-#include "wx/event.h"
-#include "wx/gdicmn.h"
-#include "wx/gtk/button.h"
-#include "wx/gtk/colour.h"
-#include "wx/gtk/stattext.h"
-#include "wx/sizer.h"
+
 #include <array>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
+#include <wx/debug.h>
+#include <wx/event.h>
+#include <wx/gdicmn.h>
+#include <wx/gtk/button.h>
+#include <wx/gtk/colour.h>
+#include <wx/gtk/stattext.h>
+#include <wx/sizer.h>
+
+#include "bm.hpp"
+#include "common.hpp"
+#include "logger.hpp"
+#include "milStd1553.hpp"
 
 enum {
   ID_ADD_BTN = 1,
@@ -25,9 +30,7 @@ enum {
 };
 constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
-BusMonitorFrame::BusMonitorFrame()
-    : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(getMaxRecentLineCount()) {
-
+BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   auto *menuFile = new wxMenu;
   menuFile->Append(ID_ADD_MENU, "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
   menuFile->Append(ID_FILTER_MENU, "Clear filter\tCtrl-F", "Clear filtering of messages");
@@ -129,9 +132,43 @@ BusMonitorFrame::BusMonitorFrame()
   Bind(wxEVT_MENU, &BusMonitorFrame::onExit, this, wxID_EXIT);
   m_milStd1553Tree->Bind(wxEVT_TREE_ITEM_ACTIVATED, &BusMonitorFrame::onTreeItemClicked, this);
 
-  m_deviceIdTextInput->SetValue(std::to_string(m_bm.getDevNum()));
+  m_deviceIdTextInput->SetValue("0");
+  m_uiRecentMessageCount = 100; // NOLINT(cppcoreguidelines-prefer-member-initializer,
+                                // cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  m_bm.setUpdateMessages([&](const std::string &text) {
+  nlohmann::json config;
+
+  // Load the JSON file
+  std::ifstream configFile(CONFIG_PATH);
+  if (not configFile.is_open()) {
+    Logger::error("Could not open the config file: " + CONFIG_PATH);
+  } else {
+    // Parse the JSON file
+    try {
+      configFile >> config; // Parse the JSON file
+
+      // Check if the Bus_Monitor key exists and contains Default_Device_Number
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number") and
+          config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
+        m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Monitor"]["Default_Device_Number"].get<int>()));
+      } else {
+        Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
+      }
+
+      // Check if the Bus_Monitor key exists and contains UI_Recent_Line_Count
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count") and
+          config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
+        m_uiRecentMessageCount = config["Bus_Monitor"]["UI_Recent_Line_Count"].get<int>();
+      } else {
+        Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");
+      }
+      
+    } catch (const nlohmann::json::parse_error &e) {
+      Logger::error("JSON parse error: " + std::string(e.what()));
+    }
+  }
+
+  BM::getInstance().setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, text] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
       wxString currentText = text + m_messageList->GetValue();
@@ -151,7 +188,7 @@ BusMonitorFrame::BusMonitorFrame()
     });
   });
 
-  m_bm.setUpdateSaState([&](char bus, int rt, int sa, bool state) {
+  BM::getInstance().setUpdateSaState([&](char bus, int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
     wxTheApp->CallAfter([this, bus, rt, sa, state] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
       // Default background color is wxSYS_COLOUR_BACKGROUND
@@ -186,8 +223,8 @@ void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
   S16BIT errorCode = 0;
   int deviceNum = 0;
 
-  if (m_bm.isMonitoring()) {
-    m_bm.stop();
+  if (BM::getInstance().isMonitoring()) {
+    BM::getInstance().stop();
     m_startStopButton->SetLabelText("Start");
 
     // Default background color is wxSYS_COLOUR_BACKGROUND
@@ -198,7 +235,7 @@ void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
         wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
   } else {
     m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
-    errorCode = m_bm.start(deviceNum);
+    errorCode = BM::getInstance().start(deviceNum);
 
     if (errorCode == 0) {
       SetStatusText("Connected to device " + std::to_string(deviceNum));
@@ -215,11 +252,11 @@ void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
 }
 
 void BusMonitorFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
-  if (not m_bm.isFiltered()) {
+  if (not BM::getInstance().isFiltered()) {
     return;
   }
 
-  m_bm.setFilter(false);
+  BM::getInstance().setFilter(false);
   m_filterButton->SetLabelText("No filter set, displaying all messages.");
   m_filterButton->Enable(false);
   m_filterButton->SetForegroundColour(wxColour("wxSYS_COLOUR_WINDOWTEXT"));
@@ -265,9 +302,9 @@ void BusMonitorFrame::onTreeItemClicked(wxTreeEvent &event) {
       rt = std::stoi(numericPart);
     }
 
-    m_bm.setFilteredBus(bus);
-    m_bm.setFilteredRt(rt);
-    m_bm.setFilteredSa(sa);
+    BM::getInstance().setFilteredBus(bus);
+    BM::getInstance().setFilteredRt(rt);
+    BM::getInstance().setFilteredSa(sa);
   }
   // RT selected
   else if (selectedItemText.Contains("RT")) {
@@ -290,9 +327,9 @@ void BusMonitorFrame::onTreeItemClicked(wxTreeEvent &event) {
       rt = std::stoi(numericPart);
     }
 
-    m_bm.setFilteredBus(bus);
-    m_bm.setFilteredRt(rt);
-    m_bm.setFilteredSa(-1);
+    BM::getInstance().setFilteredBus(bus);
+    BM::getInstance().setFilteredRt(rt);
+    BM::getInstance().setFilteredSa(-1);
   }
   // BUS selected
   else if (selectedItemText.Contains("BUS")) {
@@ -301,14 +338,14 @@ void BusMonitorFrame::onTreeItemClicked(wxTreeEvent &event) {
     char bus = 'A';
     selectedItemText.GetChar(selectedItemText.size() - 1).GetAsChar(&bus);
 
-    m_bm.setFilteredBus(bus);
-    m_bm.setFilteredRt(-1);
-    m_bm.setFilteredSa(-1);
+    BM::getInstance().setFilteredBus(bus);
+    BM::getInstance().setFilteredRt(-1);
+    BM::getInstance().setFilteredSa(-1);
   } else {
     return;
   }
 
-  m_bm.setFilter(true);
+  BM::getInstance().setFilter(true);
 
   m_filterButton->SetLabelText("Filtering: " + logMessage + ", Clear filter?");
   m_filterButton->Enable(true);

@@ -2,6 +2,7 @@
 
 #include "bc.hpp"
 #include "createFrameWindow.hpp"
+#include "logger.hpp"
 
 FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc,
                                BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
@@ -96,8 +97,8 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
 void FrameComponent::sendFrame() {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  BC::getInstance().stopBc();
-  BC::getInstance().startBc(m_mainWindow->getDeviceId());
+  BC::getInstance().stop();
+  BC::getInstance().start(m_mainWindow->getDeviceId());
 
   std::array<std::string, RT_SA_MAX_COUNT> data;
 

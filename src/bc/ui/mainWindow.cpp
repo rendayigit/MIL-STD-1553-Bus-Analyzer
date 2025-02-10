@@ -1,13 +1,14 @@
 #include "mainWindow.hpp"
 
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 
 #include <wx/wx.h>
 
-#include "bc.hpp"
 #include "bcGuiCommon.hpp"
 #include "createFrameWindow.hpp"
+#include "logger.hpp"
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
@@ -97,7 +98,31 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   m_repeatToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onRepeatToggle, this);
   m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
-  m_deviceIdTextInput->SetValue(std::to_string(BC::getInstance().getDevNum()));
+  m_deviceIdTextInput->SetValue("0");
+
+  nlohmann::json config;
+
+  // Load the JSON file
+  std::ifstream configFile(CONFIG_PATH);
+  if (not configFile.is_open()) {
+    Logger::error("Could not open the config file: " + CONFIG_PATH);
+  } else {
+    // Parse the JSON file
+    try {
+      configFile >> config; // Parse the JSON file
+
+      // Check if the Bus_Controller key exists and contains Default_Device_Number
+      if (config.contains("Bus_Controller") and config["Bus_Controller"].contains("Default_Device_Number") and
+          config["Bus_Controller"]["Default_Device_Number"].is_number_integer()) {
+        m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Controller"]["Default_Device_Number"].get<int>()));
+      } else {
+        Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
+      }
+    } catch (const nlohmann::json::parse_error &e) {
+      Logger::error("JSON parse error: " + std::string(e.what()));
+    }
+  }
+
   SetSize(650, 650);
 }
 

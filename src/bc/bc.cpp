@@ -1,10 +1,11 @@
 #include "bc.hpp"
-#include "common.hpp"
-#include "configData.hpp"
 
 #include <array>
 #include <iostream>
 #include <string>
+
+#include "common.hpp"
+#include "logger.hpp"
 
 constexpr int MOD_FLAGS = 0x000F;
 
@@ -29,114 +30,115 @@ constexpr int MJR_FRAME_3 = 4;
 
 constexpr int MNR_FRAME_TIME = 1000;
 
-BC::BC() : m_messageBuffer(), m_devNum(getDefaultDeviceNumber()) {
-  std::array<std::string, RT_SA_MAX_COUNT> dataArray;
+BC::BC() : m_messageBuffer() {}
 
-  // for (int i = 0; i < RT_SA_MAX_COUNT; i++) {
-  //   dataArray.at(i) = Json(CONFIG_PATH).getNode("UI_DEFAULT_Data").at(i).getValue<std::string>();
-  // }
+BC::~BC() { stop(); }
 
-  for (int i = 0; i < RT_SA_MAX_COUNT; i++) {
-    dataArray.at(i) = "0000";
-  }
-
-  // m_configData =
-  //     new ConfigData(std::to_string(m_devNum), Json(CONFIG_PATH).getNode("UI_DEFAULT_BUS").getValue<std::string>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_RT_RX").getValue<int>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_SA_RX").getValue<int>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_RT_TX").getValue<int>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_SA_TX").getValue<int>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_WORD_COUNT").getValue<int>(),
-  //                    Json(CONFIG_PATH).getNode("UI_DEFAULT_BC_MODE").getValue<int>(), dataArray);
-
-  m_configData = new ConfigData(std::to_string(m_devNum), "A", 0, 0, 0, 0, 0, 0, dataArray);
-}
-
-BC::~BC() { aceFree(m_devNum); }
-
-S16BIT BC::startBc(S16BIT devNum) {
-  S16BIT err = 0;
+S16BIT BC::start(int devNum) {
+  S16BIT status = ACE_ERR_SUCCESS;
 
   m_devNum = devNum;
 
-  Logger::debug("start bc with dev: " + std::to_string(m_devNum));
+  Logger::debug("Starting bus controller with device: " + std::to_string(m_devNum));
 
-  err = aceFree(m_devNum);
+  status = aceFree(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceInitialize(m_devNum, ACE_ACCESS_CARD, ACE_MODE_BC, 0, 0, 0);
+  status = aceInitialize(static_cast<S16BIT>(m_devNum), ACE_ACCESS_CARD, ACE_MODE_BC, 0, 0, 0);
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   U16BIT initialBuffer[RT_SA_MAX_COUNT] = {0x0000}; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
                                                     // cppcoreguidelines-avoid-c-arrays)
 
   // Create BC -> RT data block
-  err = aceBCDataBlkCreate(m_devNum, DATA_BLK_BC_TO_RT_ID, RT_SA_MAX_COUNT, initialBuffer, RT_SA_MAX_COUNT);
+  status = aceBCDataBlkCreate(static_cast<S16BIT>(m_devNum), DATA_BLK_BC_TO_RT_ID, RT_SA_MAX_COUNT, initialBuffer,
+                              RT_SA_MAX_COUNT);
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> BC data block
-  err = aceBCDataBlkCreate(m_devNum, DATA_BLK_RT_TO_BC_ID, RT_SA_MAX_COUNT, initialBuffer, RT_SA_MAX_COUNT);
+  status = aceBCDataBlkCreate(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, RT_SA_MAX_COUNT, initialBuffer,
+                              RT_SA_MAX_COUNT);
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> RT data block
-  err = aceBCDataBlkCreate(m_devNum, DATA_BLK_RT_TO_RT_ID, RT_SA_MAX_COUNT, initialBuffer, RT_SA_MAX_COUNT);
+  status = aceBCDataBlkCreate(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, RT_SA_MAX_COUNT, initialBuffer,
+                              RT_SA_MAX_COUNT);
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create BC -> RT message block
-  err = aceBCMsgCreateBCtoRT(m_devNum, MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, 0, 0, 0, 0, ACE_BCCTRL_CHL_A);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgCreateBCtoRT(static_cast<S16BIT>(m_devNum), MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, 0, 0, 0, 0,
+                                ACE_BCCTRL_CHL_A);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> BC message block
-  err = aceBCMsgCreateRTtoBC(m_devNum, MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, 0, 0, 0, 0, ACE_BCCTRL_CHL_A);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgCreateRTtoBC(static_cast<S16BIT>(m_devNum), MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, 0, 0, 0, 0,
+                                ACE_BCCTRL_CHL_A);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> RT message block
-  err = aceBCMsgCreateRTtoRT(m_devNum, MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, 0, 0, 0, 0, 0, 0, ACE_BCCTRL_CHL_A);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgCreateRTtoRT(static_cast<S16BIT>(m_devNum), MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, 0, 0, 0, 0, 0, 0,
+                                ACE_BCCTRL_CHL_A);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create XEQ opcode that will use BC -> RT msg block
-  err = aceBCOpCodeCreate(m_devNum, OP_CODE_1, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS, MSG_BC_TO_RT_ID, 0, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCOpCodeCreate(static_cast<S16BIT>(m_devNum), OP_CODE_1, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS,
+                             MSG_BC_TO_RT_ID, 0, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create XEQ opcode that will use RT -> BC msg block
-  err = aceBCOpCodeCreate(m_devNum, OP_CODE_3, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS, MSG_RT_TO_BC_ID, 0, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCOpCodeCreate(static_cast<S16BIT>(m_devNum), OP_CODE_3, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS,
+                             MSG_RT_TO_BC_ID, 0, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create XEQ opcode that will use RT -> RT msg block
-  err = aceBCOpCodeCreate(m_devNum, OP_CODE_4, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS, MSG_RT_TO_RT_ID, 0, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCOpCodeCreate(static_cast<S16BIT>(m_devNum), OP_CODE_4, ACE_OPCODE_XEQ, ACE_CNDTST_ALWAYS,
+                             MSG_RT_TO_RT_ID, 0, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create CAL opcode that will call BC -> RT mnr frame from major
-  err = aceBCOpCodeCreate(m_devNum, OP_CODE_2, ACE_OPCODE_CAL, ACE_CNDTST_ALWAYS, MNR_FRAME, 0, 0);
-  if (err != 0) {
-    return err;
+  status =
+      aceBCOpCodeCreate(static_cast<S16BIT>(m_devNum), OP_CODE_2, ACE_OPCODE_CAL, ACE_CNDTST_ALWAYS, MNR_FRAME, 0, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   S16BIT aOpCodes[10] = {0x0000}; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
@@ -144,57 +146,68 @@ S16BIT BC::startBc(S16BIT devNum) {
 
   // Create BC -> RT Minor Frame
   aOpCodes[0] = OP_CODE_1;
-  err = aceBCFrameCreate(m_devNum, MNR_FRAME, ACE_FRAME_MINOR, aOpCodes, 1, 0, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCFrameCreate(static_cast<S16BIT>(m_devNum), MNR_FRAME, ACE_FRAME_MINOR, aOpCodes, 1, 0, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create BC -> RT Major Frame
   aOpCodes[0] = OP_CODE_2;
-  err = aceBCFrameCreate(m_devNum, MJR_FRAME_1, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
-  if (err != 0) {
-    return err;
+  status =
+      aceBCFrameCreate(static_cast<S16BIT>(m_devNum), MJR_FRAME_1, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> BC Major Frame
   aOpCodes[0] = OP_CODE_3;
-  err = aceBCFrameCreate(m_devNum, MJR_FRAME_2, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
-  if (err != 0) {
-    return err;
+  status =
+      aceBCFrameCreate(static_cast<S16BIT>(m_devNum), MJR_FRAME_2, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create RT -> RT Major Frame
   aOpCodes[0] = OP_CODE_4;
-  err = aceBCFrameCreate(m_devNum, MJR_FRAME_3, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
-  if (err != 0) {
-    return err;
+  status =
+      aceBCFrameCreate(static_cast<S16BIT>(m_devNum), MJR_FRAME_3, ACE_FRAME_MAJOR, aOpCodes, 1, MNR_FRAME_TIME, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Create Host Buffer
-  err = aceBCInstallHBuf(m_devNum, ACE_MSGSIZE_BC * 1024);
-  if (err != 0) {
-    return err;
+  status = aceBCInstallHBuf(static_cast<S16BIT>(m_devNum), ACE_MSGSIZE_BC * 1024);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  return 0;
+  return status;
 }
 
-S16BIT BC::stopBc() {
-  S16BIT err = 0;
+S16BIT BC::stop() const {
+  S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::debug("stop bc with dev: " + std::to_string(m_devNum));
+  Logger::debug("Stopping bus controller with device: " + std::to_string(m_devNum));
 
-  err = aceBCStop(m_devNum);
+  status = aceBCStop(static_cast<S16BIT>(m_devNum));
 
-  if (err != 0) {
-    return err;
+  if (status != ACE_ERR_SUCCESS and status != ACE_ERR_INVALID_STATE) {
+    Logger::error(getStatus(status));
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  return 0;
+  Logger::error(getStatus(status));
+  return status;
 }
 
 S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
-  S16BIT err = 0;
+  S16BIT status = ACE_ERR_SUCCESS;
 
   std::string dataString;
 
@@ -206,11 +219,13 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
                 " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
                 " data: " + dataString);
 
-  stopBc();
+  stop();
 
-  err = aceBCMsgModifyBCtoRT(m_devNum, MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, rt, sa, wc, 0, bus, MOD_FLAGS);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgModifyBCtoRT(static_cast<S16BIT>(m_devNum), MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, rt, sa, wc, 0,
+                                bus, MOD_FLAGS);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Convert string array to unsigned short array
@@ -219,42 +234,49 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
         strtoul(data.at(i).c_str(), nullptr, HEX_BYTE));
   }
 
-  err = aceBCDataBlkWrite(m_devNum, DATA_BLK_BC_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_BC_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_1, 1);
-  if (err != 0) {
-    return err;
+  status = aceBCStart(static_cast<S16BIT>(m_devNum), MJR_FRAME_1, 1);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   return 0;
 }
 
 S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data) {
-  S16BIT err = 0;
+  S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("rt->bc with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
                 " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
 
-  stopBc();
+  stop();
 
-  err = aceBCMsgModifyRTtoBC(m_devNum, MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, rt, sa, wc, 0, bus, MOD_FLAGS);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgModifyRTtoBC(static_cast<S16BIT>(m_devNum), MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, rt, sa, wc, 0,
+                                bus, MOD_FLAGS);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceBCDataBlkWrite(m_devNum, DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT * sizeof(U16BIT), 0);
-  if (err != 0) {
-    return err;
+  status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer,
+                             RT_SA_MAX_COUNT * sizeof(U16BIT), 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_2, 1);
-  if (err != 0) {
-    return err;
+  status = aceBCStart(static_cast<S16BIT>(m_devNum), MJR_FRAME_2, 1);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // TODO:refactor
@@ -296,29 +318,32 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
 
 S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
                   std::array<std::string, RT_SA_MAX_COUNT> *data) {
-  S16BIT err = 0;
+  S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("rt->rt with dev: " + std::to_string(m_devNum) + " rt tx: " + std::to_string(rtTx) +
                 " sa tx: " + std::to_string(saTx) + " rt rx: " + std::to_string(rtRx) +
                 " sa rx: " + std::to_string(saRx) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
 
-  stopBc();
+  stop();
 
-  err = aceBCMsgModifyRTtoRT(m_devNum, MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, rtRx, saRx, wc, rtTx, saTx, 0, bus,
-                             MOD_FLAGS);
-  if (err != 0) {
-    return err;
+  status = aceBCMsgModifyRTtoRT(static_cast<S16BIT>(m_devNum), MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, rtRx, saRx, wc,
+                                rtTx, saTx, 0, bus, MOD_FLAGS);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
-  err = aceBCDataBlkWrite(m_devNum, DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
-  if (err != 0) {
-    return err;
+  status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   // Start BC
-  err = aceBCStart(m_devNum, MJR_FRAME_3, 1);
-  if (err != 0) {
-    return err;
+  status = aceBCStart(static_cast<S16BIT>(m_devNum), MJR_FRAME_3, 1);
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
   }
 
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
@@ -327,71 +352,6 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
 
     data->at(i) = ss.str();
   }
-
-  return 0;
-}
-
-S16BIT BC::configRun() {
-  S16BIT err = 0;
-  int rt = 0;
-  int sa = 0;
-  int rtRx = 0;
-  int saRx = 0;
-  int rtTx = 0;
-  int saTx = 0;
-
-  std::array<std::string, RT_SA_MAX_COUNT> data;
-
-  // Json commands = Json(m_commandFilePath).getNode("Commands");
-
-  // for (int i = 0; i < commands.getSize(); i++) {
-  //   Json command = commands.at(i);
-  //   int wc = command.getNode("WORD_COUNT").getValue<int>();
-  //   U8BIT bus = command.getNode("Bus").getValue<std::string>() == "A" ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B;
-
-  //   switch (command.getNode("BC_MODE").getValue<int>()) {
-  //   case 0:
-  //     rt = command.getNode("RT").getValue<int>();
-  //     sa = command.getNode("SA").getValue<int>();
-
-  //     data.fill("");
-
-  //     for (int dataIndex = 0; dataIndex < command.getNode("Data").getSize(); dataIndex++) {
-  //       data.at(dataIndex) = command.getNode("Data").at(dataIndex).getValue<std::string>();
-  //     }
-
-  //     err = bcToRt(rt, sa, wc, bus, data, false);
-  //     if (err != 0) {
-  //       return err;
-  //     }
-
-  //     break;
-  //   case 1:
-  //     rt = command.getNode("RT").getValue<int>();
-  //     sa = command.getNode("SA").getValue<int>();
-
-  //     err = rtToBc(rt, sa, wc, bus, false);
-  //     if (err != 0) {
-  //       return err;
-  //     }
-
-  //     break;
-  //   case 2:
-  //     rtRx = command.getNode("RT_RX").getValue<int>();
-  //     saRx = command.getNode("SA_RX").getValue<int>();
-  //     rtTx = command.getNode("RT_TX").getValue<int>();
-  //     saTx = command.getNode("SA_TX").getValue<int>();
-
-  //     err = rtToRt(rtTx, saTx, rtRx, saRx, wc, bus, false);
-  //     if (err != 0) {
-  //       return err;
-  //     }
-
-  //     break;
-  //   default:
-  //     break;
-  //   }
-  // }
 
   return 0;
 }

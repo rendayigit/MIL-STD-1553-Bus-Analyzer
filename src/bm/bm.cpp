@@ -8,9 +8,7 @@
 constexpr int US_TIME_LENGTH = 8;
 constexpr int DATA_LINE_LENGTH = 8;
 
-BM::BM()
-    : m_devNum(getDefaultDeviceNumber()), m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(-1),
-      m_filteredSa(-1) {}
+BM::BM() : m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(-1), m_filteredSa(-1) {}
 
 BM::~BM() { stop(); }
 

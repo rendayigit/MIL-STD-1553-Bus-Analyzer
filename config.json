@@ -1,12 +1,12 @@
 {
   "Bus_Monitor": {
-    "Default_Device_Number": 0,
+    "Default_Device_Number": 1,
     "UI_Recent_Line_Count": 1000
   },
   "Bus_Controller": {
-    "Default_Device_Number": 0
+    "Default_Device_Number": 2
   },
   "RT_Emulator": {
-    "Default_Device_Number": 0
+    "Default_Device_Number": 3
   }
 }
