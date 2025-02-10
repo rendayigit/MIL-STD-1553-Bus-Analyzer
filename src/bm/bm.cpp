@@ -168,7 +168,7 @@ void BM::monitor() {
         continue;
       }
 
-      m_updateMessages(messageString + "\n\n");
+      m_updateMessages(messageString + "\n");
     }
   }
 }
