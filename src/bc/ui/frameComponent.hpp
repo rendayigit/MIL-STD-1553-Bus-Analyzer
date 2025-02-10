@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
@@ -33,6 +34,8 @@ private:
   void onDown(wxCommandEvent &event);
 
   void updateData(std::array<std::string, RT_SA_MAX_COUNT> data);
+
+  std::mutex m_mutex;
 
   BusControllerFrame *m_mainWindow;
 

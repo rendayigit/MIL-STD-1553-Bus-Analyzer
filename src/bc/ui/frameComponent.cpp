@@ -95,31 +95,34 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
 }
 
 void FrameComponent::sendFrame() {
-  S16BIT status = ACE_ERR_SUCCESS;
+  std::lock_guard<std::mutex> lock(m_mutex);
+  wxTheApp->CallAfter([this] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+    S16BIT status = ACE_ERR_SUCCESS;
 
-  BC::getInstance().stop();
-  BC::getInstance().start(m_mainWindow->getDeviceId());
+    BC::getInstance().stop();
+    BC::getInstance().start(m_mainWindow->getDeviceId());
 
-  std::array<std::string, RT_SA_MAX_COUNT> data;
+    std::array<std::string, RT_SA_MAX_COUNT> data;
 
-  if (m_mode == BcMode::BC_TO_RT) {
-    status = BC::getInstance().bcToRt(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, m_data);
-  } else if (m_mode == BcMode::RT_TO_BC) {
-    status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
-    updateData(data);
-  } else if (m_mode == BcMode::RT_TO_RT) {
-    // TODO: implement rt2 and sa 2
-    status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, &data);
-    updateData(data);
-  }
+    if (m_mode == BcMode::BC_TO_RT) {
+      status = BC::getInstance().bcToRt(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, m_data);
+    } else if (m_mode == BcMode::RT_TO_BC) {
+      status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
+      updateData(data);
+    } else if (m_mode == BcMode::RT_TO_RT) {
+      // TODO: implement rt2 and sa 2
+      status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, &data);
+      updateData(data);
+    }
 
-  if (status != ACE_ERR_SUCCESS) {
-    Logger::error("Error sending frame (" + m_label + "): " + getStatus(status));
-    m_mainWindow->setStatusText("Error sending frame (" + m_label + "): " + getStatus(status));
-  } else {
-    Logger::debug("Sent frame (" + m_label + ")");
-    m_mainWindow->setStatusText("Sent frame (" + m_label + ")");
-  }
+    if (status != ACE_ERR_SUCCESS) {
+      Logger::error("Error sending frame (" + m_label + "): " + getStatus(status));
+      m_mainWindow->setStatusText("Error sending frame (" + m_label + "): " + getStatus(status));
+    } else {
+      Logger::debug("Sent frame (" + m_label + ")");
+      m_mainWindow->setStatusText("Sent frame (" + m_label + ")");
+    }
+  });
 }
 
 void FrameComponent::updateData(std::array<std::string, RT_SA_MAX_COUNT> data) {
