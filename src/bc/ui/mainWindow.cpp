@@ -202,6 +202,9 @@ void BusControllerFrame::onReadFromFramesJson(wxCommandEvent & /*event*/) {
       std::array<std::string, RT_SA_MAX_COUNT> data;
       data.fill("0000");
 
+      int rt2 = 0;
+      int sa2 = 0;
+
       if (frame["Mode"] == "BC->RT") {
         mode = BcMode::BC_TO_RT;
 
@@ -216,14 +219,22 @@ void BusControllerFrame::onReadFromFramesJson(wxCommandEvent & /*event*/) {
         mode = BcMode::RT_TO_BC;
       } else if (frame["Mode"] == "RT->RT") {
         mode = BcMode::RT_TO_RT;
+        if (frame.contains("Rt2") and frame["Rt2"].is_number_integer() and frame.contains("Sa2") and
+            frame["Sa2"].is_number_integer()) {
+          rt2 = frame["Rt2"].get<int>();
+          sa2 = frame["Sa2"].get<int>();
+        } else {
+          Logger::error("Rt2 or Sa2 error from frame " + frame["Label"].get<std::string>() + ", skipping");
+        }
+
       } else {
         Logger::error("Invalid mode for frame " + frame["Label"].get<std::string>() + ", skipping");
         return;
       }
 
-      auto *component =
-          new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(), frame["Bus"].get<std::string>()[0],
-                             frame["Rt"].get<int>(), frame["Sa"].get<int>(), frame["Wc"].get<int>(), mode, data);
+      auto *component = new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(),
+                                           frame["Bus"].get<std::string>()[0], frame["Rt"].get<int>(), rt2,
+                                           frame["Sa"].get<int>(), sa2, frame["Wc"].get<int>(), mode, data);
       m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
 
       updateList();
@@ -321,9 +332,9 @@ int BusControllerFrame::getFrameIndex(FrameComponent *frame) {
   return -1;
 }
 
-void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
-                                        std::array<std::string, RT_SA_MAX_COUNT> data) {
-  auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, sa, wc, mode, data);
+void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc,
+                                        BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
+  auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, rt2, sa, sa2, wc, mode, data);
   m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
 
   updateList();

@@ -23,7 +23,9 @@ private:
   wxButton *m_saveButton{};
   wxComboBox *m_busCombo{};
   wxComboBox *m_rtCombo{};
+  wxComboBox *m_rt2Combo{};
   wxComboBox *m_saCombo{};
+  wxComboBox *m_sa2Combo{};
   wxComboBox *m_wcCombo{};
   wxComboBox *m_modeCombo{};
   wxTextCtrl *m_labelTextCtrl{};

@@ -11,7 +11,7 @@ class FrameComponent;
 class BusControllerFrame : public wxFrame {
 public:
   BusControllerFrame();
-  void addFrameToList(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
+  void addFrameToList(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc, BcMode mode,
                       std::array<std::string, RT_SA_MAX_COUNT> data);
   void setStatusText(const wxString &status);
   int getDeviceId();

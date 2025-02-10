@@ -1,7 +1,7 @@
 {
   "Frames": [
     {
-      "Label": "Sample frame",
+      "Label": "Sample frame 1",
       "Bus": "A",
       "Rt": 1,
       "Sa": 2,
@@ -25,6 +25,16 @@
       "Sa": 4,
       "Wc": 5,
       "Mode": "RT->BC"
+    },
+    {
+      "Label": "Sample frame 4",
+      "Bus": "A",
+      "Rt": 3,
+      "Rt2": 4,
+      "Sa": 5,
+      "Sa2": 6,
+      "Wc": 5,
+      "Mode": "RT->RT"
     }
   ]
 }

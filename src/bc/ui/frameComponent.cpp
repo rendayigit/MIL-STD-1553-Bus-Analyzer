@@ -3,13 +3,14 @@
 #include "bc.hpp"
 #include "createFrameWindow.hpp"
 #include "logger.hpp"
+#include <string>
 
-FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int sa, int wc,
-                               BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
+FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int rt2, int sa, int sa2,
+                               int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
     : wxPanel(parent, wxID_ANY), m_mainWindow(dynamic_cast<BusControllerFrame *>(parent->GetParent())) {
   m_allText = new wxStaticText(this, wxID_ANY, "");
 
-  updateValues(label, bus, rt, sa, wc, mode, data);
+  updateValues(label, bus, rt, rt2, sa, sa2, wc, mode, data);
 
   auto *mainSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *orderSizer = new wxBoxSizer(wxVERTICAL);
@@ -78,12 +79,14 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   SetSizer(mainSizer);
 }
 
-void FrameComponent::updateValues(const std::string &label, char bus, int rt, int sa, int wc, BcMode mode,
-                                  std::array<std::string, RT_SA_MAX_COUNT> data) {
+void FrameComponent::updateValues(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc,
+                                  BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
   m_label = label;
   m_bus = bus;
   m_rt = rt;
+  m_rt2 = rt2;
   m_sa = sa;
+  m_sa2 = sa2;
   m_wc = wc;
   m_mode = mode;
   m_data = data;
@@ -97,6 +100,7 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
     text += "RT->BC";
   } else if (mode == BcMode::RT_TO_RT) {
     text += "RT->RT";
+    text += "\n\t\tRT RX: " + std::to_string(rt2) + " \tSA RX: " + std::to_string(sa2);
   }
 
   text += "\nData: ";
@@ -130,8 +134,7 @@ void FrameComponent::sendFrame() {
       status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
       updateData(data);
     } else if (m_mode == BcMode::RT_TO_RT) {
-      // TODO: implement rt2 and sa 2
-      status = BC::getInstance().rtToRt(m_rt, m_sa, 0, 0, m_wc, ACE_BCCTRL_CHL_A, &data);
+      status = BC::getInstance().rtToRt(m_rt, m_sa, m_rt2, m_sa2, m_wc, ACE_BCCTRL_CHL_A, &data);
       updateData(data);
     }
 
@@ -146,7 +149,7 @@ void FrameComponent::sendFrame() {
 }
 
 void FrameComponent::updateData(std::array<std::string, RT_SA_MAX_COUNT> data) {
-  updateValues(m_label, m_bus, m_rt, m_sa, m_wc, m_mode, data);
+  updateValues(m_label, m_bus, m_rt, m_rt2, m_sa, m_sa2, m_wc, m_mode, data);
 }
 
 bool FrameComponent::isActive() { return m_activateToggle->GetValue(); }

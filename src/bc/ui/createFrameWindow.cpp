@@ -25,7 +25,9 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent, FrameComponent *frame)
   m_labelTextCtrl->SetValue(frame->getLabel());
   m_busCombo->SetValue(frame->getBus());
   m_rtCombo->SetValue(std::to_string(frame->getRt()));
+  m_rt2Combo->SetValue(std::to_string(frame->getRt2()));
   m_saCombo->SetValue(std::to_string(frame->getSa()));
+  m_sa2Combo->SetValue(std::to_string(frame->getSa2()));
   m_wcCombo->SetValue(std::to_string(frame->getWc()));
   m_modeCombo->SetSelection(frame->getMode());
 
@@ -39,6 +41,7 @@ FrameCreationFrame::FrameCreationFrame(wxWindow *parent, FrameComponent *frame)
 void FrameCreationFrame::createFrame() {
   auto *mainSizer = new wxBoxSizer(wxVERTICAL);
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *cmdWord2Sizer = new wxBoxSizer(wxHORIZONTAL);
   auto *middleSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *dataSizer1 = new wxBoxSizer(wxHORIZONTAL);
   auto *dataSizer2 = new wxBoxSizer(wxHORIZONTAL);
@@ -79,10 +82,20 @@ void FrameCreationFrame::createFrame() {
   m_rtCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
                              rtSaWcOptions, wxCB_READONLY);
 
+  auto *rt2Label = new wxStaticText(this, wxID_ANY, "RT RX: ");
+
+  m_rt2Combo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
+                              rtSaWcOptions, wxCB_READONLY);
+
   auto *saLabel = new wxStaticText(this, wxID_ANY, "SA: ");
 
   m_saCombo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
                              rtSaWcOptions, wxCB_READONLY);
+
+  auto *sa2Label = new wxStaticText(this, wxID_ANY, "SA: ");
+
+  m_sa2Combo = new wxComboBox(this, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, WXSIZEOF(rtSaWcOptions),
+                              rtSaWcOptions, wxCB_READONLY);
 
   auto *wcLabel = new wxStaticText(this, wxID_ANY, "WC: ");
 
@@ -110,8 +123,8 @@ void FrameCreationFrame::createFrame() {
                                    ""); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   m_labelTextCtrl->SetHint("Set frame label");
 
-  // m_rtCombo->SetSelection(0);
-  // m_saCombo->SetSelection(0);
+  m_rtCombo->SetSelection(1);
+  m_saCombo->SetSelection(1);
 
   topSizer->Add(busLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -137,6 +150,15 @@ void FrameCreationFrame::createFrame() {
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topSizer->Add(m_modeCombo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  cmdWord2Sizer->Add(rt2Label, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  cmdWord2Sizer->Add(m_rt2Combo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  cmdWord2Sizer->Add(sa2Label, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  cmdWord2Sizer->Add(m_sa2Combo, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   middleSizer->Add(dataLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -176,6 +198,8 @@ void FrameCreationFrame::createFrame() {
   bottomSizer->Add(m_saveButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   mainSizer->Add(topSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  mainSizer->Add(cmdWord2Sizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   mainSizer->Add(middleSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                  5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -220,7 +244,8 @@ void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
   std::string label = m_labelTextCtrl->GetValue().ToStdString();
 
   parentFrame->addFrameToList(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0],
-                              wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_saCombo->GetValue()),
+                              wxAtoi(m_rtCombo->GetValue()), wxAtoi(m_rt2Combo->GetValue()),
+                              wxAtoi(m_saCombo->GetValue()), wxAtoi(m_sa2Combo->GetValue()),
                               wxAtoi(m_wcCombo->GetValue()), static_cast<BcMode>(m_modeCombo->GetSelection()), data);
 }
 
@@ -234,8 +259,8 @@ void FrameCreationFrame::onSaveEdit(wxCommandEvent & /*event*/, FrameComponent *
   std::string label = m_labelTextCtrl->GetValue().ToStdString();
 
   frame->updateValues(label.empty() ? "No Label" : label, m_busCombo->GetValue()[0], wxAtoi(m_rtCombo->GetValue()),
-                      wxAtoi(m_saCombo->GetValue()), wxAtoi(m_wcCombo->GetValue()),
-                      static_cast<BcMode>(m_modeCombo->GetSelection()), data);
+                      wxAtoi(m_rt2Combo->GetValue()), wxAtoi(m_saCombo->GetValue()), wxAtoi(m_sa2Combo->GetValue()),
+                      wxAtoi(m_wcCombo->GetValue()), static_cast<BcMode>(m_modeCombo->GetSelection()), data);
 
   Close(true);
 }
