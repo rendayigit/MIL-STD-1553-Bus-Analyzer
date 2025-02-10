@@ -123,7 +123,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
     }
   }
 
-  SetSize(650, 650);
+  SetSize(650, 750);
 }
 
 void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
