@@ -209,15 +209,18 @@ S16BIT BC::stop() const {
 S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  std::string dataString;
+  std::string log = "Sending Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus) + ", DATA:";
 
-  for (auto &item : data) {
-    dataString += item;
+  for (int i = 0; i < data.size(); ++i) {
+    if (i % 8 == 0) {
+      log += "\n\t " + data.at(i);
+    } else {
+      log += "   " + data.at(i);
+    }
   }
 
-  Logger::debug("bc->rt with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
-                " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus) +
-                " data: " + dataString);
+  Logger::debug(log);
 
   stop();
 
