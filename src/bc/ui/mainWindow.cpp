@@ -40,7 +40,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   m_sendActiveFramesToggle = new wxToggleButton(
       this, wxID_ANY, "Send Active Frames", wxDefaultPosition,
-      wxSize(150, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      wxSize(170, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   m_addButton = new wxButton(
       this, wxID_ANY, "Add Frame", wxDefaultPosition,
