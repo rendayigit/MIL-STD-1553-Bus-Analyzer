@@ -198,11 +198,16 @@ S16BIT BC::stop() const {
 
   if (status != ACE_ERR_SUCCESS and status != ACE_ERR_INVALID_STATE) {
     Logger::error(getStatus(status));
+    return status;
+  }
+
+  status = aceFree(static_cast<S16BIT>(m_devNum));
+
+  if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
     return status;
   }
 
-  Logger::error(getStatus(status));
   return status;
 }
 
@@ -221,8 +226,6 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   }
 
   Logger::debug(log);
-
-  stop();
 
   status = aceBCMsgModifyBCtoRT(static_cast<S16BIT>(m_devNum), MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, rt, sa, wc, 0,
                                 bus, MOD_FLAGS);
@@ -258,8 +261,6 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
 
   Logger::debug("rt->bc with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
                 " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
-
-  stop();
 
   status = aceBCMsgModifyRTtoBC(static_cast<S16BIT>(m_devNum), MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, rt, sa, wc, 0,
                                 bus, MOD_FLAGS);
@@ -326,8 +327,6 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
   Logger::debug("rt->rt with dev: " + std::to_string(m_devNum) + " rt tx: " + std::to_string(rtTx) +
                 " sa tx: " + std::to_string(saTx) + " rt rx: " + std::to_string(rtRx) +
                 " sa rx: " + std::to_string(saRx) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
-
-  stop();
 
   status = aceBCMsgModifyRTtoRT(static_cast<S16BIT>(m_devNum), MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, rtRx, saRx, wc,
                                 rtTx, saTx, 0, bus, MOD_FLAGS);
