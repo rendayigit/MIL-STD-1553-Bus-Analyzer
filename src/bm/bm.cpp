@@ -136,16 +136,15 @@ void BM::monitor() {
       messageString += "Type: " + message.getType() + "  ";
       messageString += "RT: " + std::to_string(message.getRt()) + "  ";
       messageString += "SA: " + std::to_string(message.getSa()) + "  ";
-
-      if (message.isCmdWord2()) {
-        messageString += "\n\t\tRT TX: " + std::to_string(message.getRtRx()) + "  ";
-        messageString += "\tSA TX: " + std::to_string(message.getSaRx()) + "  ";
-      }
-
       messageString += "WC: " + std::to_string(message.wc()) + "  ";
 
       if (not message.isResponded()) {
         messageString += "(No Response)";
+      }
+
+      if (message.isCmdWord2()) {
+        messageString += "\nRT TX: " + std::to_string(message.getRtRx()) + "  ";
+        messageString += "SA TX: " + std::to_string(message.getSaRx());
       }
 
       messageString += "\nData:";
