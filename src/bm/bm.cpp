@@ -138,8 +138,8 @@ void BM::monitor() {
       messageString += "SA: " + std::to_string(message.getSa()) + "  ";
 
       if (message.isCmdWord2()) {
-        messageString += "RT2: " + std::to_string(message.getRtRx()) + "  ";
-        messageString += "SA2: " + std::to_string(message.getSaRx()) + "  ";
+        messageString += "\n\t\tRT TX: " + std::to_string(message.getRtRx()) + "  ";
+        messageString += "\tSA TX: " + std::to_string(message.getSaRx()) + "  ";
       }
 
       messageString += "WC: " + std::to_string(message.wc()) + "  ";
