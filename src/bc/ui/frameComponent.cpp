@@ -15,9 +15,23 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   auto *orderSizer = new wxBoxSizer(wxVERTICAL);
   auto *repeatSendSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBitmap upImg(getExecutableDirectory() + "../src/bc/icons/up_arrow.png", wxBITMAP_TYPE_PNG);
-  wxBitmap downImg(getExecutableDirectory() + "../src/bc/icons/down_arrow.png", wxBITMAP_TYPE_PNG);
-  wxBitmap removeImg(getExecutableDirectory() + "../src/bc/icons/remove.png", wxBITMAP_TYPE_PNG);
+  std::string upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow.png";
+  std::string downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow.png";
+  std::string removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove.png";
+
+  if (wxSystemSettingsNative::GetAppearance().IsDark()) {
+    upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow.png";
+    downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow.png";
+    removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove.png";
+  } else {
+    upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow_dark.png";
+    downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow_dark.png";
+    removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove_dark.png";
+  }
+
+  wxBitmap upImg(upImgOPath, wxBITMAP_TYPE_PNG);
+  wxBitmap downImg(downImgPath, wxBITMAP_TYPE_PNG);
+  wxBitmap removeImg(removeImgPath, wxBITMAP_TYPE_PNG);
 
   auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);
   auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);
