@@ -15,10 +15,13 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   int addFrameId = wxNewId();
   menuFile->Append(addFrameId, "Add Frame\tCtrl-A", "Add a frame to the frame list");
-  
+
   int clearFramesId = wxNewId();
   menuFile->Append(clearFramesId, "Clear All Frames\tCtrl-W", "Clear all frames from the frame list");
-  
+
+  int readFromFramesJsonId = wxNewId();
+  menuFile->Append(readFromFramesJsonId, "Read frames.json\tCtrl-J", "Populate frame list with data from frames.json");
+
   menuFile->Append(wxID_EXIT);
 
   auto *menuBar = new wxMenuBar;
@@ -87,6 +90,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, addFrameId);
   Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onReadFromFramesJson, this, readFromFramesJsonId);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
   m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddFrameClicked, this);
@@ -102,9 +106,7 @@ void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
   frame->Show(true);
 }
 
-void BusControllerFrame::onClearFramesClicked(wxCommandEvent & /*event*/) {
-  m_scrolledSizer->Clear(true);
-}
+void BusControllerFrame::onClearFramesClicked(wxCommandEvent & /*event*/) { m_scrolledSizer->Clear(true); }
 
 void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
   if (m_repeatToggle->GetValue()) {
@@ -128,6 +130,78 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
   } else {
     m_sendActiveFramesToggle->SetLabel("Send Active Frames");
     stopSending();
+  }
+}
+
+void BusControllerFrame::onReadFromFramesJson(wxCommandEvent & /*event*/) {
+  nlohmann::json framesJson;
+  std::string framesJsonPath = getExecutableDirectory() + "../frames.json";
+
+  // Load the JSON file
+  std::ifstream jsonFile(framesJsonPath);
+  if (not jsonFile.is_open()) {
+    Logger::error("Could not open file: " + framesJsonPath);
+    return;
+  }
+
+  // Parse the JSON file
+  try {
+    jsonFile >> framesJson; // Parse the JSON file
+  } catch (const nlohmann::json::parse_error &e) {
+    Logger::error("JSON parse error: " + std::string(e.what()));
+    return;
+  }
+
+  // Check if the json file contains the necessary keys
+  if (not framesJson.contains("Frames")) {
+    Logger::error("Key 'Frames' not found in JSON file.");
+    return;
+  }
+
+  if (framesJson["Frames"].empty()) {
+    Logger::error("No frames found in JSON file.");
+    return;
+  }
+
+  for (auto &frame : framesJson["Frames"]) {
+    if (frame.contains("Label") and frame["Label"].is_string() and frame.contains("Bus") and
+        frame["Bus"].is_string() and frame.contains("Rt") and frame["Rt"].is_number_integer() and
+        frame.contains("Sa") and frame["Sa"].is_number_integer() and frame.contains("Wc") and
+        frame["Wc"].is_number_integer() and frame.contains("Mode") and frame["Mode"].is_string()) {
+
+      auto mode = BcMode::BC_TO_RT;
+      std::array<std::string, RT_SA_MAX_COUNT> data;
+      data.fill("0000");
+
+      if (frame["Mode"] == "BC->RT") {
+        mode = BcMode::BC_TO_RT;
+
+        if (frame.contains("Data") and frame["Data"].is_array()) {
+          for (int i = 0; i < frame["Data"].size(); ++i) {
+            data.at(i) = frame["Data"][i].get<std::string>();
+          }
+        } else {
+          Logger::error("Data error from frame " + frame["Label"].get<std::string>() + ", skipping");
+        }
+      } else if (frame["Mode"] == "RT->BC") {
+        mode = BcMode::RT_TO_BC;
+      } else if (frame["Mode"] == "RT->RT") {
+        mode = BcMode::RT_TO_RT;
+      } else {
+        Logger::error("Invalid mode for frame " + frame["Label"].get<std::string>() + ", skipping");
+        return;
+      }
+
+      auto *component =
+          new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(), frame["Bus"].get<std::string>()[0],
+                             frame["Rt"].get<int>(), frame["Sa"].get<int>(), frame["Wc"].get<int>(), mode, data);
+      m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
+
+      updateList();
+    } else {
+      Logger::error("Invalid frame read from json, skipping frame");
+      continue;
+    }
   }
 }
 

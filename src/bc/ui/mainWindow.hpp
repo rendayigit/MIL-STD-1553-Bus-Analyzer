@@ -27,6 +27,7 @@ private:
   void onClearFramesClicked(wxCommandEvent &event);
   void onRepeatToggle(wxCommandEvent &event);
   void onSendActiveFrames(wxCommandEvent &event);
+  void onReadFromFramesJson(wxCommandEvent &event);
   void onExit(wxCommandEvent &event);
 
   void sendActiveFrames();
