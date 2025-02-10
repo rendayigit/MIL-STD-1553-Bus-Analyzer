@@ -259,8 +259,10 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
 S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::debug("rt->bc with dev: " + std::to_string(m_devNum) + " rt: " + std::to_string(rt) +
-                " sa: " + std::to_string(sa) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
+  std::string log = "Sending Frame, Mode: RT->BC, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus);
+
+  Logger::debug(log);
 
   status = aceBCMsgModifyRTtoBC(static_cast<S16BIT>(m_devNum), MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, rt, sa, wc, 0,
                                 bus, MOD_FLAGS);
@@ -324,9 +326,11 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
                   std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::debug("rt->rt with dev: " + std::to_string(m_devNum) + " rt tx: " + std::to_string(rtTx) +
-                " sa tx: " + std::to_string(saTx) + " rt rx: " + std::to_string(rtRx) +
-                " sa rx: " + std::to_string(saRx) + " wc: " + std::to_string(wc) + "bus: " + std::to_string(bus));
+  std::string log = "Sending Frame, Mode: RT->RT, RT TX: " + std::to_string(rtTx) + ", RT RX: " + std::to_string(rtRx) +
+                    ", SA TX: " + std::to_string(saTx) + ", SA RX: " + std::to_string(saRx) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus);
+
+  Logger::debug(log);
 
   status = aceBCMsgModifyRTtoRT(static_cast<S16BIT>(m_devNum), MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, rtRx, saRx, wc,
                                 rtTx, saTx, 0, bus, MOD_FLAGS);
