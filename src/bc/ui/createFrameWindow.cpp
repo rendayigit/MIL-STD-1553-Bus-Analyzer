@@ -232,7 +232,7 @@ void FrameCreationFrame::createFrame() {
 
   SetSizer(m_mainSizer);
 
-  SetSize(650, 470);
+  SetSize(670, 470);
 }
 
 void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
@@ -296,7 +296,19 @@ void FrameCreationFrame::onModeChanged(wxCommandEvent & /*event*/) {
   } else {
     m_cmdWord2Sizer->ShowItems(false);
   }
+
   m_mainSizer->Layout();
+
+  for (auto &dataTextCtrl : m_dataTextCtrls) {
+    dataTextCtrl->Enable(false);
+  }
+
+  if (m_modeCombo->GetValue() == "BC->RT") {
+    int end = m_wcCombo->GetValue() == "0" ? RT_SA_MAX_COUNT : wxAtoi(m_wcCombo->GetValue());
+    for (int i = 0; i < end; ++i) {
+      m_dataTextCtrls.at(i)->Enable(true);
+    }
+  }
 }
 
 void FrameCreationFrame::onRandomize(wxCommandEvent & /*event*/) {
