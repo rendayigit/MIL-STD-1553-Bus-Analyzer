@@ -6,7 +6,6 @@
 
 #include <wx/wx.h>
 
-#include "bcGuiCommon.hpp"
 #include "createFrameWindow.hpp"
 #include "logger.hpp"
 

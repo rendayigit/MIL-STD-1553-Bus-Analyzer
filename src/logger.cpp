@@ -14,7 +14,6 @@ void Logger::debug(const std::string &message) { getLogger()->debug(message); }
 
 std::shared_ptr<spdlog::logger> Logger::getLogger() {
   static std::shared_ptr<spdlog::logger> logger = [] {
-    // TODO(renda): Need to add BC and RT options as well
     auto log = spdlog::daily_logger_mt("1553 Bus Monitor Log", getExecutableDirectory() + "1553.log", 0, 0);
     log->set_pattern("[%H:%M:%S.%f %z] [%n] [%l] [thread %t] %v");
     log->set_level(spdlog::level::trace);

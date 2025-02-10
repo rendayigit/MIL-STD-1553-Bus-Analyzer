@@ -28,7 +28,6 @@ enum {
   ID_DEVICE_ID_TXT,
   ID_RT_SA_TREE
 };
-constexpr int TOP_BAR_COMP_HEIGHT = 30;
 
 BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
   auto *menuFile = new wxMenu;

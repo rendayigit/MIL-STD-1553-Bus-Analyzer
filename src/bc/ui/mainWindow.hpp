@@ -4,7 +4,6 @@
 #include <wx/tglbtn.h>
 #include <wx/wx.h>
 
-#include "bcGuiCommon.hpp"
 #include "common.hpp"
 
 class FrameComponent;

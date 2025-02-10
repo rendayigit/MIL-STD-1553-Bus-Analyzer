@@ -8,7 +8,6 @@
 #include <wx/sizer.h>
 #include <wx/wx.h>
 
-#include "bcGuiCommon.hpp"
 #include "common.hpp"
 #include "mainWindow.hpp"
 

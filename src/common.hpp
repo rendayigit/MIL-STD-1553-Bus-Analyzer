@@ -12,6 +12,10 @@ constexpr int ACE_ERROR_BUFFER_SIZE = 80;
 constexpr int HEX_BYTE = 16;
 constexpr int RT_SA_MAX_COUNT = 32;
 
+enum BcMode { BC_TO_RT, RT_TO_BC, RT_TO_RT };
+
+constexpr int TOP_BAR_COMP_HEIGHT = 30;
+
 static std::string getExecutableDirectory() {
   char result[PATH_MAX]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
                          // cppcoreguidelines-avoid-c-arrays)
