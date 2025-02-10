@@ -42,6 +42,10 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
       this, wxID_ANY, "Send Active Frames", wxDefaultPosition,
       wxSize(170, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
+  m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#00ccff"));
+  m_sendActiveFramesToggle->SetForegroundColour(
+      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+
   m_addButton = new wxButton(
       this, wxID_ANY, "Add Frame", wxDefaultPosition,
       wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)

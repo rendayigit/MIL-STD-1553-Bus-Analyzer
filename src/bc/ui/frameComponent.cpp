@@ -29,9 +29,15 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
 
   m_activateToggle =
       new wxToggleButton(this, wxID_ANY, "Activate Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+
   auto *editFrameButton =
       new wxButton(this, wxID_ANY, "Edit Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+
   auto *sendButton = new wxButton(this, wxID_ANY, "Send Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT));
+
+  sendButton->SetBackgroundColour(wxColour("#55ff55"));
+  sendButton->SetForegroundColour(
+      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
   orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0);
   orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 0);
