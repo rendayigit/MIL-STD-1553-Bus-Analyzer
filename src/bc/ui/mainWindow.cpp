@@ -148,6 +148,8 @@ void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
 void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
   if (m_sendActiveFramesToggle->GetValue()) {
     m_sendActiveFramesToggle->SetLabel("Sending Active Frames");
+    m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#ff4545"));
+    m_sendActiveFramesToggle->SetForegroundColour(wxColour("white"));
 
     if (m_repeatToggle->GetValue()) {
       startSendingThread();
@@ -156,7 +158,6 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
       stopSending();
     }
   } else {
-    m_sendActiveFramesToggle->SetLabel("Send Active Frames");
     stopSending();
   }
 }
@@ -269,6 +270,9 @@ void BusControllerFrame::stopSending() {
 
   m_sendActiveFramesToggle->SetValue(false);
   m_sendActiveFramesToggle->SetLabel("Send Active Frames");
+  m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#00ccff"));
+  m_sendActiveFramesToggle->SetForegroundColour(
+      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 }
 
 void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(status); }
