@@ -272,7 +272,12 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return status;
   }
 
-  aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  S16BIT readCount =
+      aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  if (readCount < 0) {
+    Logger::error(getStatus(readCount));
+    return readCount;
+  }
 
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     std::stringstream ss;
@@ -309,7 +314,12 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
     return status;
   }
 
-  aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  S16BIT readCount =
+      aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  if (readCount < 0) {
+    Logger::error(getStatus(readCount));
+    return readCount;
+  }
 
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     std::stringstream ss;
