@@ -293,7 +293,9 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   U32BIT dwHBufLost;
 
   /* Check host buffer for msgs */
-  std::cout << "hbuf: " << aceBCGetHBufMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, &dwMsgCount, &dwHBufLost, ACE_BC_MSGLOC_NEXT_NPURGE)
+  std::cout << "hbuf: "
+            << aceBCGetHBufMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, &dwMsgCount, &dwHBufLost,
+                                      ACE_BC_MSGLOC_NEXT_NPURGE)
             << std::endl;
 
   std::cout << dwMsgCount << " " << dwHBufLost << std::endl;
