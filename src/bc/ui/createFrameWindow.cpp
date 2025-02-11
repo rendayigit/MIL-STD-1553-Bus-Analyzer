@@ -238,7 +238,7 @@ void FrameCreationFrame::createFrame() {
 
   SetSizer(m_mainSizer);
 
-  SetSize(670, 470); // NOLINT
+  SetSize(700, 470); // NOLINT
 }
 
 void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
