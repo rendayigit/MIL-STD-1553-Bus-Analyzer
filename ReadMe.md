@@ -1,15 +1,39 @@
 # MIL STD 1553 Bus Monitor, Bus Controller and RT Emulator with GUI using the [wxWidgets framework](https://wxwidgets.org/) and [DDC drivers](https://www.ddc-web.com/en/connectivity/databus/milstd1553-1)
 
-![image](https://github.com/user-attachments/assets/6f846b98-4fcd-4fb0-85a4-964397017ee9)
+![image](https://github.com/user-attachments/assets/534a3791-a22b-4e0d-b64c-29fdd7b285ba)
 
 ## How to use
 
-1. Run `sudo apt install build-essential`
-1. Run `sudo apt install cmake`
-1. Run `sudo apt install libspdlog-dev`
-1. Clone the project
-1. Run `./scripts/build.sh`
-1. Run `./scripts/run.sh`
+### Install dependencies
+``` bash
+sudo apt install build-essential libboost-all-dev cmake libspdlog-dev nlohmann-json3-dev git
+```
+
+### Clone the project
+``` bash
+git clone https://github.com/rendayigit/MIL-STD-1553-Bus-Analyzer.git
+```
+
+### Build the project
+``` bash 
+./scripts/build.sh
+```
+
+### Run the project
+#### Bus Controller
+``` bash
+./scripts/bc.sh
+```
+
+#### Bus Monitor
+``` bash
+./scripts/bc.sh
+```
+
+#### RT Emulator
+``` bash
+./scripts/rt.sh
+```
 
 #### ❗ Don't forget to have the DDC drivers installed on your machine and have a valid DDC device connected to your machine. You should also make sure the DDC device is connected to a functioning MIL STD 1553 bus ❗
 
