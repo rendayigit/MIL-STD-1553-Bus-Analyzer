@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 
-class MyApp : public wxApp {
+class BusMonitorApp : public wxApp {
 public:
   bool OnInit() override;
 };

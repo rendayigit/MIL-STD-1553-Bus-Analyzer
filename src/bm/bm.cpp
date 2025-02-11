@@ -8,9 +8,7 @@
 constexpr int US_TIME_LENGTH = 8;
 constexpr int DATA_LINE_LENGTH = 8;
 
-BM::BM()
-    : m_devNum(getDefaultDeviceNumber()), m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(-1),
-      m_filteredSa(-1) {}
+BM::BM() : m_isMonitoring(false), m_filter(false), m_filteredBus('A'), m_filteredRt(-1), m_filteredSa(-1) {}
 
 BM::~BM() { stop(); }
 
@@ -120,9 +118,8 @@ Message BM::getMessage(MSGSTRUCT *msg) {
 }
 
 void BM::monitor() {
-  S16BIT status = 0;
+  S16BIT status = ACE_ERR_SUCCESS;
   MSGSTRUCT sMsg;
-  std::string messageBuffer;
 
   // Poll Messages
   while (m_isMonitoring) {
@@ -139,16 +136,15 @@ void BM::monitor() {
       messageString += "Type: " + message.getType() + "  ";
       messageString += "RT: " + std::to_string(message.getRt()) + "  ";
       messageString += "SA: " + std::to_string(message.getSa()) + "  ";
-
-      if (message.isCmdWord2()) {
-        messageString += "RT2: " + std::to_string(message.getRtRx()) + "  ";
-        messageString += "SA2: " + std::to_string(message.getSaRx()) + "  ";
-      }
-
       messageString += "WC: " + std::to_string(message.wc()) + "  ";
 
       if (not message.isResponded()) {
         messageString += "(No Response)";
+      }
+
+      if (message.isCmdWord2()) {
+        messageString += "\nRT TX: " + std::to_string(message.getRtRx()) + "  ";
+        messageString += "SA TX: " + std::to_string(message.getSaRx());
       }
 
       messageString += "\nData:";
@@ -171,7 +167,7 @@ void BM::monitor() {
         continue;
       }
 
-      m_updateMessages(messageString + "\n\n");
+      m_updateMessages(messageString + "\n");
     }
   }
 }

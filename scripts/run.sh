@@ -8,4 +8,4 @@ export LD_LIBRARY_PATH
 
 # Run application
 cd $SCRIPTDIR/../bin/
-./bm-gui
+./bus-controller

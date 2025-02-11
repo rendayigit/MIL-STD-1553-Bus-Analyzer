@@ -1,0 +1,40 @@
+{
+  "Frames": [
+    {
+      "Label": "Sample frame 1",
+      "Bus": "A",
+      "Rt": 1,
+      "Sa": 2,
+      "Wc": 3,
+      "Mode": "BC->RT",
+      "Data": ["1234", "5678", "ABCD"]
+    },
+    {
+      "Label": "Sample frame 2",
+      "Bus": "A",
+      "Rt": 2,
+      "Sa": 3,
+      "Wc": 4,
+      "Mode": "BC->RT",
+      "Data": ["1234", "5678", "ABCD", "EF99"]
+    },
+    {
+      "Label": "Sample frame 3",
+      "Bus": "A",
+      "Rt": 3,
+      "Sa": 4,
+      "Wc": 5,
+      "Mode": "RT->BC"
+    },
+    {
+      "Label": "Sample frame 4",
+      "Bus": "A",
+      "Rt": 3,
+      "Rt2": 4,
+      "Sa": 5,
+      "Sa2": 6,
+      "Wc": 5,
+      "Mode": "RT->RT"
+    }
+  ]
+}
