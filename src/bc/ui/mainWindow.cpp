@@ -330,9 +330,10 @@ void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
     file.close();
 
     wxString infoLog("Frames saved to " + framesJsonPath);
-    wxLogMessage(infoLog);
+    SetStatusText(infoLog);
   } else {
     wxString errorLog("Could not open " + framesJsonPath + " for writing.");
+    SetStatusText(errorLog);
     wxLogError(errorLog);
   }
 }
