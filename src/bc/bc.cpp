@@ -4,6 +4,7 @@
 #include <ios>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include "common.hpp"
 #include "logger.hpp"
@@ -234,6 +235,7 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
         strtoul(data.at(i).c_str(), nullptr, HEX_BYTE));
   }
 
+  // Read RT data
   status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_BC_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
@@ -246,6 +248,10 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     Logger::error(getStatus(status));
     return status;
   }
+
+  // Wait for response
+  std::this_thread::sleep_for(
+      std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   return ACE_ERR_SUCCESS;
 }
@@ -272,6 +278,11 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return status;
   }
 
+  // Wait for response
+  std::this_thread::sleep_for(
+      std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  // Read RT data
   S16BIT readCount =
       aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
   if (readCount < 0) {
@@ -314,6 +325,11 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
     return status;
   }
 
+  // Wait for response
+  std::this_thread::sleep_for(
+      std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+
+  // Read RT data
   S16BIT readCount =
       aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
   if (readCount < 0) {

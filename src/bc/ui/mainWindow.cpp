@@ -352,7 +352,7 @@ void BusControllerFrame::sendActiveFrames() {
       frame->sendFrame();
 
       std::this_thread::sleep_for(
-          std::chrono::milliseconds(100)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+          std::chrono::milliseconds(90)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
   }
 }
