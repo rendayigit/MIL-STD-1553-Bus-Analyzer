@@ -6,7 +6,9 @@
 
 #include <wx/wx.h>
 
+#include "common.hpp"
 #include "createFrameWindow.hpp"
+#include "frameComponent.hpp"
 #include "logger.hpp"
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
@@ -19,8 +21,11 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   int clearFramesId = wxNewId();
   menuFile->Append(clearFramesId, "Clear All Frames\tCtrl-W", "Clear all frames from the frame list");
 
-  int readFromFramesJsonId = wxNewId();
-  menuFile->Append(readFromFramesJsonId, "Read frames.json\tCtrl-J", "Populate frame list with data from frames.json");
+  int loadFramesId = wxNewId();
+  menuFile->Append(loadFramesId, "Load frames\tCtrl-L", "Load frames from a file");
+
+  int saveFramesId = wxNewId();
+  menuFile->Append(saveFramesId, "Save frames\tCtrl-S", "Save frame into a file");
 
   menuFile->Append(wxID_EXIT);
 
@@ -94,7 +99,8 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, addFrameId);
   Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
-  Bind(wxEVT_MENU, &BusControllerFrame::onReadFromFramesJson, this, readFromFramesJsonId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onLoadFrames, this, loadFramesId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onSaveFrames, this, saveFramesId);
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
 
   m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddFrameClicked, this);
@@ -162,7 +168,7 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
   }
 }
 
-void BusControllerFrame::onReadFromFramesJson(wxCommandEvent & /*event*/) {
+void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
   nlohmann::json framesJson;
   std::string framesJsonPath = getExecutableDirectory() + "../frames.json";
 
@@ -242,6 +248,57 @@ void BusControllerFrame::onReadFromFramesJson(wxCommandEvent & /*event*/) {
       Logger::error("Invalid frame read from json, skipping frame");
       continue;
     }
+  }
+}
+
+void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
+  nlohmann::json framesJson;
+
+  framesJson["Frames"] = {};
+
+  for (auto &child : m_scrolledSizer->GetChildren()) {
+    nlohmann::json frame;
+    auto *frameComponent = dynamic_cast<FrameComponent *>(child->GetWindow());
+
+    frame["Label"] = frameComponent->getLabel().ToStdString();
+    frame["Bus"] = std::string(1, frameComponent->getBus());
+    frame["Rt"] = frameComponent->getRt();
+    frame["Sa"] = frameComponent->getSa();
+    frame["Wc"] = frameComponent->getWc();
+
+    if (frameComponent->getMode() == BcMode::BC_TO_RT) {
+      frame["Mode"] = "BC->RT";
+
+      for (auto &data : frameComponent->getData()) {
+        frame["Data"].push_back(data);
+      }
+    } else if (frameComponent->getMode() == BcMode::RT_TO_BC) {
+      frame["Mode"] = "RT->BC";
+    } else {
+      frame["Mode"] = "RT->RT";
+
+      frame["Rt2"] = frameComponent->getRt2();
+      frame["Sa2"] = frameComponent->getSa2();
+    }
+
+    framesJson["Frames"].push_back(frame);
+  }
+
+  std::string framesJsonPath = getExecutableDirectory() + "../frames.json";
+
+  std::ofstream file(framesJsonPath);
+
+  if (file.is_open()) {
+    file << framesJson.dump(2);
+    file.close();
+
+    std::cout << "JSON data written to " << framesJson << std::endl;
+
+    wxString infoLog("Frames saved to " + framesJsonPath);
+    wxLogMessage(infoLog);
+  } else {
+    wxString errorLog("Could not open " + framesJsonPath + " for writing.");
+    wxLogError(errorLog);
   }
 }
 
