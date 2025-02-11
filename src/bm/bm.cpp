@@ -106,11 +106,7 @@ Message BM::getMessage(MSGSTRUCT *msg) {
        << std::setfill('0') << (msg->wTimeTag2 * 2) << ":" << std::setw(US_TIME_LENGTH) << std::setfill('0')
        << (msg->wTimeTag * 2) << "us";
 
-  if ((msg->wBlkSts & ACE_MT_BSW_ERRFLG) != 0) { // NOLINT(hicpp-signed-bitwise)
-    if (std::strcmp(aceGetBSWErrString(ACE_MODE_MT, msg->wBlkSts), "NORES") != 0) {
-      noRes = true;
-    }
-  }
+  noRes = ((msg->wBlkSts & ACE_MT_BSW_NORES) != 0); // NOLINT(hicpp-signed-bitwise)
 
   return Message(rt, sa, rtRx, saRx, wc,
                  (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
