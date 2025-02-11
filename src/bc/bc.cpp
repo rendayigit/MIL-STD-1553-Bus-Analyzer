@@ -1,6 +1,7 @@
 #include "bc.hpp"
 
 #include <array>
+#include <ios>
 #include <iostream>
 #include <string>
 
@@ -179,13 +180,6 @@ S16BIT BC::start(int devNum) {
     return status;
   }
 
-  // Create Host Buffer
-  status = aceBCInstallHBuf(static_cast<S16BIT>(m_devNum), ACE_MSGSIZE_BC * 1024);
-  if (status != ACE_ERR_SUCCESS) {
-    Logger::error(getStatus(status));
-    return status;
-  }
-
   return status;
 }
 
@@ -253,7 +247,7 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return status;
   }
 
-  return 0;
+  return ACE_ERR_SUCCESS;
 }
 
 S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data) {
@@ -271,13 +265,6 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return status;
   }
 
-  status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer,
-                             RT_SA_MAX_COUNT * sizeof(U16BIT), 0);
-  if (status != ACE_ERR_SUCCESS) {
-    Logger::error(getStatus(status));
-    return status;
-  }
-
   // Start BC
   status = aceBCStart(static_cast<S16BIT>(m_devNum), MJR_FRAME_2, 1);
   if (status != ACE_ERR_SUCCESS) {
@@ -285,43 +272,17 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     return status;
   }
 
-  // TODO:refactor
-
-  MSGSTRUCT sMsg;
-
-  U32BIT dwMsgCount;
-  U32BIT dwHBufLost;
-
-  /* Check host buffer for msgs */
-  std::cout << "hbuf: "
-            << aceBCGetHBufMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, &dwMsgCount, &dwHBufLost,
-                                      ACE_BC_MSGLOC_NEXT_NPURGE)
-            << std::endl;
-
-  std::cout << dwMsgCount << " " << dwHBufLost << std::endl;
-
-  // aceBCDecodeRawMsg(m_devNum, m_messageBuffer, &sMsg);
-
-  U16BIT _rt = 0;
-  U16BIT _tr = 0;
-  U16BIT _sa = 0;
-  U16BIT _wc = 0;
-
-  aceCmdWordParse(sMsg.wCmdWrd1, &_rt, &_tr, &_sa, &_wc);
-
-  std::cout << _rt << " " << _tr << " " << _sa << " " << _wc << std::endl;
+  aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_BC_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
 
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     std::stringstream ss;
-    ss << std::hex << std::setw(4) << std::setfill('0') << sMsg.aDataWrds[i];
-    std::cout << ss.str() << " ";
+    ss << std::hex << std::setw(4) << std::uppercase << std::setfill('0')
+       << m_messageBuffer[i]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 
     data->at(i) = ss.str();
   }
 
-  std::cout << '\n';
-
-  return 0;
+  return ACE_ERR_SUCCESS;
 }
 
 S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
@@ -341,12 +302,6 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
     return status;
   }
 
-  status = aceBCDataBlkWrite(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
-  if (status != ACE_ERR_SUCCESS) {
-    Logger::error(getStatus(status));
-    return status;
-  }
-
   // Start BC
   status = aceBCStart(static_cast<S16BIT>(m_devNum), MJR_FRAME_3, 1);
   if (status != ACE_ERR_SUCCESS) {
@@ -354,12 +309,15 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
     return status;
   }
 
+  aceBCDataBlkRead(static_cast<S16BIT>(m_devNum), DATA_BLK_RT_TO_RT_ID, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+
   for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
     std::stringstream ss;
-    ss << std::hex << std::setw(4) << std::setfill('0') << m_messageBuffer[i];
+    ss << std::hex << std::setw(4) << std::uppercase << std::setfill('0')
+       << m_messageBuffer[i]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 
     data->at(i) = ss.str();
   }
 
-  return 0;
+  return ACE_ERR_SUCCESS;
 }
