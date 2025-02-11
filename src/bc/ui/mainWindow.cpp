@@ -329,8 +329,6 @@ void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
     file << framesJson.dump(2);
     file.close();
 
-    std::cout << "JSON data written to " << framesJson << std::endl;
-
     wxString infoLog("Frames saved to " + framesJsonPath);
     wxLogMessage(infoLog);
   } else {
