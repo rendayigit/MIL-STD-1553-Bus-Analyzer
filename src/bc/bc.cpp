@@ -215,7 +215,7 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   S16BIT status = ACE_ERR_SUCCESS;
 
   std::string log = "Sending Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus) + ", DATA:";
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
 
   for (int i = 0; i < data.size(); ++i) {
     if (i % DATA_OCTET == 0) {
@@ -260,7 +260,7 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   S16BIT status = ACE_ERR_SUCCESS;
 
   std::string log = "Sending Frame, Mode: RT->BC, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus);
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B");
 
   Logger::debug(log);
 
@@ -330,7 +330,7 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
 
   std::string log = "Sending Frame, Mode: RT->RT, RT TX: " + std::to_string(rtTx) + ", RT RX: " + std::to_string(rtRx) +
                     ", SA TX: " + std::to_string(saTx) + ", SA RX: " + std::to_string(saRx) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus);
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B");
 
   Logger::debug(log);
 
