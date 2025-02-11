@@ -203,20 +203,26 @@ void FrameCreationFrame::createFrame() {
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   bottomSizer->Add(m_saveButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  m_mainSizer->Add(topSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(topSizer, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  m_mainSizer->Add(m_cmdWord2Sizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(m_cmdWord2Sizer, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   m_mainSizer->Add(middleSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  m_mainSizer->Add(dataSizer1, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(dataSizer1, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  m_mainSizer->Add(dataSizer2, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(dataSizer2, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  m_mainSizer->Add(dataSizer3, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(dataSizer3, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  m_mainSizer->Add(dataSizer4, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+  m_mainSizer->Add(dataSizer4, 0,
+                   wxALIGN_CENTER_HORIZONTAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   m_mainSizer->Add(labelSizer, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
                    5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -232,7 +238,7 @@ void FrameCreationFrame::createFrame() {
 
   SetSizer(m_mainSizer);
 
-  SetSize(670, 470);
+  SetSize(670, 470); // NOLINT
 }
 
 void FrameCreationFrame::onSaveAdd(wxCommandEvent & /*event*/) {
@@ -316,7 +322,7 @@ void FrameCreationFrame::onRandomize(wxCommandEvent & /*event*/) {
     // Generate a random number between 0 and 65535
     std::random_device rd;                           // Obtain a random number from hardware
     std::mt19937 eng(rd());                          // Seed the generator
-    std::uniform_int_distribution<> distr(0, 65535); // Define the range
+    std::uniform_int_distribution<> distr(0, 65535); // NOLINT
 
     int randomValue = distr(eng); // Generate the random number
 

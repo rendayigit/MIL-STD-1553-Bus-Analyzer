@@ -3,6 +3,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <utility>
 
 #include <wx/wx.h>
 
@@ -67,9 +68,11 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   // Replace bottomHorizontalSizer with scrolled window
   m_scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
   m_scrolledWindow->SetBackgroundColour(this->GetBackgroundColour());
-  m_scrolledSizer = new wxBoxSizer(wxVERTICAL);
+  m_scrolledSizer = new wxBoxSizer(wxVERTICAL); // NOLINT(cppcoreguidelines-prefer-member-initializer)
   m_scrolledWindow->SetSizer(m_scrolledSizer);
-  m_scrolledWindow->SetScrollRate(10, 10); // Set scroll speed
+
+  // Set scroll speed
+  m_scrolledWindow->SetScrollRate(10, 10); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   topHorizontalSizer->Add(deviceIdLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -77,12 +80,12 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->AddStretchSpacer();
   topHorizontalSizer->Add(m_repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->AddSpacer(5);
+                          5);       // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->AddSpacer(5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_sendActiveFramesToggle, 0,
                           wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->AddSpacer(5);
+                          5);       // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->AddSpacer(5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
   topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
@@ -134,7 +137,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
     }
   }
 
-  SetSize(650, 750);
+  SetSize(650, 750); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
 void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
@@ -153,7 +156,7 @@ void BusControllerFrame::onRepeatToggle(wxCommandEvent & /*event*/) {
   }
 }
 
-void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
+void BusControllerFrame::onSendActiveFrames(wxCommandEvent & /*event*/) {
   if (m_sendActiveFramesToggle->GetValue()) {
     m_sendActiveFramesToggle->SetLabel("Sending Active Frames");
     m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#ff4545"));
@@ -265,7 +268,8 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
       auto *component = new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(),
                                            frame["Bus"].get<std::string>()[0], frame["Rt"].get<int>(), rt2,
                                            frame["Sa"].get<int>(), sa2, frame["Wc"].get<int>(), mode, data);
-      m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
+      m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
+                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
       updateList();
     } else {
@@ -313,7 +317,7 @@ void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
     char filename[MAX_FILE_PATH_SIZE]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
     // cppcoreguidelines-avoid-c-arrays)
     FILE *f = popen("zenity --file-selection --save", "r"); // NOLINT (cert-env33-c)
-    fgets(filename, MAX_FILE_PATH_SIZE, f);          // NOLINT (cert-err33-c)
+    fgets(filename, MAX_FILE_PATH_SIZE, f);                 // NOLINT (cert-err33-c)
     framesJsonPath = filename;
     framesJsonPath.pop_back(); // Remove last "\n"
   } catch (std::exception &e) {
@@ -391,7 +395,8 @@ void BusControllerFrame::moveUp(FrameComponent *item) {
   }
 
   m_scrolledSizer->Remove(index);
-  m_scrolledSizer->Insert(index - 1, item, 0, wxEXPAND | wxALL, 5);
+  m_scrolledSizer->Insert(index - 1, item, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   updateList();
 }
@@ -404,7 +409,8 @@ void BusControllerFrame::moveDown(FrameComponent *item) {
   }
 
   m_scrolledSizer->Remove(index);
-  m_scrolledSizer->Insert(index + 1, item, 0, wxEXPAND | wxALL, 5);
+  m_scrolledSizer->Insert(index + 1, item, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
+                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   updateList();
 }
@@ -427,8 +433,9 @@ int BusControllerFrame::getFrameIndex(FrameComponent *frame) {
 
 void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc,
                                         BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
-  auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, rt2, sa, sa2, wc, mode, data);
-  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5);
+  auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, rt2, sa, sa2, wc, mode, std::move(data));
+  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
+                       5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   updateList();
 }

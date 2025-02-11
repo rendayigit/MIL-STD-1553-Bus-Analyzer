@@ -218,7 +218,7 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
                     ", WC: " + std::to_string(wc) + ", BUS: " + std::to_string(bus) + ", DATA:";
 
   for (int i = 0; i < data.size(); ++i) {
-    if (i % 8 == 0) {
+    if (i % DATA_OCTET == 0) {
       log += "\n\t " + data.at(i);
     } else {
       log += "   " + data.at(i);
@@ -293,7 +293,7 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   U32BIT dwHBufLost;
 
   /* Check host buffer for msgs */
-  std::cout << "hbuf: " << aceBCGetHBufMsgDecoded(m_devNum, &sMsg, &dwMsgCount, &dwHBufLost, ACE_BC_MSGLOC_NEXT_NPURGE)
+  std::cout << "hbuf: " << aceBCGetHBufMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, &dwMsgCount, &dwHBufLost, ACE_BC_MSGLOC_NEXT_NPURGE)
             << std::endl;
 
   std::cout << dwMsgCount << " " << dwHBufLost << std::endl;
