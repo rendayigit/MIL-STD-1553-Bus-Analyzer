@@ -11,6 +11,8 @@
 #include "frameComponent.hpp"
 #include "logger.hpp"
 
+constexpr int MAX_FILE_PATH_SIZE = 1024;
+
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
@@ -170,12 +172,28 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent &event) {
 
 void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
   nlohmann::json framesJson;
-  std::string framesJsonPath = getExecutableDirectory() + "../frames.json";
+  std::string framesJsonPath;
+
+  try {
+    char filename[MAX_FILE_PATH_SIZE];               // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
+                                                     // cppcoreguidelines-avoid-c-arrays)
+    FILE *f = popen("zenity --file-selection", "r"); // NOLINT (cert-env33-c)
+    fgets(filename, MAX_FILE_PATH_SIZE, f);          // NOLINT (cert-err33-c)
+    framesJsonPath = filename;
+    framesJsonPath.pop_back(); // Remove last "\n"
+  } catch (std::exception &e) {
+    std::string logError = "Cannot load file: " + std::string(e.what());
+    Logger::error(logError);
+    SetStatusText(logError);
+    return;
+  }
 
   // Load the JSON file
   std::ifstream jsonFile(framesJsonPath);
   if (not jsonFile.is_open()) {
-    Logger::error("Could not open file: " + framesJsonPath);
+    std::string logError = "Could not open file: " + framesJsonPath;
+    Logger::error(logError);
+    SetStatusText(logError);
     return;
   }
 
@@ -183,18 +201,24 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
   try {
     jsonFile >> framesJson; // Parse the JSON file
   } catch (const nlohmann::json::parse_error &e) {
-    Logger::error("JSON parse error: " + std::string(e.what()));
+    std::string logError = "JSON parse error: " + std::string(e.what());
+    Logger::error(logError);
+    SetStatusText(logError);
     return;
   }
 
   // Check if the json file contains the necessary keys
   if (not framesJson.contains("Frames")) {
-    Logger::error("Key 'Frames' not found in JSON file.");
+    std::string logError = "Key 'Frames' not found in JSON file.";
+    Logger::error(logError);
+    SetStatusText(logError);
     return;
   }
 
   if (framesJson["Frames"].empty()) {
-    Logger::error("No frames found in JSON file.");
+    std::string logError = "No frames found in JSON file.";
+    Logger::error(logError);
+    SetStatusText(logError);
     return;
   }
 
@@ -249,12 +273,13 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
       continue;
     }
   }
+
+  SetStatusText("Loaded frames from " + framesJsonPath);
 }
 
 void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
   nlohmann::json framesJson;
-
-  framesJson["Frames"] = {};
+  std::string framesJsonPath;
 
   for (auto &child : m_scrolledSizer->GetChildren()) {
     nlohmann::json frame;
@@ -284,7 +309,19 @@ void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
     framesJson["Frames"].push_back(frame);
   }
 
-  std::string framesJsonPath = getExecutableDirectory() + "../frames.json";
+  try {
+    char filename[MAX_FILE_PATH_SIZE]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
+    // cppcoreguidelines-avoid-c-arrays)
+    FILE *f = popen("zenity --file-selection --save", "r"); // NOLINT (cert-env33-c)
+    fgets(filename, MAX_FILE_PATH_SIZE, f);          // NOLINT (cert-err33-c)
+    framesJsonPath = filename;
+    framesJsonPath.pop_back(); // Remove last "\n"
+  } catch (std::exception &e) {
+    std::string logError = "Cannot save to file: " + std::string(e.what());
+    Logger::error(logError);
+    SetStatusText(logError);
+    return;
+  }
 
   std::ofstream file(framesJsonPath);
 
