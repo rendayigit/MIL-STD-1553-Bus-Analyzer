@@ -16,7 +16,7 @@
       "Sa": 3,
       "Wc": 4,
       "Mode": "BC->RT",
-      "Data": ["1234", "5678", "ABCD", "EFGH"]
+      "Data": ["1234", "5678", "ABCD", "EF99"]
     },
     {
       "Label": "Sample frame 3",
