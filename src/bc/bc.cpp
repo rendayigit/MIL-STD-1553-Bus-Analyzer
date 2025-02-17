@@ -209,19 +209,6 @@ S16BIT BC::stop() const {
 S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  std::string log = "Sending Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
-
-  for (int i = 0; i < data.size(); ++i) {
-    if (i % DATA_OCTET == 0) {
-      log += "\n\t " + data.at(i);
-    } else {
-      log += "   " + data.at(i);
-    }
-  }
-
-  Logger::debug(log);
-
   status = aceBCMsgModifyBCtoRT(static_cast<S16BIT>(m_devNum), MSG_BC_TO_RT_ID, DATA_BLK_BC_TO_RT_ID, rt, sa, wc, 0,
                                 bus, MOD_FLAGS);
   if (status != ACE_ERR_SUCCESS) {
@@ -253,16 +240,24 @@ S16BIT BC::bcToRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
   std::this_thread::sleep_for(
       std::chrono::milliseconds(10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
+  std::string log = "Sent Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
+
+  for (int i = 0; i < data.size(); ++i) {
+    if (i % DATA_OCTET == 0) {
+      log += "\n\t " + data.at(i);
+    } else {
+      log += "   " + data.at(i);
+    }
+  }
+
+  Logger::debug(log);
+
   return ACE_ERR_SUCCESS;
 }
 
 S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT status = ACE_ERR_SUCCESS;
-
-  std::string log = "Sending Frame, Mode: RT->BC, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B");
-
-  Logger::debug(log);
 
   status = aceBCMsgModifyRTtoBC(static_cast<S16BIT>(m_devNum), MSG_RT_TO_BC_ID, DATA_BLK_RT_TO_BC_ID, rt, sa, wc, 0,
                                 bus, MOD_FLAGS);
@@ -298,18 +293,25 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     data->at(i) = ss.str();
   }
 
+  std::string log = "Sent Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
+
+  for (int i = 0; i < data->size(); ++i) {
+    if (i % DATA_OCTET == 0) {
+      log += "\n\t " + data->at(i);
+    } else {
+      log += "   " + data->at(i);
+    }
+  }
+
+  Logger::debug(log);
+
   return ACE_ERR_SUCCESS;
 }
 
 S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
                   std::array<std::string, RT_SA_MAX_COUNT> *data) {
   S16BIT status = ACE_ERR_SUCCESS;
-
-  std::string log = "Sending Frame, Mode: RT->RT, RT TX: " + std::to_string(rtTx) + ", RT RX: " + std::to_string(rtRx) +
-                    ", SA TX: " + std::to_string(saTx) + ", SA RX: " + std::to_string(saRx) +
-                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B");
-
-  Logger::debug(log);
 
   status = aceBCMsgModifyRTtoRT(static_cast<S16BIT>(m_devNum), MSG_RT_TO_RT_ID, DATA_BLK_RT_TO_RT_ID, rtRx, saRx, wc,
                                 rtTx, saTx, 0, bus, MOD_FLAGS);
@@ -344,6 +346,20 @@ S16BIT BC::rtToRt(int rtTx, int saTx, int rtRx, int saRx, int wc, U8BIT bus,
 
     data->at(i) = ss.str();
   }
+
+  std::string log = "Sent Frame, Mode: RT->RT, RT TX: " + std::to_string(rtTx) + ", RT RX: " + std::to_string(rtRx) +
+                    ", SA TX: " + std::to_string(saTx) + ", SA RX: " + std::to_string(saRx) +
+                    ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
+
+  for (int i = 0; i < data->size(); ++i) {
+    if (i % DATA_OCTET == 0) {
+      log += "\n\t " + data->at(i);
+    } else {
+      log += "   " + data->at(i);
+    }
+  }
+
+  Logger::debug(log);
 
   return ACE_ERR_SUCCESS;
 }
