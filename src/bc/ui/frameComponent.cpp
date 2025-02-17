@@ -164,7 +164,8 @@ void FrameComponent::sendFrame() {
       status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
       updateData(data);
     } else if (m_mode == BcMode::RT_TO_RT) {
-      status = BC::getInstance().rtToRt(m_rt, m_sa, m_rt2, m_sa2, m_wc, ACE_BCCTRL_CHL_A, &data);
+      status = BC::getInstance().rtToRt(m_rt, m_sa, m_rt2, m_sa2, m_wc,
+                                        m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
       updateData(data);
     }
 

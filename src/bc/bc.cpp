@@ -293,7 +293,7 @@ S16BIT BC::rtToBc(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_
     data->at(i) = ss.str();
   }
 
-  std::string log = "Sent Frame, Mode: BC->RT, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+  std::string log = "Sent Frame, Mode: RT->BC, RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
                     ", WC: " + std::to_string(wc) + ", BUS: " + (bus == ACE_BCCTRL_CHL_A ? "A" : "B") + ", DATA:";
 
   for (int i = 0; i < data->size(); ++i) {
