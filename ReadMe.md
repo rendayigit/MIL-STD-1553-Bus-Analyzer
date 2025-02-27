@@ -7,7 +7,7 @@
 ### Install dependencies
 
 ``` bash
-sudo apt install build-essential libboost-all-dev cmake libspdlog-dev nlohmann-json3-dev git libqt5gui5
+sudo apt install build-essential libboost-all-dev cmake libspdlog-dev nlohmann-json3-dev git libqt5gui5 libtiff5-dev
 ```
 
 ### Clone the project
