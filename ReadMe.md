@@ -33,7 +33,7 @@ git clone https://github.com/rendayigit/MIL-STD-1553-Bus-Analyzer.git
 #### Bus Monitor
 
 ``` bash
-./scripts/bc.sh
+./scripts/bm.sh
 ```
 
 #### RT Emulator
