@@ -8,4 +8,4 @@ add_subdirectory(src/bm/)
 add_subdirectory(src/bc/)
 
 # RT Emulator
-# add_subdirectory(src/rt/)
+add_subdirectory(src/rt/)
