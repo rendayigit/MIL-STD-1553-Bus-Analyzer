@@ -12,6 +12,8 @@ RT::~RT() { stop(); }
 S16BIT RT::start(int devNum) {
   S16BIT status = ACE_ERR_SUCCESS;
 
+  m_devNum = devNum;
+
   Logger::debug("Starting rt emulator with device: " + std::to_string(m_devNum));
 
   status = aceFree(static_cast<S16BIT>(m_devNum));
