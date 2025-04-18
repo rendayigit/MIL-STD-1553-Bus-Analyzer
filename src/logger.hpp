@@ -14,5 +14,4 @@ public:
 
 private:
   Logger() = default;
-  static std::shared_ptr<spdlog::logger> getLogger();
 };
