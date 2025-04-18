@@ -5,32 +5,7 @@
 
 constexpr int DW_H_BUF_SIZE = (512 * ACE_MSGSIZE_RT) * 4 * 3; // TODO: review
 
-RT::RT() {
-  S16BIT status = ACE_ERR_SUCCESS;
-
-  // Create Data Block Identifiers
-  for (int rt = 0; rt < RT_SA_MAX_COUNT; ++rt) {
-    for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
-      S16BIT dataBlockId = rt * 1000 + sa;
-
-      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), dataBlockId, ACE_RT_DBLK_C_128, nullptr, 0);
-
-      if (status != ACE_ERR_SUCCESS) {
-        Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) + " " +
-                      getStatus(status));
-      }
-
-      // for (int saNum = 1; saNum <= 30; ++saNum) {
-      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), 1, dataBlockId, 1, ACE_RT_MSGTYPE_RX,
-                                       ACE_RT_DBLK_EOM_IRQ, 1);
-
-      if (status != ACE_ERR_SUCCESS) {
-        Logger::error("Cannot map data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) + " " +
-                      getStatus(status));
-      }
-    }
-  }
-}
+RT::RT() {}
 
 RT::~RT() { stop(); }
 
@@ -73,6 +48,31 @@ S16BIT RT::start(int devNum) {
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
     return status;
+  }
+
+  // Create then map data block identifiers
+  for (int rt = 0; rt < RT_SA_MAX_COUNT; ++rt) {
+    for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
+      S16BIT dataBlockId = rt * 1000 + sa;
+
+      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), dataBlockId, ACE_RT_DBLK_C_128, nullptr, 0);
+
+      if (status != ACE_ERR_SUCCESS) {
+        Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                      " " + getStatus(status));
+        return status;
+      }
+
+      // for (int saNum = 1; saNum <= 30; ++saNum) {
+      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), 1, dataBlockId, 1, ACE_RT_MSGTYPE_RX,
+                                       ACE_RT_DBLK_EOM_IRQ, 1);
+
+      if (status != ACE_ERR_SUCCESS) {
+        Logger::error("Cannot map data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) + " " +
+                      getStatus(status));
+        return status;
+      }
+    }
   }
 
   return status;
