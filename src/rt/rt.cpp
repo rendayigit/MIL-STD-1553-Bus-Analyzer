@@ -5,6 +5,10 @@
 
 constexpr int DW_H_BUF_SIZE = (512 * ACE_MSGSIZE_RT) * 4 * 3; // TODO: review
 
+static int getDataBlockId(int rt, int sa) {
+  return 1000 + rt * 1000 + sa;
+}
+
 RT::RT() {}
 
 RT::~RT() { stop(); }
@@ -54,10 +58,10 @@ S16BIT RT::start(int devNum) {
 
   // Create then map data block identifiers
   for (int rt = 0; rt < RT_SA_MAX_COUNT; ++rt) {
-    for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
-      S16BIT dataBlockId = rt * 1000 + sa;
+    activateRt(rt);
 
-      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), dataBlockId, ACE_RT_DBLK_C_128, nullptr, 0);
+    for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
+      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_C_128, nullptr, 0);
 
       if (status != ACE_ERR_SUCCESS) {
         Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
@@ -66,7 +70,7 @@ S16BIT RT::start(int devNum) {
       }
 
       // for (int saNum = 1; saNum <= 30; ++saNum) {
-      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), 1, dataBlockId, 1, ACE_RT_MSGTYPE_RX,
+      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), rt, getDataBlockId(rt, sa), sa, ACE_RT_MSGTYPE_RX,
                                        ACE_RT_DBLK_EOM_IRQ, 1);
 
       if (status != ACE_ERR_SUCCESS) {
@@ -122,8 +126,7 @@ S16BIT RT::setRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_S
         strtoul(data.at(i).c_str(), nullptr, HEX_BYTE));
   }
 
-  S16BIT dataBlockId = rt * 1000 + sa;
-  status = aceRTDataBlkWrite(static_cast<S16BIT>(m_devNum), dataBlockId, messageBuffer, RT_SA_MAX_COUNT, 0);
+  status = aceRTDataBlkWrite(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), messageBuffer, RT_SA_MAX_COUNT, 0);
 
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
