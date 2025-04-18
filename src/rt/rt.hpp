@@ -16,15 +16,13 @@ public:
   S16BIT stop() const;
 
   S16BIT setRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data);
-  S16BIT activateRt(int rt, int sa);
-  S16BIT deactivateRt(int rt, int sa);
+  S16BIT activateRt(int rt);
+  S16BIT deactivateRt(int rt);
 
 private:
   RT();
   ~RT();
 
-  U16BIT m_messageBuffer[RT_SA_MAX_COUNT]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
-                                           // cppcoreguidelines-avoid-c-arrays)
   int m_devNum{};
 };
 

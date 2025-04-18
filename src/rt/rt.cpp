@@ -1,8 +1,36 @@
 #include "rt.hpp"
 
 #include "logger.hpp"
+#include <string>
 
-RT::RT() : m_messageBuffer() {}
+constexpr int DW_H_BUF_SIZE = (512 * ACE_MSGSIZE_RT) * 4 * 3; // TODO: review
+
+RT::RT() {
+  S16BIT status = ACE_ERR_SUCCESS;
+
+  // Create Data Block Identifiers
+  for (int rt = 0; rt < RT_SA_MAX_COUNT; ++rt) {
+    for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
+      S16BIT dataBlockId = rt * 1000 + sa;
+
+      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), dataBlockId, ACE_RT_DBLK_C_128, nullptr, 0);
+
+      if (status != ACE_ERR_SUCCESS) {
+        Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                      getStatus(status));
+      }
+
+      // for (int saNum = 1; saNum <= 30; ++saNum) {
+      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), 1, dataBlockId, 1, ACE_RT_MSGTYPE_RX,
+                                       ACE_RT_DBLK_EOM_IRQ, 1);
+
+      if (status != ACE_ERR_SUCCESS) {
+        Logger::error("Cannot map data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
+                      getStatus(status));
+      }
+    }
+  }
+}
 
 RT::~RT() { stop(); }
 
@@ -33,38 +61,18 @@ S16BIT RT::start(int devNum) {
     return status;
   }
 
-  int id = 3; // TODO: what is this?
-  status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), id, ACE_RT_DBLK_C_128, NULL, 0);
+  // status = aceRTInstallHBuf(static_cast<S16BIT>(m_devNum), DW_H_BUF_SIZE);
 
-  std::array<std::string, RT_SA_MAX_COUNT> data = {"AAAA", "BBBB", "CCCC", "DDDD", "1234", "0000", "0000", "0000",
-                                                   "0000", "0000", "0000", "0000", "0000", "0000", "0000", "0000",
-                                                   "0000", "0000", "0000", "0000", "0000", "0000", "0000", "0000",
-                                                   "0000", "0000", "0000", "0000", "0000", "0000", "0000", "0000"};
+  // if (status != ACE_ERR_SUCCESS) {
+  //   Logger::error(getStatus(status));
+  //   return status;
+  // }
 
-  // Convert string array to unsigned short array
-  for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
-    m_messageBuffer[i] = static_cast<unsigned short>( // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
-        strtoul(data.at(i).c_str(), nullptr, HEX_BYTE));
-  }
-
-  status = aceRTDataBlkWrite(static_cast<S16BIT>(m_devNum), id, m_messageBuffer, RT_SA_MAX_COUNT, 0);
+  status = acexMRTStart(static_cast<S16BIT>(m_devNum), -1, 0);
 
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
     return status;
-  }
-
-  for (int rtNum = 0; rtNum < RT_SA_MAX_COUNT; ++rtNum) {
-    // for (int saNum = 0; saNum < RT_SA_MAX_COUNT; ++saNum) {
-    for (int saNum = 1; saNum <= 30; ++saNum) { // TODO: Try above code
-      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), rtNum, id, saNum, ACE_RT_MSGTYPE_RX,
-                                       ACE_RT_DBLK_EOM_IRQ, 1);
-
-      if (status != ACE_ERR_SUCCESS) {
-        Logger::error(getStatus(status));
-        return status;
-      }
-    }
   }
 
   return status;
@@ -74,6 +82,15 @@ S16BIT RT::stop() const {
   S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("Stopping rt emulator with device: " + std::to_string(m_devNum));
+
+  status = acexMRTStop(static_cast<S16BIT>(m_devNum), -1);
+
+  if (status != ACE_ERR_SUCCESS) {
+    Logger::error(getStatus(status));
+    return status;
+  }
+
+  status = aceFree(static_cast<S16BIT>(m_devNum));
 
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
@@ -86,6 +103,26 @@ S16BIT RT::stop() const {
 S16BIT RT::setRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
+  // Concatenate data into a single string for logging
+  std::string dataString;
+  for (auto &d : data) {
+    dataString += d + " ";
+  }
+
+  Logger::debug("Setting Data for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) + " to: " + dataString);
+
+  U16BIT messageBuffer[RT_SA_MAX_COUNT]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
+                                         // cppcoreguidelines-avoid-c-arrays)
+
+  // Convert string array to unsigned short array
+  for (int i = 0; i < RT_SA_MAX_COUNT; ++i) {
+    messageBuffer[i] = static_cast<unsigned short>( // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+        strtoul(data.at(i).c_str(), nullptr, HEX_BYTE));
+  }
+
+  S16BIT dataBlockId = rt * 1000 + sa;
+  status = aceRTDataBlkWrite(static_cast<S16BIT>(m_devNum), dataBlockId, messageBuffer, RT_SA_MAX_COUNT, 0);
+
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
     return status;
@@ -94,15 +131,10 @@ S16BIT RT::setRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_S
   return status;
 }
 
-S16BIT RT::activateRt(int rt, int sa) {
+S16BIT RT::activateRt(int rt) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::debug("Activating RT:SA: " + std::to_string(rt) + ":" + std::to_string(sa));
-
-  if (status != ACE_ERR_SUCCESS) {
-    Logger::error(getStatus(status));
-    return status;
-  }
+  Logger::debug("Activating RT: " + std::to_string(rt));
 
   status = acexMRTEnableRT(static_cast<S16BIT>(m_devNum), rt, 0);
 
@@ -114,10 +146,12 @@ S16BIT RT::activateRt(int rt, int sa) {
   return status;
 }
 
-S16BIT RT::deactivateRt(int rt, int sa) {
+S16BIT RT::deactivateRt(int rt) {
   S16BIT status = ACE_ERR_SUCCESS;
 
-  Logger::debug("Deactivating RT:SA: " + std::to_string(rt) + ":" + std::to_string(sa));
+  Logger::debug("Deactivating RT: " + std::to_string(rt));
+
+  status = acexMRTDisableRT(static_cast<S16BIT>(m_devNum), rt);
 
   if (status != ACE_ERR_SUCCESS) {
     Logger::error(getStatus(status));
