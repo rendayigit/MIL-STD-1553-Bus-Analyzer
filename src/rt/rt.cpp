@@ -4,10 +4,9 @@
 #include <string>
 
 constexpr int DW_H_BUF_SIZE = (512 * ACE_MSGSIZE_RT) * 4 * 3; // TODO: review
+constexpr int MAX_BUFFER_SIZE = 64; // TODO: review
 
-static int getDataBlockId(int rt, int sa) {
-  return 1000 + rt * 1000 + sa;
-}
+static int getDataBlockId(int rt, int sa) { return 1000 + rt * 1000 + sa; }
 
 RT::RT() {}
 
@@ -57,11 +56,11 @@ S16BIT RT::start(int devNum) {
   }
 
   // Create then map data block identifiers
-  for (int rt = 0; rt < RT_SA_MAX_COUNT; ++rt) {
+  for (int rt = 0; rt < 31; ++rt) { // TODO why skip 31?
     activateRt(rt);
 
     for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
-      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_C_128, nullptr, 0);
+      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_SINGLE, nullptr, MAX_BUFFER_SIZE);
 
       if (status != ACE_ERR_SUCCESS) {
         Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
@@ -70,8 +69,8 @@ S16BIT RT::start(int devNum) {
       }
 
       // for (int saNum = 1; saNum <= 30; ++saNum) {
-      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), rt, getDataBlockId(rt, sa), sa, ACE_RT_MSGTYPE_RX,
-                                       ACE_RT_DBLK_EOM_IRQ, 1);
+      status = acexMRTDataBlkMapToRTSA(static_cast<S16BIT>(m_devNum), rt, getDataBlockId(rt, sa), sa,
+                                       ACE_RT_MSGTYPE_ALL, 0, 1);
 
       if (status != ACE_ERR_SUCCESS) {
         Logger::error("Cannot map data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) + " " +
