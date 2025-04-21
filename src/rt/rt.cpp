@@ -4,7 +4,7 @@
 #include <string>
 
 constexpr int DW_H_BUF_SIZE = (512 * ACE_MSGSIZE_RT) * 4 * 3; // TODO: review
-constexpr int MAX_BUFFER_SIZE = 64; // TODO: review
+constexpr int MAX_BUFFER_SIZE = 64;                           // TODO: review
 
 static int getDataBlockId(int rt, int sa) { return 1000 + rt * 1000 + sa; }
 
@@ -60,7 +60,8 @@ S16BIT RT::start(int devNum) {
     activateRt(rt);
 
     for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
-      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_SINGLE, nullptr, MAX_BUFFER_SIZE);
+      status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_SINGLE, nullptr,
+                                  MAX_BUFFER_SIZE);
 
       if (status != ACE_ERR_SUCCESS) {
         Logger::error("Cannot create data block id for RT: " + std::to_string(rt) + ", SA: " + std::to_string(sa) +
@@ -80,10 +81,12 @@ S16BIT RT::start(int devNum) {
     }
   }
 
+  m_isRunning = true;
+
   return status;
 }
 
-S16BIT RT::stop() const {
+S16BIT RT::stop() {
   S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("Stopping rt emulator with device: " + std::to_string(m_devNum));
@@ -102,10 +105,12 @@ S16BIT RT::stop() const {
     return status;
   }
 
+  m_isRunning = false;
+
   return status;
 }
 
-S16BIT RT::setRt(int rt, int sa, int wc, U8BIT bus, std::array<std::string, RT_SA_MAX_COUNT> data) {
+S16BIT RT::setRt(int rt, int sa, std::array<std::string, RT_SA_MAX_COUNT> data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
   // Concatenate data into a single string for logging
@@ -163,4 +168,16 @@ S16BIT RT::deactivateRt(int rt) {
   }
 
   return status;
+}
+
+bool RT::isRtActive(int rt) {
+  // TODO: implement this function
+
+  return true;
+}
+
+std::array<std::string, RT_SA_MAX_COUNT> RT::getData(int rt, int sa) { return m_data.at(rt).at(sa); }
+
+void RT::setData(int rt, int sa, std::array<std::string, RT_SA_MAX_COUNT> data) {
+  
 }
