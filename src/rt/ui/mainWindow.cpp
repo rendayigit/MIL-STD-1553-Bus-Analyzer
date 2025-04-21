@@ -62,6 +62,10 @@ RtEmulatorFrame::RtEmulatorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 RT
     for (auto &sa : rt.saList) {
       sa.setTreeObject(m_milStd1553Tree->AppendItem(rt.getTreeObject(), sa.getName()));
     }
+
+    auto treeObject = rt.getTreeObject();
+    m_milStd1553Tree->SetItemBackgroundColour(treeObject, wxColour("green"));
+    m_milStd1553Tree->SetItemTextColour(treeObject, wxColour("white"));
   }
 
   m_milStd1553Tree->Expand(rtSaTreeRoot);
