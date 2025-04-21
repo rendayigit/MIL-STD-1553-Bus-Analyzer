@@ -8,7 +8,10 @@ constexpr int MAX_BUFFER_SIZE = 64;                           // TODO: review
 
 static int getDataBlockId(int rt, int sa) { return 1000 + rt * 1000 + sa; }
 
-RT::RT() {}
+RT::RT() {
+  m_data.fill({});
+  m_rtStatuses.fill(false);
+}
 
 RT::~RT() { stop(); }
 
@@ -57,7 +60,7 @@ S16BIT RT::start(int devNum) {
 
   // Create then map data block identifiers
   for (int rt = 0; rt < 31; ++rt) { // TODO why skip 31?
-    activateRt(rt);
+    enableRt(rt);
 
     for (int sa = 0; sa < RT_SA_MAX_COUNT; ++sa) {
       status = aceRTDataBlkCreate(static_cast<S16BIT>(m_devNum), getDataBlockId(rt, sa), ACE_RT_DBLK_SINGLE, nullptr,
@@ -110,7 +113,7 @@ S16BIT RT::stop() {
   return status;
 }
 
-S16BIT RT::setRt(int rt, int sa, std::array<std::string, RT_SA_MAX_COUNT> data) {
+S16BIT RT::setRt(int rt, int sa, const std::array<std::string, RT_SA_MAX_COUNT> &data) {
   S16BIT status = ACE_ERR_SUCCESS;
 
   // Concatenate data into a single string for logging
@@ -137,10 +140,12 @@ S16BIT RT::setRt(int rt, int sa, std::array<std::string, RT_SA_MAX_COUNT> data) 
     return status;
   }
 
+  setData(rt, sa, data);
+
   return status;
 }
 
-S16BIT RT::activateRt(int rt) {
+S16BIT RT::enableRt(int rt) {
   S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("Activating RT: " + std::to_string(rt));
@@ -152,10 +157,12 @@ S16BIT RT::activateRt(int rt) {
     return status;
   }
 
+  m_rtStatuses.at(rt) = true;
+
   return status;
 }
 
-S16BIT RT::deactivateRt(int rt) {
+S16BIT RT::disableRt(int rt) {
   S16BIT status = ACE_ERR_SUCCESS;
 
   Logger::debug("Deactivating RT: " + std::to_string(rt));
@@ -167,17 +174,13 @@ S16BIT RT::deactivateRt(int rt) {
     return status;
   }
 
+  m_rtStatuses.at(rt) = false;
+
   return status;
 }
 
-bool RT::isRtActive(int rt) {
-  // TODO: implement this function
-
-  return true;
-}
+bool RT::isRtActive(int rt) { return m_rtStatuses.at(rt); }
 
 std::array<std::string, RT_SA_MAX_COUNT> RT::getData(int rt, int sa) { return m_data.at(rt).at(sa); }
 
-void RT::setData(int rt, int sa, std::array<std::string, RT_SA_MAX_COUNT> data) {
-  
-}
+void RT::setData(int rt, int sa, const std::array<std::string, RT_SA_MAX_COUNT> &data) { m_data.at(rt).at(sa) = data; }

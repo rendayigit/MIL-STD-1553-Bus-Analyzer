@@ -65,7 +65,6 @@ RtEmulatorFrame::RtEmulatorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 RT
   }
 
   m_milStd1553Tree->Expand(rtSaTreeRoot);
-  m_milStd1553Tree->Expand(MilStd1553::getInstance().rtList.at(0).getTreeObject());
 
   m_messageList = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize,
                                  wxTE_READONLY | wxTE_MULTILINE); // NOLINT(hicpp-signed-bitwise)
@@ -253,7 +252,7 @@ void RtEmulatorFrame::onTreeItemClicked(wxTreeEvent &event) {
 
     // Activate / Deactivate RT
     if (RT::getInstance().isRtActive(rt)) {
-      RT::getInstance().deactivateRt(rt);
+      RT::getInstance().disableRt(rt);
 
       // Default background color is wxSYS_COLOUR_BACKGROUND
       // Default text color is wxSYS_COLOUR_WINDOWTEXT
@@ -262,7 +261,7 @@ void RtEmulatorFrame::onTreeItemClicked(wxTreeEvent &event) {
       m_milStd1553Tree->SetItemBackgroundColour(treeObject, wxColour("red"));
       m_milStd1553Tree->SetItemTextColour(treeObject, wxColour("wxSYS_COLOUR_WINDOWTEXT"));
     } else {
-      RT::getInstance().activateRt(rt);
+      RT::getInstance().enableRt(rt);
       
       // Default background color is wxSYS_COLOUR_BACKGROUND
       // Default text color is wxSYS_COLOUR_WINDOWTEXT
