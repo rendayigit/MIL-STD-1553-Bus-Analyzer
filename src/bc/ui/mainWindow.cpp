@@ -13,6 +13,7 @@
 #include <wx/wx.h>
 
 constexpr int MAX_FILE_PATH_SIZE = 1024;
+const std::string BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY = "Bus_Controller_Default_Device_Number";
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
   auto *menuFile = new wxMenu;
@@ -34,7 +35,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   auto *deviceIdLabel = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
-  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig("Bus_Controller_Default_Device_Number"), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
+  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   m_repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat Off", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
@@ -97,6 +98,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
   auto *frame = new FrameCreationFrame(this);
   frame->Show(true);
+  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, m_deviceIdTextInput->GetValue().ToStdString());
 }
 
 void BusControllerFrame::onClearFramesClicked(wxCommandEvent & /*event*/) { m_scrolledSizer->Clear(true); }
@@ -125,6 +127,8 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent & /*event*/) {
   } else {
     stopSending();
   }
+
+  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, m_deviceIdTextInput->GetValue().ToStdString());
 }
 
 void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {

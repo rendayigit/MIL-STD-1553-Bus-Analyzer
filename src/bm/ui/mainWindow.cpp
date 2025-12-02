@@ -9,10 +9,13 @@
 #include <regex>
 #include <string>
 
-BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(std::stoi(Config::getValueFromConfig("Bus_Monitor_UI_Recent_Line_Count"))) {
+const std::string BM_DEFAULT_DEVICE_NUMBER_CONFIG_KEY = "Bus_Monitor_Default_Device_Number";
+const std::string BM_UI_RECENT_LINE_COUNT_CONFIG_KEY = "Bus_Monitor_UI_Recent_Line_Count";
+
+BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(std::stoi(Config::getValueFromConfig(BM_UI_RECENT_LINE_COUNT_CONFIG_KEY))) {
   auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
-  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig("Bus_Monitor_Default_Device_Number"), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
+  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig(BM_DEFAULT_DEVICE_NUMBER_CONFIG_KEY), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   m_startStopButton = new wxButton(this, wxID_ANY, "Start", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
@@ -152,6 +155,8 @@ void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
       wxLogError(errorString.c_str());
     }
   }
+
+  Config::updateKeyInConfig(BM_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, std::to_string(deviceNum));
 }
 
 void BusMonitorFrame::onClearFilterClicked(wxCommandEvent & /*event*/) {
