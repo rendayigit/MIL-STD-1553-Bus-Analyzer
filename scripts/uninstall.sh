@@ -88,9 +88,9 @@ remove_desktop_shortcuts() {
     BC_DESKTOP_FILE="/home/$SUDO_USER/.local/share/applications/bc.desktop"
     RT_DESKTOP_FILE="/home/$SUDO_USER/.local/share/applications/rt.desktop"
 
-    BM_ICON_FILE="/home/$SUDO_USER/.local/share/icons/bm.png"
-    BC_ICON_FILE="/home/$SUDO_USER/.local/share/icons/bc.png"
-    RT_ICON_FILE="/home/$SUDO_USER/.local/share/icons/rt.png"
+    BM_ICON_FILE="/home/$SUDO_USER/.local/share/icons/bus-monitor.png"
+    BC_ICON_FILE="/home/$SUDO_USER/.local/share/icons/bus-controller.png"
+    RT_ICON_FILE="/home/$SUDO_USER/.local/share/icons/remote-terminal.png"
 
     # Remove desktop shortcuts from Desktop if they exist
     if [[ -f "$BM_DESKTOP_SHORTCUT" ]]; then
