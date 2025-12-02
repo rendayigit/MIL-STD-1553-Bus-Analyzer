@@ -1,5 +1,10 @@
 #include "mainWindow.hpp"
 
+#include "bm/bm.hpp"
+#include "common.hpp"
+#include "logger.hpp"
+#include "milStd1553.hpp"
+
 #include <array>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -12,11 +17,6 @@
 #include <wx/gtk/colour.h>
 #include <wx/gtk/stattext.h>
 #include <wx/sizer.h>
-
-#include "bm/bm.hpp"
-#include "common.hpp"
-#include "logger.hpp"
-#include "milStd1553.hpp"
 
 enum {
   ID_ADD_BTN = 1,
@@ -65,9 +65,9 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
       this, ID_CLEAR_BTN, "Clear", wxDefaultPosition,
       wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
-  m_milStd1553Tree =
-      new wxTreeCtrl(this, ID_RT_SA_TREE, wxDefaultPosition,
-                     wxSize(180, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_milStd1553Tree
+      = new wxTreeCtrl(this, ID_RT_SA_TREE, wxDefaultPosition,
+                       wxSize(180, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
   auto rtSaTreeRoot = m_milStd1553Tree->AddRoot("MIL-STD-1553");
 
@@ -147,16 +147,16 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
       configFile >> config; // Parse the JSON file
 
       // Check if the Bus_Monitor key exists and contains Default_Device_Number
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number") and
-          config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number")
+          and config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
         m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Monitor"]["Default_Device_Number"].get<int>()));
       } else {
         Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
       }
 
       // Check if the Bus_Monitor key exists and contains UI_Recent_Line_Count
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count") and
-          config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count")
+          and config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
         m_uiRecentMessageCount = config["Bus_Monitor"]["UI_Recent_Line_Count"].get<int>();
       } else {
         Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");

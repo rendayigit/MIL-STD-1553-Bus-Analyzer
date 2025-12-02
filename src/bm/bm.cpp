@@ -1,9 +1,9 @@
 #include "bm.hpp"
 
-#include <exception>
-
 #include "common.hpp"
 #include "logger.hpp"
+
+#include <exception>
 
 constexpr int US_TIME_LENGTH = 8;
 constexpr int DATA_LINE_LENGTH = 8;
@@ -119,8 +119,8 @@ void BM::monitor() {
 
   // Poll Messages
   while (m_isMonitoring) {
-    status =
-        aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
+    status
+        = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
     if (status == ACE_ERR_MTI_EOB) {
       Message message = getMessage(&sMsg);
@@ -158,8 +158,9 @@ void BM::monitor() {
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
-      if (m_filter and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1) or
-                        (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
+      if (m_filter
+          and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1)
+               or (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
         continue;
       }
 
