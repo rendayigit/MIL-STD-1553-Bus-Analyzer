@@ -6,7 +6,7 @@
 #include "bc/bc.hpp"
 #include "common.hpp"
 #include "createFrameWindow.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int rt2, int sa, int sa2,
                                int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)

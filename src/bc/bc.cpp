@@ -7,7 +7,7 @@
 #include <thread>
 
 #include "common.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 constexpr int MOD_FLAGS = 0x000F;
 

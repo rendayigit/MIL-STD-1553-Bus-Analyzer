@@ -1,7 +1,7 @@
 #include "bm.hpp"
 
 #include "common.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 #include <exception>
 

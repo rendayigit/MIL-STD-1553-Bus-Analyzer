@@ -2,7 +2,7 @@
 
 #include "bm/bm.hpp"
 #include "common.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 #include "milStd1553.hpp"
 
 #include <array>

@@ -10,7 +10,7 @@
 #include "common.hpp"
 #include "createFrameWindow.hpp"
 #include "frameComponent.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 constexpr int MAX_FILE_PATH_SIZE = 1024;
 
