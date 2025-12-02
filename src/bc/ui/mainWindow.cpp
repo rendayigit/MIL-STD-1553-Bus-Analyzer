@@ -1,5 +1,6 @@
 #include "mainWindow.hpp"
 
+#include "bc/bc.hpp"
 #include "common.hpp"
 #include "config/config.hpp"
 #include "createFrameWindow.hpp"
@@ -16,8 +17,14 @@ constexpr int MAX_FILE_PATH_SIZE = 1024;
 const std::string BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY = "Bus_Controller_Default_Device_Number";
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
+  auto *setButton = new wxButton(this, wxID_ANY, "Set", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
+  setButton->SetBackgroundColour(wxColour("#ffcc00"));
+  setButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
+  menuFile->Append(setButton->GetId(), "Set\tCtrl-R", "Set controller ID for selected DDC device");
   menuFile->Append(wxID_ANY, "Add Frame\tCtrl-A", "Add a frame to the frame list");
 
   int clearFramesId = wxNewId();
@@ -63,6 +70,7 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   topHorizontalSizer->Add(deviceIdLabel, 0, wxALIGN_CENTER_VERTICAL, 5); // NOLINT
   topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, 5);  // NOLINT
+  topHorizontalSizer->Add(setButton, 0, wxALIGN_CENTER_VERTICAL, 5);     // NOLINT
   topHorizontalSizer->AddStretchSpacer();
   topHorizontalSizer->Add(m_repeatToggle, 0, wxALIGN_CENTER_VERTICAL, 5);           // NOLINT
   topHorizontalSizer->AddSpacer(5);                                                 // NOLINT
@@ -79,15 +87,16 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   verticalSizer->SetSizeHints(this);
 
   CreateStatusBar();
-  SetStatusText("Ready, add frames to send");
+  SetStatusText("Ready, set device then add frames to send");
 
+  setButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onSetClicked, this);
   m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddFrameClicked, this);
   m_repeatToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onRepeatToggle, this);
   m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
+  Bind(wxEVT_MENU, &BusControllerFrame::onSetClicked, this, setButton->GetId());
   Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, m_addButton->GetId());
   Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
-
   Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
   Bind(wxEVT_MENU, &BusControllerFrame::onLoadFrames, this, loadFramesId);
   Bind(wxEVT_MENU, &BusControllerFrame::onSaveFrames, this, saveFramesId);
@@ -95,10 +104,29 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   SetSize(650, 750); // NOLINT
 }
 
+void BusControllerFrame::onSetClicked(wxCommandEvent & /*event*/) {
+  S16BIT errorCode = 0;
+  int deviceNum = 0;
+
+  BC::getInstance().stop();
+
+  m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
+  errorCode = BC::getInstance().start(deviceNum);
+
+  if (errorCode == 0) {
+    SetStatusText("Connected to device " + std::to_string(deviceNum));
+  } else {
+    std::string errorString = getStatus(errorCode);
+    SetStatusText(errorString.c_str());
+    wxLogError(errorString.c_str());
+  }
+
+  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, std::to_string(deviceNum));
+}
+
 void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
   auto *frame = new FrameCreationFrame(this);
   frame->Show(true);
-  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, m_deviceIdTextInput->GetValue().ToStdString());
 }
 
 void BusControllerFrame::onClearFramesClicked(wxCommandEvent & /*event*/) { m_scrolledSizer->Clear(true); }
@@ -127,8 +155,6 @@ void BusControllerFrame::onSendActiveFrames(wxCommandEvent & /*event*/) {
   } else {
     stopSending();
   }
-
-  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, m_deviceIdTextInput->GetValue().ToStdString());
 }
 
 void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
