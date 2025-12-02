@@ -13,7 +13,7 @@
 #include <wx/gtk/stattext.h>
 #include <wx/sizer.h>
 
-#include "bm.hpp"
+#include "bm/bm.hpp"
 #include "common.hpp"
 #include "logger.hpp"
 #include "milStd1553.hpp"
@@ -161,7 +161,7 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
       } else {
         Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");
       }
-      
+
     } catch (const nlohmann::json::parse_error &e) {
       Logger::error("JSON parse error: " + std::string(e.what()));
     }

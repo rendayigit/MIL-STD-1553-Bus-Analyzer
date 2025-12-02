@@ -1,11 +1,11 @@
 build:
   ./scripts/build.sh
 
+release:
+  ./scripts/build.sh --release
+
 clean:
   ./scripts/clean.sh
-
-run:
-  ./scripts/run.sh
 
 bc:
   ./scripts/bc.sh
@@ -16,4 +16,11 @@ bm:
 rt:
   ./scripts/rt.sh
 
+install:
+  ./scripts/install.sh
+
+uninstall:
+  ./scripts/uninstall.sh
+
 all: build
+rel: release

@@ -1,48 +1,87 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Build App",
-            "type": "shell",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "command": [
-                "chmod -R 777 ./scripts/;",
-                "./scripts/build.sh"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/"
-            },
-            "problemMatcher": "$gcc",
-            "runOptions": {"reevaluateOnRerun": false},
-        },
-        {
-            "label": "Run App",
-            "type": "shell",
-            "group": "test",
-            "command": [
-                "chmod -R 777 ./scripts/;",
-                "./scripts/run.sh"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/"
-            },
-            "runOptions": {"reevaluateOnRerun": false},
-        },
-        {
-            "label": "Clean App",
-            "type": "shell",
-            "group": "test",
-            "command": [
-                "chmod -R 777 ./scripts/;",
-                "./scripts/clean.sh"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/"
-            },
-            "runOptions": {"reevaluateOnRerun": false},
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build App",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": ["chmod +x ./scripts/*.sh;", "./scripts/build.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "problemMatcher": "$gcc",
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Run App BM",
+      "type": "shell",
+      "group": "test",
+      "command": ["chmod +x ./scripts/*.sh;", "./scripts/bm.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Run App BC",
+      "type": "shell",
+      "group": "test",
+      "command": ["chmod +x ./scripts/*.sh;", "./scripts/bc.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Run App RT",
+      "type": "shell",
+      "group": "test",
+      "command": ["chmod +x ./scripts/*.sh;", "./scripts/rt.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Clean App",
+      "type": "shell",
+      "group": "test",
+      "command": ["chmod +x ./scripts/*.sh;", "./scripts/clean.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Install App",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": ["chmod +x ./scripts/*.sh;", "sudo ./scripts/install.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "problemMatcher": "$gcc",
+      "runOptions": { "reevaluateOnRerun": false }
+    },
+    {
+      "label": "Uninstall App",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": ["chmod +x ./scripts/*.sh;", "sudo ./scripts/uninstall.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      },
+      "problemMatcher": "$gcc",
+      "runOptions": { "reevaluateOnRerun": false }
+    }
+  ]
 }

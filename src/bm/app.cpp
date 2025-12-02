@@ -1,5 +1,5 @@
 #include "app.hpp"
-#include "mainWindow.hpp"
+#include "bm/ui/mainWindow.hpp"
 
 // Main function is set here
 wxIMPLEMENT_APP(BusMonitorApp); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)

@@ -31,7 +31,9 @@ Checks: '
     -hicpp-no-array-decay,
     -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
     -cppcoreguidelines-pro-type-reinterpret-cast,
-    -misc-no-recursion
+    -misc-no-recursion,
+    -abseil-string-find-str-contains,
+    -fuchsia-overloaded-operator
 '
 
 CheckOptions:
