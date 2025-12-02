@@ -102,14 +102,13 @@ Message BM::getMessage(MSGSTRUCT *msg) {
 
   std::ostringstream time;
 
-  time << std::setw(US_TIME_LENGTH) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":" << std::setw(US_TIME_LENGTH)
-       << std::setfill('0') << (msg->wTimeTag2 * 2) << ":" << std::setw(US_TIME_LENGTH) << std::setfill('0')
-       << (msg->wTimeTag * 2) << "us";
+  time << std::setw(US_TIME_LENGTH) << std::setfill('0') << (msg->wTimeTag3 * 2) << ":" << std::setw(US_TIME_LENGTH) << std::setfill('0') << (msg->wTimeTag2 * 2) << ":" << std::setw(US_TIME_LENGTH)
+       << std::setfill('0') << (msg->wTimeTag * 2) << "us";
 
-  noRes = ((msg->wBlkSts & ACE_MT_BSW_NORES) != 0); // NOLINT(hicpp-signed-bitwise)
+  noRes = ((msg->wBlkSts & ACE_MT_BSW_NORES) != 0); // NOLINT
 
   return Message(rt, sa, rtRx, saRx, wc,
-                 (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT(hicpp-signed-bitwise)
+                 (msg->wBlkSts & ACE_MT_BSW_CHNL) != 0 ? 'B' : 'A', // NOLINT
                  aceGetMsgTypeString(msg->wType), time.str(), msg->aDataWrds, msg->wCmdWrd2Flg != 0U, noRes);
 }
 
@@ -119,8 +118,7 @@ void BM::monitor() {
 
   // Poll Messages
   while (m_isMonitoring) {
-    status
-        = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
+    status = aceMTGetStkMsgDecoded(static_cast<S16BIT>(m_devNum), &sMsg, ACE_MT_MSGLOC_NEXT_PURGE, ACE_MT_STKLOC_ACTIVE);
 
     if (status == ACE_ERR_MTI_EOB) {
       Message message = getMessage(&sMsg);
@@ -158,9 +156,7 @@ void BM::monitor() {
 
       m_updateSaState(message.getBus(), message.getRt(), message.getSa(), message.isResponded());
 
-      if (m_filter
-          and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1)
-               or (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
+      if (m_filter and (m_filteredBus != message.getBus() or (m_filteredRt != message.getRt() and m_filteredRt != -1) or (m_filteredSa != message.getSa() and m_filteredSa != -1))) {
         continue;
       }
 

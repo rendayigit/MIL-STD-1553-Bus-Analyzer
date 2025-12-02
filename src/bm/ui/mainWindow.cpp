@@ -6,7 +6,6 @@
 #include "milStd1553.hpp"
 
 #include <array>
-#include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
 

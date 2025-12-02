@@ -1,15 +1,14 @@
 #include "frameComponent.hpp"
 
-#include <string>
-#include <utility>
-
 #include "bc/bc.hpp"
 #include "common.hpp"
 #include "createFrameWindow.hpp"
 #include "logger/logger.hpp"
 
-FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int rt2, int sa, int sa2,
-                               int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
+#include <string>
+#include <utility>
+
+FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data)
     : wxPanel(parent, wxID_ANY), m_mainWindow(dynamic_cast<BusControllerFrame *>(parent->GetParent())) {
   m_allText = new wxStaticText(this, wxID_ANY, "");
 
@@ -37,66 +36,36 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   wxBitmap downImg(downImgPath, wxBITMAP_TYPE_PNG);
   wxBitmap removeImg(removeImgPath, wxBITMAP_TYPE_PNG);
 
-  auto *upButton =
-      new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition,
-                         wxSize(30, 30), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                         wxNO_BORDER);
-  auto *downButton =
-      new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition,
-                         wxSize(30, 30), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                         wxNO_BORDER);
-  auto *removeButton =
-      new wxBitmapButton(this, wxID_ANY, removeImg, wxDefaultPosition,
-                         wxSize(30, 30), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-                         wxNO_BORDER);
+  auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);         // NOLINT
+  auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);     // NOLINT
+  auto *removeButton = new wxBitmapButton(this, wxID_ANY, removeImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER); // NOLINT
 
   upButton->SetBackgroundColour(wxTransparentColour);
   removeButton->SetBackgroundColour(wxTransparentColour);
   downButton->SetBackgroundColour(wxTransparentColour);
 
-  m_activateToggle = new wxToggleButton(
-      this, wxID_ANY, "Activate Frame", wxDefaultPosition,
-      wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_activateToggle = new wxToggleButton(this, wxID_ANY, "Activate Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
-  auto *editFrameButton = new wxButton(
-      this, wxID_ANY, "Edit Frame", wxDefaultPosition,
-      wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  auto *editFrameButton = new wxButton(this, wxID_ANY, "Edit Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
-  auto *sendButton = new wxButton(
-      this, wxID_ANY, "Send Frame", wxDefaultPosition,
-      wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  auto *sendButton = new wxButton(this, wxID_ANY, "Send Frame", wxDefaultPosition, wxSize(120, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   sendButton->SetBackgroundColour(wxColour("#55ff55"));
-  sendButton->SetForegroundColour(
-      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+  sendButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
-  orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0); // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-  orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                  0);
-  orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                  0);
+  orderSizer->Add(upButton, 0, wxALIGN_LEFT | wxALL, 0);     // NOLINT
+  orderSizer->Add(removeButton, 0, wxALIGN_LEFT | wxALL, 0); // NOLINT
+  orderSizer->Add(downButton, 0, wxALIGN_LEFT | wxALL, 0);   // NOLINT
 
-  repeatSendSizer->Add(m_activateToggle, 0,
-                       wxALIGN_LEFT | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                       5);                   // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  repeatSendSizer->Add(editFrameButton, 0,
-                       wxALIGN_LEFT | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                       5);                   // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  repeatSendSizer->Add(sendButton, 0,
-                       wxALIGN_LEFT | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                       5);                   // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  repeatSendSizer->Add(m_activateToggle, 0, wxALIGN_LEFT | wxALL, 5); // NOLINT
+  repeatSendSizer->Add(editFrameButton, 0, wxALIGN_LEFT | wxALL, 5);  // NOLINT
+  repeatSendSizer->Add(sendButton, 0, wxALIGN_LEFT | wxALL, 5);       // NOLINT
 
-  mainSizer->AddSpacer(15); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  mainSizer->Add(orderSizer, 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                 0);
-  mainSizer->AddSpacer(30); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  mainSizer->Add(m_allText, 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  mainSizer->Add(repeatSendSizer, 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, // NOLINT(bugprone-suspicious-enum-usage, hicpp-signed-bitwise)
-                 5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  mainSizer->AddSpacer(15);                                               // NOLINT
+  mainSizer->Add(orderSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 0);      // NOLINT
+  mainSizer->AddSpacer(30);                                               // NOLINT
+  mainSizer->Add(m_allText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);       // NOLINT
+  mainSizer->Add(repeatSendSizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5); // NOLINT
 
   sendButton->Bind(wxEVT_BUTTON, &FrameComponent::onSend, this);
   removeButton->Bind(wxEVT_BUTTON, &FrameComponent::onRemove, this);
@@ -109,8 +78,7 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   SetSizer(mainSizer);
 }
 
-void FrameComponent::updateValues(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc,
-                                  BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
+void FrameComponent::updateValues(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
   m_label = label;
   m_bus = bus;
   m_rt = rt;
@@ -121,8 +89,7 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
   m_mode = mode;
   m_data = data;
 
-  std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) +
-                     "\tWC: " + std::to_string(wc) + "\tMode: ";
+  std::string text = label + "\n\nBus: " + bus + "\tRT: " + std::to_string(rt) + "\tSA: " + std::to_string(sa) + "\tWC: " + std::to_string(wc) + "\tMode: ";
 
   if (mode == BcMode::BC_TO_RT) {
     text += "BC->RT";
@@ -150,11 +117,8 @@ void FrameComponent::updateValues(const std::string &label, char bus, int rt, in
 
 void FrameComponent::sendFrame() {
   std::lock_guard<std::mutex> lock(m_mutex);
-  wxTheApp->CallAfter([this] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+  wxTheApp->CallAfter([this] { // NOLINT
     S16BIT status = ACE_ERR_SUCCESS;
-
-    BC::getInstance().stop();
-    BC::getInstance().start(m_mainWindow->getDeviceId());
 
     std::array<std::string, RT_SA_MAX_COUNT> data;
 
@@ -164,8 +128,7 @@ void FrameComponent::sendFrame() {
       status = BC::getInstance().rtToBc(m_rt, m_sa, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
       updateData(data);
     } else if (m_mode == BcMode::RT_TO_RT) {
-      status = BC::getInstance().rtToRt(m_rt, m_sa, m_rt2, m_sa2, m_wc,
-                                        m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
+      status = BC::getInstance().rtToRt(m_rt, m_sa, m_rt2, m_sa2, m_wc, m_bus == 'A' ? ACE_BCCTRL_CHL_A : ACE_BCCTRL_CHL_B, &data);
       updateData(data);
     }
 
@@ -179,9 +142,7 @@ void FrameComponent::sendFrame() {
   });
 }
 
-void FrameComponent::updateData(std::array<std::string, RT_SA_MAX_COUNT> data) {
-  updateValues(m_label, m_bus, m_rt, m_rt2, m_sa, m_sa2, m_wc, m_mode, std::move(data));
-}
+void FrameComponent::updateData(std::array<std::string, RT_SA_MAX_COUNT> data) { updateValues(m_label, m_bus, m_rt, m_rt2, m_sa, m_sa2, m_wc, m_mode, std::move(data)); }
 
 bool FrameComponent::isActive() { return m_activateToggle->GetValue(); }
 
