@@ -1,6 +1,7 @@
 #include "frameComponent.hpp"
 
 #include "bc/bc.hpp"
+#include "bc/ui/embeddedIcons.hpp"
 #include "common.hpp"
 #include "createFrameWindow.hpp"
 #include "logger/logger.hpp"
@@ -18,23 +19,11 @@ FrameComponent::FrameComponent(wxWindow *parent, const std::string &label, char 
   auto *orderSizer = new wxBoxSizer(wxVERTICAL);
   auto *repeatSendSizer = new wxBoxSizer(wxVERTICAL);
 
-  std::string upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow.png";
-  std::string downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow.png";
-  std::string removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove.png";
-
-  if (wxSystemSettingsNative::GetAppearance().IsDark()) {
-    upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow.png";
-    downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow.png";
-    removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove.png";
-  } else {
-    upImgOPath = getExecutableDirectory() + "../src/bc/icons/up_arrow_dark.png";
-    downImgPath = getExecutableDirectory() + "../src/bc/icons/down_arrow_dark.png";
-    removeImgPath = getExecutableDirectory() + "../src/bc/icons/remove_dark.png";
-  }
-
-  wxBitmap upImg(upImgOPath, wxBITMAP_TYPE_PNG);
-  wxBitmap downImg(downImgPath, wxBITMAP_TYPE_PNG);
-  wxBitmap removeImg(removeImgPath, wxBITMAP_TYPE_PNG);
+  // Use embedded icons - no external files needed
+  bool isDarkTheme = wxSystemSettingsNative::GetAppearance().IsDark();
+  wxBitmap upImg = getUpArrowBitmap(isDarkTheme);
+  wxBitmap downImg = getDownArrowBitmap(isDarkTheme);
+  wxBitmap removeImg = getRemoveBitmap(isDarkTheme);
 
   auto *upButton = new wxBitmapButton(this, wxID_ANY, upImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);         // NOLINT
   auto *downButton = new wxBitmapButton(this, wxID_ANY, downImg, wxDefaultPosition, wxSize(30, 30), wxNO_BORDER);     // NOLINT
