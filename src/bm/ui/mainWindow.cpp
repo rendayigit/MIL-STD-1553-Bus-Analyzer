@@ -10,30 +10,27 @@
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
-#include <wx/debug.h>
-#include <wx/event.h>
-#include <wx/gdicmn.h>
-#include <wx/gtk/button.h>
-#include <wx/gtk/colour.h>
-#include <wx/gtk/stattext.h>
-#include <wx/sizer.h>
-
-enum {
-  ID_ADD_BTN = 1,
-  ID_ADD_MENU,
-  ID_FILTER_BTN,
-  ID_CLEAR_BTN,
-  ID_FILTER_MENU,
-  ID_CLEAR_MENU,
-  ID_DEVICE_ID_TXT,
-  ID_RT_SA_TREE
-};
 
 BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
+  auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
+
+  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, "00", wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
+  m_startStopButton = new wxButton(this, wxID_ANY, "Start", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
+  m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
+  m_startStopButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+
+  m_filterButton = new wxButton(this, wxID_ANY, "No filter set, displaying all messages.", wxDefaultPosition, wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
+  m_filterButton->Enable(false);
+
+  auto *clearButton = new wxButton(this, wxID_ANY, "Clear", wxDefaultPosition, wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
   auto *menuFile = new wxMenu;
-  menuFile->Append(ID_ADD_MENU, "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
-  menuFile->Append(ID_FILTER_MENU, "Clear filter\tCtrl-F", "Clear filtering of messages");
-  menuFile->Append(ID_CLEAR_MENU, "Clear messages\tCtrl-M", "Clear messages");
+  menuFile->Append(m_startStopButton->GetId(), "Start / Stop\tCtrl-R", "Start or stop monitoring on selected DDC device");
+  menuFile->Append(m_filterButton->GetId(), "Clear filter\tCtrl-F", "Clear filtering of messages");
+  menuFile->Append(clearButton->GetId(), "Clear messages\tCtrl-M", "Clear messages");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
@@ -41,33 +38,7 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
   SetMenuBar(menuBar);
   menuBar->Append(menuFile, "&Commands");
 
-  auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
-
-  m_deviceIdTextInput = new wxTextCtrl(
-      this, ID_DEVICE_ID_TXT, "00", wxDefaultPosition,
-      wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-
-  m_startStopButton = new wxButton(
-      this, ID_ADD_BTN, "Start", wxDefaultPosition,
-      wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-
-  m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
-  m_startStopButton->SetForegroundColour(
-      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
-
-  m_filterButton = new wxButton(
-      this, ID_FILTER_BTN, "No filter set, displaying all messages.", wxDefaultPosition,
-      wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-
-  m_filterButton->Enable(false);
-
-  auto *clearButton = new wxButton(
-      this, ID_CLEAR_BTN, "Clear", wxDefaultPosition,
-      wxSize(-1, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-
-  m_milStd1553Tree
-      = new wxTreeCtrl(this, ID_RT_SA_TREE, wxDefaultPosition,
-                       wxSize(180, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_milStd1553Tree = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxSize(180, 200)); // NOLINT
 
   auto rtSaTreeRoot = m_milStd1553Tree->AddRoot("MIL-STD-1553");
 
@@ -86,33 +57,23 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
   m_milStd1553Tree->Expand(rtSaTreeRoot);
   m_milStd1553Tree->Expand(MilStd1553::getInstance().busList.at(0).getTreeObject());
 
-  m_messageList = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize,
-                                 wxTE_READONLY | wxTE_MULTILINE); // NOLINT(hicpp-signed-bitwise)
+  m_messageList = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_MULTILINE); // NOLINT
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *bottomHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topHorizontalSizer->Add(deviceIdText, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_startStopButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(clearButton, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(deviceIdText, 0, wxALIGN_CENTER_VERTICAL, 5); // NOLINT
+  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, 5); // NOLINT
+  topHorizontalSizer->Add(m_startStopButton, 0, wxEXPAND | wxALL, 5);   // NOLINT
+  topHorizontalSizer->Add(m_filterButton, 1, wxEXPAND | wxALL, 5);      // NOLINT
+  topHorizontalSizer->Add(clearButton, 0, wxEXPAND | wxALL, 5);         // NOLINT
 
-  bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                             5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  bottomHorizontalSizer->Add(m_messageList, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                             5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  bottomHorizontalSizer->Add(m_milStd1553Tree, 0, wxEXPAND | wxALL, 5); // NOLINT
+  bottomHorizontalSizer->Add(m_messageList, 1, wxEXPAND | wxALL, 5);    // NOLINT
 
-  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  verticalSizer->Add(bottomHorizontalSizer, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, 5);    // NOLINT
+  verticalSizer->Add(bottomHorizontalSizer, 1, wxEXPAND | wxALL, 5); // NOLINT
 
   SetSizer(verticalSizer);
 
@@ -122,18 +83,18 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
   CreateStatusBar();
   SetStatusText("Ready, press Start");
 
-  Bind(wxEVT_BUTTON, &BusMonitorFrame::onStartStopClicked, this, ID_ADD_BTN);
-  Bind(wxEVT_MENU, &BusMonitorFrame::onStartStopClicked, this, ID_ADD_MENU);
-  Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_BTN);
-  Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearClicked, this, ID_CLEAR_BTN);
-  Bind(wxEVT_MENU, &BusMonitorFrame::onClearFilterClicked, this, ID_FILTER_MENU);
-  Bind(wxEVT_MENU, &BusMonitorFrame::onClearClicked, this, ID_CLEAR_MENU);
-  Bind(wxEVT_MENU, &BusMonitorFrame::onExit, this, wxID_EXIT);
+  m_startStopButton->Bind(wxEVT_BUTTON, &BusMonitorFrame::onStartStopClicked, this);
+  m_filterButton->Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearFilterClicked, this);
+  clearButton->Bind(wxEVT_BUTTON, &BusMonitorFrame::onClearClicked, this);
   m_milStd1553Tree->Bind(wxEVT_TREE_ITEM_ACTIVATED, &BusMonitorFrame::onTreeItemClicked, this);
 
+  Bind(wxEVT_MENU, &BusMonitorFrame::onStartStopClicked, this, m_startStopButton->GetId());
+  Bind(wxEVT_MENU, &BusMonitorFrame::onClearFilterClicked, this, m_filterButton->GetId());
+  Bind(wxEVT_MENU, &BusMonitorFrame::onClearClicked, this, clearButton->GetId());
+  Bind(wxEVT_MENU, &BusMonitorFrame::onExit, this, wxID_EXIT);
+
   m_deviceIdTextInput->SetValue("0");
-  m_uiRecentMessageCount = 100; // NOLINT(cppcoreguidelines-prefer-member-initializer,
-                                // cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_uiRecentMessageCount = 100; // NOLINT
 
   nlohmann::json config;
 
@@ -147,16 +108,14 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
       configFile >> config; // Parse the JSON file
 
       // Check if the Bus_Monitor key exists and contains Default_Device_Number
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number")
-          and config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number") and config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
         m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Monitor"]["Default_Device_Number"].get<int>()));
       } else {
         Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
       }
 
       // Check if the Bus_Monitor key exists and contains UI_Recent_Line_Count
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count")
-          and config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
+      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count") and config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
         m_uiRecentMessageCount = config["Bus_Monitor"]["UI_Recent_Line_Count"].get<int>();
       } else {
         Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");
@@ -169,7 +128,7 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
 
   BM::getInstance().setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    wxTheApp->CallAfter([this, text] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+    wxTheApp->CallAfter([this, text] { // NOLINT
       wxString currentText = text + m_messageList->GetValue();
       wxArrayString lines = wxSplit(currentText, '\n');
 
@@ -189,31 +148,14 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
 
   BM::getInstance().setUpdateSaState([&](char bus, int rt, int sa, bool state) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    wxTheApp->CallAfter([this, bus, rt, sa, state] { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
-      // Default background color is wxSYS_COLOUR_BACKGROUND
-      // Default text color is wxSYS_COLOUR_WINDOWTEXT
-
-      m_milStd1553Tree->SetItemBackgroundColour(
-          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(), wxColour(state ? "green" : "red"));
-
-      m_milStd1553Tree->SetItemTextColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(),
-                                          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
-
-      m_milStd1553Tree->SetItemBackgroundColour(
-          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(),
-          wxColour(state ? "green" : "red"));
-
-      m_milStd1553Tree->SetItemTextColour(
-          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(),
-          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
-
-      m_milStd1553Tree->SetItemBackgroundColour(
-          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(),
-          wxColour(state ? "green" : "red"));
-
-      m_milStd1553Tree->SetItemTextColour(
-          MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(),
-          wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
+    wxTheApp->CallAfter([this, bus, rt, sa, state] { // NOLINT
+      // Default background color is wxSYS_COLOUR_BACKGROUND and Default text color is wxSYS_COLOUR_WINDOWTEXT
+      m_milStd1553Tree->SetItemBackgroundColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(), wxColour(state ? "green" : "red"));
+      m_milStd1553Tree->SetItemTextColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).getTreeObject(), wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
+      m_milStd1553Tree->SetItemBackgroundColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(), wxColour(state ? "green" : "red"));
+      m_milStd1553Tree->SetItemTextColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).getTreeObject(), wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
+      m_milStd1553Tree->SetItemBackgroundColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(), wxColour(state ? "green" : "red"));
+      m_milStd1553Tree->SetItemTextColour(MilStd1553::getInstance().busList.at(bus == 'A' ? 0 : 1).rtList.at(rt).saList.at(sa).getTreeObject(), wxColour(state ? "white" : "wxSYS_COLOUR_WINDOWTEXT"));
     });
   });
 }
@@ -226,12 +168,9 @@ void BusMonitorFrame::onStartStopClicked(wxCommandEvent & /*event*/) {
     BM::getInstance().stop();
     m_startStopButton->SetLabelText("Start");
 
-    // Default background color is wxSYS_COLOUR_BACKGROUND
-    // Default text color is wxSYS_COLOUR_WINDOWTEXT
-
+    // Default background color is wxSYS_COLOUR_BACKGROUND and Default text color is wxSYS_COLOUR_WINDOWTEXT
     m_startStopButton->SetBackgroundColour(wxColour("#ffcc00"));
-    m_startStopButton->SetForegroundColour(
-        wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+    m_startStopButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
   } else {
     m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
     errorCode = BM::getInstance().start(deviceNum);
