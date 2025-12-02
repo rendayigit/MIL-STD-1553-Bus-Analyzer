@@ -5,4 +5,4 @@ cd -
 
 # Run unit tests
 cd $SCRIPTDIR/../bin/
-./rt-emulator
+./remote-terminal

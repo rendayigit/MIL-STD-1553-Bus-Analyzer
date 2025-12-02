@@ -7,5 +7,5 @@ add_subdirectory(src/bm/)
 # Bus Controller
 add_subdirectory(src/bc/)
 
-# RT Emulator
+# Remote Terminal
 # add_subdirectory(src/rt/)
