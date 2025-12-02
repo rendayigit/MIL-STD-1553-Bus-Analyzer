@@ -1,14 +1,13 @@
 #include "logger.hpp"
 
-#include "common.hpp"
-
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/spdlog.h>
 
+const std::string LOGS_PATH = std::getenv("HOME") + std::string("/Bus Analyzer Logs"); // NOLINT
+
 static std::shared_ptr<spdlog::logger> getFileLogger() {
   static std::shared_ptr<spdlog::logger> logger = [] {
-    static std::string filePathName = getExecutableDirectory() + "1553.log";
-    auto log = spdlog::daily_logger_mt("1553 Bus Log", filePathName, 0, 0);
+    auto log = spdlog::daily_logger_mt("1553", LOGS_PATH + "/1553.log", 0, 0);
     log->set_pattern("[%H:%M:%S.%f %z] [%l] %v");
     log->set_level(spdlog::level::trace);
     log->flush_on(spdlog::level::trace);
