@@ -1,7 +1,5 @@
 #pragma once
 
-#include <spdlog/sinks/daily_file_sink.h>
-#include <spdlog/spdlog.h>
 #include <string>
 
 class Logger {
@@ -14,5 +12,4 @@ public:
 
 private:
   Logger() = default;
-  static std::shared_ptr<spdlog::logger> getLogger();
 };
