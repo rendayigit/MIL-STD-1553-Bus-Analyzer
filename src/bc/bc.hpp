@@ -1,11 +1,11 @@
 #ifndef BC_HPP
 #define BC_HPP
 
+#include "common.hpp"
+
 #include <array>
 #include <stdemace.h>
 #include <string>
-
-#include "common.hpp"
 
 class BC {
 public:
@@ -24,8 +24,7 @@ private:
   BC();
   ~BC();
 
-  U16BIT m_messageBuffer[RT_SA_MAX_COUNT]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
-                                           // cppcoreguidelines-avoid-c-arrays)
+  U16BIT m_messageBuffer[RT_SA_MAX_COUNT]; // NOLINT
   int m_devNum{};
 };
 

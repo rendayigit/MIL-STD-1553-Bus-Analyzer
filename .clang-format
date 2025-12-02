@@ -3,4 +3,9 @@ PointerAlignment: Right
 IndentWidth: 2
 TabWidth: 4
 UseTab: Never
-ColumnLimit: 120
+ColumnLimit: 200
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+NamespaceIndentation: All
+IncludeBlocks: Regroup
+BreakBeforeBinaryOperators: All
+BreakBeforeTernaryOperators: 'true'

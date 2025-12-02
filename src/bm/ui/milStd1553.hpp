@@ -1,6 +1,7 @@
 #pragma once
 
 #include "wx/treebase.h"
+
 #include <array>
 #include <string>
 #include <wx/treectrl.h>

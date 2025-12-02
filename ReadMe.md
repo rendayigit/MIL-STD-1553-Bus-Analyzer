@@ -1,15 +1,8 @@
-# MIL STD 1553 Bus Monitor, Bus Controller and RT Emulator GUI for [DDC](https://www.ddc-web.com/en/connectivity/databus/milstd1553-1)
+# MIL STD 1553 Bus Monitor, Bus Controller and Remote Terminal GUI for [DDC](https://www.ddc-web.com/en/connectivity/databus/milstd1553-1)
 
 ![image](https://github.com/user-attachments/assets/534a3791-a22b-4e0d-b64c-29fdd7b285ba)
 
 ## How to use
-
-### Install dependencies
-
-``` bash
-sudo apt install -y build-essential libboost-all-dev cmake libspdlog-dev nlohmann-json3-dev git libqt5gui5 libtiff5-dev
-sudo ln -s /usr/lib/x86_64-linux-gnu/libtiff.so.6 /usr/lib/x86_64-linux-gnu/libtiff.so.5
-```
 
 ### Clone the project
 
@@ -17,9 +10,15 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libtiff.so.6 /usr/lib/x86_64-linux-gnu/libt
 git clone https://github.com/rendayigit/MIL-STD-1553-Bus-Analyzer.git
 ```
 
+### Install dependencies
+
+``` bash
+sudo ./scripts/install_dependencies.sh
+```
+
 ### Build the project
 
-``` bash 
+``` bash
 ./scripts/build.sh
 ```
 
@@ -37,7 +36,7 @@ git clone https://github.com/rendayigit/MIL-STD-1553-Bus-Analyzer.git
 ./scripts/bm.sh
 ```
 
-#### RT Emulator
+#### Remote Terminal
 
 ``` bash
 ./scripts/rt.sh

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+
 #include <iomanip>
 #include <string>
 #include <utility>
@@ -8,14 +9,11 @@
 
 class Message {
 public:
-  explicit Message(U16BIT rt, U16BIT sa, U16BIT rtRx, U16BIT saRx, U16BIT wc, char bus, const char *type,
-                   std::string time, const U16BIT *data, bool cmdWord2, bool noRes)
-      : m_rt(rt), m_sa(sa), m_rtRx(rtRx), m_saRx(saRx), m_wc(wc), m_bus(bus), m_type(type), m_time(std::move(time)),
-        m_cmdWord2(cmdWord2), m_noRes(noRes) {
+  explicit Message(U16BIT rt, U16BIT sa, U16BIT rtRx, U16BIT saRx, U16BIT wc, char bus, const char *type, std::string time, const U16BIT *data, bool cmdWord2, bool noRes)
+      : m_rt(rt), m_sa(sa), m_rtRx(rtRx), m_saRx(saRx), m_wc(wc), m_bus(bus), m_type(type), m_time(std::move(time)), m_cmdWord2(cmdWord2), m_noRes(noRes) {
     for (int i = 0; i < RT_SA_MAX_COUNT; i++) {
       std::ostringstream stream;
-      stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase
-             << data[i]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << data[i]; // NOLINT
       m_data.push_back(stream.str());
     }
   }

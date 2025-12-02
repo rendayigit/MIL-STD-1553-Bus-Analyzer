@@ -1,11 +1,11 @@
 #pragma once
 
+#include "message.hpp"
+
 #include <functional>
 #include <stdemace.h>
 #include <string>
 #include <thread>
-
-#include "message.hpp"
 
 class BM {
 public:

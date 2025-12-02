@@ -1,35 +1,39 @@
 #include "mainWindow.hpp"
 
+#include "bc/bc.hpp"
+#include "common.hpp"
+#include "config/config.hpp"
+#include "createFrameWindow.hpp"
+#include "frameComponent.hpp"
+#include "logger/logger.hpp"
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <utility>
-
 #include <wx/wx.h>
 
-#include "common.hpp"
-#include "createFrameWindow.hpp"
-#include "frameComponent.hpp"
-#include "logger.hpp"
-
 constexpr int MAX_FILE_PATH_SIZE = 1024;
+const std::string BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY = "Bus_Controller_Default_Device_Number";
 
 BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Controller") {
+  auto *setButton = new wxButton(this, wxID_ANY, "Set", wxDefaultPosition, wxSize(50, TOP_BAR_COMP_HEIGHT)); // NOLINT
+
+  setButton->SetBackgroundColour(wxColour("#ffcc00"));
+  setButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+
   auto *menuFile = new wxMenu;
   menuFile->AppendSeparator();
-
-  int addFrameId = wxNewId();
-  menuFile->Append(addFrameId, "Add Frame\tCtrl-A", "Add a frame to the frame list");
+  menuFile->Append(setButton->GetId(), "Set\tCtrl-R", "Set controller ID for selected DDC device");
+  menuFile->Append(wxID_ANY, "Add Frame\tCtrl-A", "Add a frame to the frame list");
 
   int clearFramesId = wxNewId();
-  menuFile->Append(clearFramesId, "Clear All Frames\tCtrl-W", "Clear all frames from the frame list");
-
   int loadFramesId = wxNewId();
-  menuFile->Append(loadFramesId, "Load frames\tCtrl-L", "Load frames from a file");
-
   int saveFramesId = wxNewId();
-  menuFile->Append(saveFramesId, "Save frames\tCtrl-S", "Save frame into a file");
 
+  menuFile->Append(clearFramesId, "Clear All Frames\tCtrl-W", "Clear all frames from the frame list");
+  menuFile->Append(loadFramesId, "Load frames\tCtrl-L", "Load frames from a file");
+  menuFile->Append(saveFramesId, "Save frames\tCtrl-S", "Save frame into a file");
   menuFile->Append(wxID_EXIT);
 
   auto *menuBar = new wxMenuBar;
@@ -38,29 +42,19 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
 
   auto *deviceIdLabel = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
-  m_deviceIdTextInput = new wxTextCtrl(
-      this, wxID_ANY, "00", wxDefaultPosition,
-      wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
-  m_repeatToggle = new wxToggleButton(
-      this, wxID_ANY, "Repeat Off", wxDefaultPosition,
-      wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_repeatToggle = new wxToggleButton(this, wxID_ANY, "Repeat Off", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
-  m_sendActiveFramesToggle = new wxToggleButton(
-      this, wxID_ANY, "Send Active Frames", wxDefaultPosition,
-      wxSize(170, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_sendActiveFramesToggle = new wxToggleButton(this, wxID_ANY, "Send Active Frames", wxDefaultPosition, wxSize(170, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#00ccff"));
-  m_sendActiveFramesToggle->SetForegroundColour(
-      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+  m_sendActiveFramesToggle->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
-  m_addButton = new wxButton(
-      this, wxID_ANY, "Add Frame", wxDefaultPosition,
-      wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_addButton = new wxButton(this, wxID_ANY, "Add Frame", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   m_addButton->SetBackgroundColour(wxColour("#ffcc00"));
-  m_addButton->SetForegroundColour(
-      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+  m_addButton->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 
   auto *verticalSizer = new wxBoxSizer(wxVERTICAL);
   auto *topHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -68,31 +62,24 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   // Replace bottomHorizontalSizer with scrolled window
   m_scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
   m_scrolledWindow->SetBackgroundColour(this->GetBackgroundColour());
-  m_scrolledSizer = new wxBoxSizer(wxVERTICAL); // NOLINT(cppcoreguidelines-prefer-member-initializer)
+  m_scrolledSizer = new wxBoxSizer(wxVERTICAL); // NOLINT
   m_scrolledWindow->SetSizer(m_scrolledSizer);
 
   // Set scroll speed
-  m_scrolledWindow->SetScrollRate(10, 10); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_scrolledWindow->SetScrollRate(10, 10); // NOLINT
 
-  topHorizontalSizer->Add(deviceIdLabel, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(deviceIdLabel, 0, wxALIGN_CENTER_VERTICAL, 5); // NOLINT
+  topHorizontalSizer->Add(m_deviceIdTextInput, 0, wxEXPAND | wxALL, 5);  // NOLINT
+  topHorizontalSizer->Add(setButton, 0, wxALIGN_CENTER_VERTICAL, 5);     // NOLINT
   topHorizontalSizer->AddStretchSpacer();
-  topHorizontalSizer->Add(m_repeatToggle, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5);       // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->AddSpacer(5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_sendActiveFramesToggle, 0,
-                          wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5);       // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->AddSpacer(5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, // NOLINT(bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  topHorizontalSizer->Add(m_repeatToggle, 0, wxALIGN_CENTER_VERTICAL, 5);           // NOLINT
+  topHorizontalSizer->AddSpacer(5);                                                 // NOLINT
+  topHorizontalSizer->Add(m_sendActiveFramesToggle, 0, wxALIGN_CENTER_VERTICAL, 5); // NOLINT
+  topHorizontalSizer->AddSpacer(5);                                                 // NOLINT
+  topHorizontalSizer->Add(m_addButton, 0, wxALIGN_CENTER_VERTICAL, 5);              // NOLINT
 
-  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  verticalSizer->Add(m_scrolledWindow, 1, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                     5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  verticalSizer->Add(topHorizontalSizer, 0, wxEXPAND | wxALL, 5); // NOLINT
+  verticalSizer->Add(m_scrolledWindow, 1, wxEXPAND | wxALL, 5);   // NOLINT
 
   SetSizer(verticalSizer);
 
@@ -100,44 +87,41 @@ BusControllerFrame::BusControllerFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1
   verticalSizer->SetSizeHints(this);
 
   CreateStatusBar();
-  SetStatusText("Ready, add frames to send");
+  SetStatusText("Ready, set device then add frames to send");
 
-  Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, addFrameId);
-  Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
-  Bind(wxEVT_MENU, &BusControllerFrame::onLoadFrames, this, loadFramesId);
-  Bind(wxEVT_MENU, &BusControllerFrame::onSaveFrames, this, saveFramesId);
-  Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
-
+  setButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onSetClicked, this);
   m_addButton->Bind(wxEVT_BUTTON, &BusControllerFrame::onAddFrameClicked, this);
   m_repeatToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onRepeatToggle, this);
   m_sendActiveFramesToggle->Bind(wxEVT_TOGGLEBUTTON, &BusControllerFrame::onSendActiveFrames, this);
 
-  m_deviceIdTextInput->SetValue("0");
+  Bind(wxEVT_MENU, &BusControllerFrame::onSetClicked, this, setButton->GetId());
+  Bind(wxEVT_MENU, &BusControllerFrame::onAddFrameClicked, this, m_addButton->GetId());
+  Bind(wxEVT_MENU, &BusControllerFrame::onExit, this, wxID_EXIT);
+  Bind(wxEVT_MENU, &BusControllerFrame::onClearFramesClicked, this, clearFramesId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onLoadFrames, this, loadFramesId);
+  Bind(wxEVT_MENU, &BusControllerFrame::onSaveFrames, this, saveFramesId);
 
-  nlohmann::json config;
+  SetSize(650, 750); // NOLINT
+}
 
-  // Load the JSON file
-  std::ifstream configFile(CONFIG_PATH);
-  if (not configFile.is_open()) {
-    Logger::error("Could not open the config file: " + CONFIG_PATH);
+void BusControllerFrame::onSetClicked(wxCommandEvent & /*event*/) {
+  S16BIT errorCode = 0;
+  int deviceNum = 0;
+
+  BC::getInstance().stop();
+
+  m_deviceIdTextInput->GetValue().ToInt(&deviceNum);
+  errorCode = BC::getInstance().start(deviceNum);
+
+  if (errorCode == 0) {
+    SetStatusText("Connected to device " + std::to_string(deviceNum));
   } else {
-    // Parse the JSON file
-    try {
-      configFile >> config; // Parse the JSON file
-
-      // Check if the Bus_Controller key exists and contains Default_Device_Number
-      if (config.contains("Bus_Controller") and config["Bus_Controller"].contains("Default_Device_Number") and
-          config["Bus_Controller"]["Default_Device_Number"].is_number_integer()) {
-        m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Controller"]["Default_Device_Number"].get<int>()));
-      } else {
-        Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
-      }
-    } catch (const nlohmann::json::parse_error &e) {
-      Logger::error("JSON parse error: " + std::string(e.what()));
-    }
+    std::string errorString = getStatus(errorCode);
+    SetStatusText(errorString.c_str());
+    wxLogError(errorString.c_str());
   }
 
-  SetSize(650, 750); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  Config::updateKeyInConfig(BC_DEFAULT_DEVICE_NUMBER_CONFIG_KEY, std::to_string(deviceNum));
 }
 
 void BusControllerFrame::onAddFrameClicked(wxCommandEvent & /*event*/) {
@@ -178,10 +162,9 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
   std::string framesJsonPath;
 
   try {
-    char filename[MAX_FILE_PATH_SIZE];               // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
-                                                     // cppcoreguidelines-avoid-c-arrays)
-    FILE *f = popen("zenity --file-selection", "r"); // NOLINT (cert-env33-c)
-    fgets(filename, MAX_FILE_PATH_SIZE, f);          // NOLINT (cert-err33-c)
+    char filename[MAX_FILE_PATH_SIZE];               // NOLINT
+    FILE *f = popen("zenity --file-selection", "r"); // NOLINT
+    fgets(filename, MAX_FILE_PATH_SIZE, f);          // NOLINT
     framesJsonPath = filename;
     framesJsonPath.pop_back(); // Remove last "\n"
   } catch (std::exception &e) {
@@ -226,10 +209,8 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
   }
 
   for (auto &frame : framesJson["Frames"]) {
-    if (frame.contains("Label") and frame["Label"].is_string() and frame.contains("Bus") and
-        frame["Bus"].is_string() and frame.contains("Rt") and frame["Rt"].is_number_integer() and
-        frame.contains("Sa") and frame["Sa"].is_number_integer() and frame.contains("Wc") and
-        frame["Wc"].is_number_integer() and frame.contains("Mode") and frame["Mode"].is_string()) {
+    if (frame.contains("Label") and frame["Label"].is_string() and frame.contains("Bus") and frame["Bus"].is_string() and frame.contains("Rt") and frame["Rt"].is_number_integer()
+        and frame.contains("Sa") and frame["Sa"].is_number_integer() and frame.contains("Wc") and frame["Wc"].is_number_integer() and frame.contains("Mode") and frame["Mode"].is_string()) {
 
       auto mode = BcMode::BC_TO_RT;
       std::array<std::string, RT_SA_MAX_COUNT> data;
@@ -252,8 +233,7 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
         mode = BcMode::RT_TO_BC;
       } else if (frame["Mode"] == "RT->RT") {
         mode = BcMode::RT_TO_RT;
-        if (frame.contains("Rt2") and frame["Rt2"].is_number_integer() and frame.contains("Sa2") and
-            frame["Sa2"].is_number_integer()) {
+        if (frame.contains("Rt2") and frame["Rt2"].is_number_integer() and frame.contains("Sa2") and frame["Sa2"].is_number_integer()) {
           rt2 = frame["Rt2"].get<int>();
           sa2 = frame["Sa2"].get<int>();
         } else {
@@ -265,11 +245,9 @@ void BusControllerFrame::onLoadFrames(wxCommandEvent & /*event*/) {
         return;
       }
 
-      auto *component = new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(),
-                                           frame["Bus"].get<std::string>()[0], frame["Rt"].get<int>(), rt2,
-                                           frame["Sa"].get<int>(), sa2, frame["Wc"].get<int>(), mode, data);
-      m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, // NOLINT(bugprone-suspicious-enum-usage)
-                           5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      auto *component = new FrameComponent(m_scrolledWindow, frame["Label"].get<std::string>(), frame["Bus"].get<std::string>()[0], frame["Rt"].get<int>(), rt2, frame["Sa"].get<int>(), sa2,
+                                           frame["Wc"].get<int>(), mode, data);
+      m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5); // NOLINT
 
       updateList();
     } else {
@@ -314,10 +292,9 @@ void BusControllerFrame::onSaveFrames(wxCommandEvent & /*event*/) {
   }
 
   try {
-    char filename[MAX_FILE_PATH_SIZE]; // NOLINT(hicpp-avoid-c-arrays, modernize-avoid-c-arrays,
-    // cppcoreguidelines-avoid-c-arrays)
-    FILE *f = popen("zenity --file-selection --save", "r"); // NOLINT (cert-env33-c)
-    fgets(filename, MAX_FILE_PATH_SIZE, f);                 // NOLINT (cert-err33-c)
+    char filename[MAX_FILE_PATH_SIZE];                      // NOLINT
+    FILE *f = popen("zenity --file-selection --save", "r"); // NOLINT
+    fgets(filename, MAX_FILE_PATH_SIZE, f);                 // NOLINT
     framesJsonPath = filename;
     framesJsonPath.pop_back(); // Remove last "\n"
   } catch (std::exception &e) {
@@ -351,8 +328,7 @@ void BusControllerFrame::sendActiveFrames() {
     if (frame != nullptr and frame->isActive()) {
       frame->sendFrame();
 
-      std::this_thread::sleep_for(
-          std::chrono::milliseconds(90)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      std::this_thread::sleep_for(std::chrono::milliseconds(90)); // NOLINT
     }
   }
 }
@@ -379,8 +355,7 @@ void BusControllerFrame::stopSending() {
   m_sendActiveFramesToggle->SetValue(false);
   m_sendActiveFramesToggle->SetLabel("Send Active Frames");
   m_sendActiveFramesToggle->SetBackgroundColour(wxColour("#00ccff"));
-  m_sendActiveFramesToggle->SetForegroundColour(
-      wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
+  m_sendActiveFramesToggle->SetForegroundColour(wxColour(wxSystemSettingsNative::GetAppearance().IsDark() ? "black" : "wxSYS_COLOUR_WINDOWTEXT"));
 }
 
 void BusControllerFrame::setStatusText(const wxString &status) { SetStatusText(status); }
@@ -395,8 +370,7 @@ void BusControllerFrame::moveUp(FrameComponent *item) {
   }
 
   m_scrolledSizer->Remove(index);
-  m_scrolledSizer->Insert(index - 1, item, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_scrolledSizer->Insert(index - 1, item, 0, wxEXPAND | wxALL, 5); // NOLINT
 
   updateList();
 }
@@ -409,8 +383,7 @@ void BusControllerFrame::moveDown(FrameComponent *item) {
   }
 
   m_scrolledSizer->Remove(index);
-  m_scrolledSizer->Insert(index + 1, item, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
-                          5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_scrolledSizer->Insert(index + 1, item, 0, wxEXPAND | wxALL, 5); // NOLINT
 
   updateList();
 }
@@ -431,11 +404,9 @@ int BusControllerFrame::getFrameIndex(FrameComponent *frame) {
   return -1;
 }
 
-void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc,
-                                        BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
+void BusControllerFrame::addFrameToList(const std::string &label, char bus, int rt, int rt2, int sa, int sa2, int wc, BcMode mode, std::array<std::string, RT_SA_MAX_COUNT> data) {
   auto *component = new FrameComponent(m_scrolledWindow, label, bus, rt, rt2, sa, sa2, wc, mode, std::move(data));
-  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, // NOLINT (bugprone-suspicious-enum-usage)
-                       5); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  m_scrolledSizer->Add(component, 0, wxEXPAND | wxALL, 5); // NOLINT
 
   updateList();
 }

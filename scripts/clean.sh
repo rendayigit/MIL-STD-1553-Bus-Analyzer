@@ -1,5 +1,5 @@
 # Initialization
-cd `dirname $0`
+cd "$(dirname "$0")"
 SCRIPTDIR=`pwd`
 cd -
 
@@ -11,8 +11,4 @@ cmake \
 # Force Delete Dirs
 rm -rf $SCRIPTDIR/../bin/
 rm -rf $SCRIPTDIR/../build/
-
-# Force Delete Residuals
-rm -rf $SCRIPTDIR/../cmake_install.cmake
-rm -rf $SCRIPTDIR/../CMakeCache.txt
-rm -rf $SCRIPTDIR/../Makefile
+rm -rf $SCRIPTDIR/../.cache/

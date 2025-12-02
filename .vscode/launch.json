@@ -7,7 +7,14 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/bus-monitor",
       "args": [],
-      "cwd": "${workspaceFolder}/bin/"
+      "cwd": "${workspaceFolder}/bin/",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     },
     {
       "name": "Bus Controller",
@@ -15,15 +22,29 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/bus-controller",
       "args": [],
-      "cwd": "${workspaceFolder}/bin/"
+      "cwd": "${workspaceFolder}/bin/",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     },
     {
-      "name": "RT Emulator",
+      "name": "Remote Terminal",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/rt-emulator",
+      "program": "${workspaceFolder}/bin/remote-terminal",
       "args": [],
-      "cwd": "${workspaceFolder}/bin/"
+      "cwd": "${workspaceFolder}/bin/",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }
