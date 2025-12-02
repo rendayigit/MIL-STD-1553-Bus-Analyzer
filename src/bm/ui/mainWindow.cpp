@@ -2,19 +2,18 @@
 
 #include "bm/bm.hpp"
 #include "common.hpp"
-#include "logger/logger.hpp"
+#include "config/config.hpp"
 #include "milStd1553.hpp"
 
 #include <array>
-#include <fstream>
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
 
-BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor") {
+BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bus Monitor"), m_uiRecentMessageCount(std::stoi(Config::getValueFromConfig("Bus_Monitor_UI_Recent_Line_Count"))) {
   auto *deviceIdText = new wxStaticText(this, wxID_ANY, "DDC Device ID");
 
-  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, "00", wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
+  m_deviceIdTextInput = new wxTextCtrl(this, wxID_ANY, Config::getValueFromConfig("Bus_Monitor_Default_Device_Number"), wxDefaultPosition, wxSize(30, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
   m_startStopButton = new wxButton(this, wxID_ANY, "Start", wxDefaultPosition, wxSize(100, TOP_BAR_COMP_HEIGHT)); // NOLINT
 
@@ -92,39 +91,6 @@ BusMonitorFrame::BusMonitorFrame() : wxFrame(nullptr, wxID_ANY, "MIL-STD-1553 Bu
   Bind(wxEVT_MENU, &BusMonitorFrame::onClearFilterClicked, this, m_filterButton->GetId());
   Bind(wxEVT_MENU, &BusMonitorFrame::onClearClicked, this, clearButton->GetId());
   Bind(wxEVT_MENU, &BusMonitorFrame::onExit, this, wxID_EXIT);
-
-  m_deviceIdTextInput->SetValue("0");
-  m_uiRecentMessageCount = 100; // NOLINT
-
-  nlohmann::json config;
-
-  // Load the JSON file
-  std::ifstream configFile(CONFIG_PATH);
-  if (not configFile.is_open()) {
-    Logger::error("Could not open the config file: " + CONFIG_PATH);
-  } else {
-    // Parse the JSON file
-    try {
-      configFile >> config; // Parse the JSON file
-
-      // Check if the Bus_Monitor key exists and contains Default_Device_Number
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("Default_Device_Number") and config["Bus_Monitor"]["Default_Device_Number"].is_number_integer()) {
-        m_deviceIdTextInput->SetValue(std::to_string(config["Bus_Monitor"]["Default_Device_Number"].get<int>()));
-      } else {
-        Logger::error("Key 'Default_Device_Number' not found in 'Bus_Monitor' or is not an integer.");
-      }
-
-      // Check if the Bus_Monitor key exists and contains UI_Recent_Line_Count
-      if (config.contains("Bus_Monitor") and config["Bus_Monitor"].contains("UI_Recent_Line_Count") and config["Bus_Monitor"]["UI_Recent_Line_Count"].is_number_integer()) {
-        m_uiRecentMessageCount = config["Bus_Monitor"]["UI_Recent_Line_Count"].get<int>();
-      } else {
-        Logger::error("Key 'UI_Recent_Line_Count' not found in 'Bus_Monitor' or is not an integer.");
-      }
-
-    } catch (const nlohmann::json::parse_error &e) {
-      Logger::error("JSON parse error: " + std::string(e.what()));
-    }
-  }
 
   BM::getInstance().setUpdateMessages([&](const std::string &text) {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -204,9 +170,7 @@ void BusMonitorFrame::onClearClicked(wxCommandEvent & /*event*/) { m_messageList
 
 void BusMonitorFrame::onTreeItemClicked(wxTreeEvent &event) {
   wxTreeItemId selectedItem = event.GetItem();
-
   wxString selectedItemText = m_milStd1553Tree->GetItemText(selectedItem);
-
   wxString logMessage;
 
   // SA selected
