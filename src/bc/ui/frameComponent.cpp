@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-#include "bc.hpp"
+#include "bc/bc.hpp"
 #include "common.hpp"
 #include "createFrameWindow.hpp"
 #include "logger.hpp"
